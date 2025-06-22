@@ -1,0 +1,972 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/* ========== الإعدادات العامة والمتغيرات ========== */
+:root {
+  --color-primary: #6C9BCF;
+  --color-danger: #FF0060;
+  --color-success: #1B9C85;
+  --color-warning: #F7D060;
+  --color-white: #fff;
+  --color-info-dark: #7d8da1;
+  --color-dark: #363949;
+  --color-light: rgba(132, 139, 200, 0.18);
+  --color-dark-variant: #677483;
+  --color-background: #f6f6f9;
+
+  --card-border-radius: 2rem;
+  --border-radius-1: 0.4rem;
+  --border-radius-2: 1.2rem;
+
+  --card-padding: 1.8rem;
+  --padding-1: 1.2rem;
+
+  --box-shadow: 0 2rem 3rem var(--color-light);
+}
+
+/* ========== إعدادات الوضع المظلم ========== */
+.dark-mode-variables {
+  --color-background: #181a1e;
+  --color-white: #202528;
+  --color-dark: #edeffd;
+  --color-dark-variant: #a3bdcc;
+  --color-light: rgba(0, 0, 0, 0.4);
+  --box-shadow: 0 2rem 3rem var(--color-light);
+}
+
+/* ========== الأساسيات ========== */
+* {
+  direction: rtl;
+  margin: 0;
+  padding: 0;
+  outline: 0;
+  appearance: 0;
+  border: 0;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 14px;
+  direction: rtl;
+}
+
+body {
+  width: 100vw;
+ 
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.88rem;
+  user-select: none;
+  overflow-x: hidden;
+  color: var(--color-dark);
+  background-color: var(--color-background);
+  text-align: right; /* لجعل النصوص تتجه لليمين */
+  
+}
+
+a {
+  color: var(--color-dark);
+}
+
+img {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+}
+  .date-wrapper {
+   
+    position: relative;
+    width: 200px;
+    margin: 0 auto; /* يجعل الحاوية في منتصف العنصر الأب */
+  }
+
+  .custom-date {
+    width: 100%;
+    padding-right: 40px; /* مساحة لأيقونة التقويم */
+    padding-left: 12px;
+    height: 38px;
+    font-size: 15px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    background-color: #fff;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .custom-date:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    outline: none;
+  }
+
+  .datepicker-icon {
+    position: absolute;
+    top: 50%;
+    right: 10px; /* استخدم left: 10px في حال RTL */
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg fill='gray' xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+
+
+/* ========== العناوين والنصوص ========== */
+h1 {
+  font-weight: 800;
+  font-size: 1.8rem;
+}
+
+h2 {
+  font-weight: 600;
+  font-size: 1.4rem;
+}
+
+h3 {
+  font-weight: 500;
+  font-size: 0.87rem;
+}
+
+small {
+  font-size: 0.76rem;
+}
+
+p {
+  color: var(--color-dark-variant);
+  text-align: right; /* لجعل النصوص متوافقة مع الاتجاه العربي */
+}
+
+b {
+  color: var(--color-dark);
+}
+
+.text-muted {
+  color: var(--color-info-dark);
+}
+
+.primary {
+  color: var(--color-primary);
+}
+
+.danger {
+  color: var(--color-danger);
+}
+
+/* ========== القسم الأيمن والأيسر العالق (Sticky) ========== */
+/* القسم الأيسر (Sidebar) */
+aside {
+  height: 100vh;
+  overflow: hidden;
+  position: sticky;
+  top: 0;
+}
+
+/* القسم الأيمن */
+.right-section {
+  margin-top: 1.4rem;
+  width: 100%;
+  position: sticky;
+  top: 0;
+}
+
+/* ========== البطاقات ========== */
+.card {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.card-header {
+  font-size: 1.5rem;
+  padding: 1.5rem;
+  border-bottom: 2px solid #ddd;
+}
+
+/* ========== لوحة التحكم (Dashboard) ========== */
+.dashboard .filter {
+  position: absolute;
+  right: 0;
+  top: 15px;
+}
+
+.dashboard .filter .icon {
+  color: #aab7cf;
+  padding-right: 20px;
+  padding-bottom: 5px;
+  transition: 0.3s;
+  font-size: 16px;
+}
+
+.dashboard .filter .icon:hover,
+.dashboard .filter .icon:focus {
+  color: #4154f1;
+}
+
+.dashboard .filter .dropdown-header {
+  padding: 8px 15px;
+}
+
+.dashboard .filter .dropdown-header h6 {
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #aab7cf;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.dashboard .filter .dropdown-item {
+  padding: 8px 15px;
+}
+
+/* ========== النماذج والعناصر التفاعلية ========== */
+.form-label {
+  font-weight: bold;
+  color: #333;
+}
+
+input[type="file"] {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 8px;
+}
+
+button.btn {
+  font-size: 1.1rem;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+#search {
+  text-align: center;
+  width: 50%;
+  max-width: 300px; /* حتى لا يكون الحقل عريضاً جداً */
+  height: 45px;
+  border: 2px solid #ebebeb;
+  font-size: 15px;
+  padding: 0 12px;
+  border-radius: 1.25rem;
+  transition: all 0.3s ease-in-out;
+}
+
+#btnb {
+  margin: 10px;
+  position: relative;
+  cursor: pointer;
+  color: #5688f5;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  background: none;
+  transition: all 0.375s;
+}
+
+#btnd {
+  position: relative;
+  cursor: pointer;
+  color: #ff0060;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.375s;
+  border: none;
+  background: none;
+}
+
+#btnd:focus,
+#btnd:active {
+  outline: none;
+  box-shadow: none;
+}
+
+select {
+  text-align: center;
+  background-color: #ebebeb;
+  width: 100%;
+  height: 50px;
+  border: 2px solid #ebebeb;
+  font-family: inherit;
+  font-size: 15px;
+  padding: 0 16px;
+  border-radius: 1.25rem;
+  transition: all 0.375s;
+}
+
+.warning {
+  color: var(--color-warning);
+}
+
+/* ========== الحاويات والتخطيط العام ========== */
+.container {
+  display: grid;
+  width: 96%;
+  margin: 0 auto;
+  gap: 1.8rem;
+  /* تعديل عرض العمود الأيمن من 23rem إلى 15rem */
+  grid-template-columns: 14rem auto 15rem;
+}
+
+/* ========== القائمة الجانبية (Sidebar) ========== */
+aside .toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: 15px 15px 0 0;
+  margin-top: 1.4rem;
+}
+
+aside .toggle .logo {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+aside .toggle .logo img {
+  width: 3rem;
+  height: 3rem;
+}
+
+aside .toggle .close {
+  padding-right: 1rem;
+  display: none;
+}
+
+aside .sidebar {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-white);
+  box-shadow: var(--box-shadow);
+  border-radius: 15px;
+  height: calc(91vh - 4.2rem);
+  position: relative;
+  transition: all 0.3s ease;
+  overflow-y: scroll; /* التمرير الرأسي يعمل */
+  scrollbar-width: none; /* لإخفاء شريط التمرير في فايرفوكس */
+  -ms-overflow-style: none; /* لإخفاء شريط التمرير في إنترنت إكسبلورر */
+}
+
+aside .sidebar:hover {
+  box-shadow: none;
+}
+
+aside .sidebar a {
+  display: flex;
+  align-items: center;
+  color: var(--color-info-dark);
+  height: 3.7rem;
+  gap: 1rem;
+  position: relative;
+  margin-right: 2rem;
+  margin: 0.5rem 2rem;
+  transition: all 0.3s ease;
+}
+
+aside .sidebar a span {
+  font-size: 2rem;
+  transition: all 0.3s ease;
+}
+
+aside .sidebar a:last-child {
+  position: absolute;
+  bottom: 2rem;
+  width: 100%;
+}
+
+aside .sidebar a.active {
+  width: 100%;
+  color: var(--color-primary);
+  background-color: var(--color-light);
+  margin-right: 0; /* عكس الاتجاه */
+}
+
+aside .sidebar a.active::before {
+  content: '';
+  width: 6px;
+  height: 18px;
+  background-color: var(--color-primary);
+  position: absolute;
+  right: 0; /* نقل الخط إلى الجهة اليمنى */
+}
+
+aside .sidebar a.active span {
+  color: var(--color-primary);
+  margin-right: calc(1rem - 3px); /* عكس الاتجاه */
+  margin-left: 0;
+}
+
+aside .sidebar a:hover {
+  color: var(--color-primary);
+}
+
+aside .sidebar a:hover span {
+  margin-right: 0.6rem; /* عكس الاتجاه */
+  margin-left: 0;
+}
+
+aside .sidebar .message-count {
+  background-color: var(--color-danger);
+  padding: 2px 6px;
+  color: var(--color-white);
+  font-size: 11px;
+  border-radius: var(--border-radius-1);
+}
+
+/* ========== الجداول والمحتويات الرئيسية ========== */
+main {
+
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  align-content: space-around;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+main .recent-orders {
+  margin-top: 1.3rem;
+}
+
+main .recent-orders h2 {
+  margin-bottom: 0.8rem;
+}
+
+main .recent-orders table {
+    width: 900px;      /* عرض ثابت */
+    height: 400px;     /* ارتفاع ثابت */
+    overflow: auto;    /* تفعيل التمرير عند تجاوز المحتوى للحجم المحدد */
+    background-color: var(--color-white);
+    padding: var(--card-padding);
+    text-align: center;
+    box-shadow: var(--box-shadow);
+    border-radius: var(--card-border-radius);
+    transition: all 0.3s ease;
+  }
+  
+main .recent-orders table:hover {
+  box-shadow: none;
+}
+.table thead th{
+  font-size: 18px; /* تكبير حجم الخط */
+  font-weight: bold; /* جعل الخط عريضًا */
+  text-align: center; /* توسيط النص */
+  padding: 12px; /* إضافة مسافات داخلية */
+  
+}
+main table tbody td {
+  height: 3.5rem;
+  border-bottom: 1px solid var(--color-light);
+  color: var(--color-dark-variant);
+  font-size: medium;
+}
+
+main table tbody tr:last-child td {
+  border: none;
+}
+
+main .recent-orders a {
+  text-align: center;
+  margin: 1rem auto;
+  color: var(--color-primary);
+}
+
+/* ========== قسم اليمين (Right Section) ========== */
+.right-section .nav {
+  flex-direction: row-reverse;
+  display: flex;
+  justify-content: end;
+  gap: 2rem;
+}
+
+.right-section .nav button {
+  text-align: right;
+  display: none;
+}
+
+.right-section .dark-mode {
+  background-color: var(--color-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 1.6rem;
+  width: 4.2rem;
+  cursor: pointer;
+  border-radius: var(--border-radius-1);
+}
+
+.right-section .dark-mode span {
+  font-size: 1.2rem;
+  width: 50%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.right-section .dark-mode span.active {
+  background-color: var(--color-primary);
+  color: white;
+  border-radius: var(--border-radius-1);
+}
+
+.right-section .nav .profile {
+  display: flex;
+  gap: 2rem;
+  text-align: right;
+}
+
+.right-section .nav .profile .profile-photo {
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 50%;
+  overflow: hidden;
+  text-align: right;
+}
+
+.right-section .user-profile {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  margin-top: 2rem;
+  background-color: var(--color-white);
+  padding: var(--card-padding);
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--box-shadow);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.right-section .user-profile:hover {
+  box-shadow: none;
+}
+
+.right-section .user-profile img {
+  width: 11rem;
+  height: auto;
+  margin-bottom: 0.8rem;
+  border-radius: 50%;
+}
+
+.right-section .user-profile h2 {
+  margin-bottom: 0.2rem;
+}
+
+.right-section .reminders {
+  margin-top: 2rem;
+}
+
+.right-section .reminders .header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.right-section .reminders .header span {
+  padding: 10px;
+  box-shadow: var(--box-shadow);
+  background-color: var(--color-white);
+  border-radius: 50%;
+}
+
+.right-section .reminders .notification {
+  background-color: var(--color-white);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1.4rem var(--card-padding);
+  border-radius: var(--border-radius-2);
+  box-shadow: var(--box-shadow);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.right-section .reminders .notification:hover {
+  box-shadow: none;
+}
+
+.right-section .reminders .notification .content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0;
+  width: 100%;
+}
+
+.right-section .reminders .notification .icon {
+  padding: 0.6rem;
+  color: var(--color-white);
+  background-color: var(--color-success);
+  border-radius: 20%;
+  display: flex;
+}
+
+.right-section .reminders .notification.deactive .icon {
+  background-color: var(--color-danger);
+}
+
+.right-section .reminders .add-reminder {
+  background-color: var(--color-white);
+  border: 2px dashed var(--color-primary);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.right-section .reminders .add-reminder:hover {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.right-section .reminders .add-reminder div {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* ========== الاستجابة للشاشات ========== */
+@media screen and (max-width: 1200px) {
+  aside .logo h2 {
+    display: none;
+  }
+  .table thead th{
+    font-size: 11px; /* تكبير حجم الخط */
+    font-weight: bold; /* جعل الخط عريضًا */
+    text-align: center; /* توسيط النص */
+    padding: 12px; /* إضافة مسافات داخلية */
+    
+  }
+  aside .sidebar h3 {
+    display: none;
+  }
+
+  aside .sidebar a {
+    width: 5.6rem;
+  }
+
+  aside .sidebar a:last-child {
+    position: relative;
+    margin-top: 1.8rem;
+  }
+
+  main .analyse {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  main .new-users .user-list .user {
+    flex-basis: 40%;
+  }
+
+  main .recent-orders {
+    width: 94%;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 2rem 0 0 0.8rem;
+  }
+
+  main .recent-orders table {
+    width: 83vw;
+  }
+}
+@media screen and (max-width: 768px) {
+    body {
+      font-size: 0.8rem; /* تقليل حجم الخط */
+     
+    }
+    /* تعديل للحاوية */
+    .container {
+        margin: 0 0;
+      grid-template-columns: 1fr; /* جعل الحاوية بعمود واحد */
+      gap: 1rem;                  /* تقليل الفجوة بين العناصر */
+      padding: 0 1rem;
+    }
+    
+    /* تحسين القائمة الجانبية لتفتح من اليمين بدلاً من اليسار */
+    aside {
+      position: fixed;
+      text-align: right;
+      background-color: var(--color-white);
+      width: 15rem;
+      z-index: 3;
+      box-shadow: -1rem 3rem 4rem var(--color-light);
+      height: 100vh;
+      right: -100%;
+      left: auto;
+      display: none;
+      animation: showMenu 0.4s ease forwards;
+    }
+    
+    /* ضبط الأنيميشن لفتح القائمة من اليمين */
+    @keyframes showMenu {
+      to {
+        right: 0;
+      }
+    }
+    
+    aside .logo {
+      margin-right: 1rem;
+      margin-left: auto;
+    }
+    
+    aside .logo h2 {
+      display: inline;
+    }
+    
+    aside .sidebar h3 {
+      display: inline;
+    }
+    
+    aside .sidebar a {
+      width: 100%;
+      height: 3.4rem;
+      flex-direction: row-reverse;
+    }
+    
+    aside .sidebar a:last-child {
+      position: absolute;
+      bottom: 5rem;
+    }
+    
+    aside .toggle .close {
+      display: inline-block;
+      cursor: pointer;
+      padding-right: 1rem;
+      padding-left: 0;
+    }
+    
+    /* تعديل لقسم الـ main ليكون في المنتصف */
+    main {
+      margin: 3rem auto;  /* هامش علوي وتوسيط أفقي */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+    
+    main .new-users .user-list .user {
+      flex-basis: 35%;
+    }
+    
+    main .recent-orders {
+      position: relative;
+      margin: 3rem 0 0 0;
+      width: 100%;
+    }
+    
+    main .recent-orders table {
+      width: 100%;
+      margin: 0;
+    }
+    
+    .right-section {
+      right: 18%;
+    }
+    
+    /* إصلاح الـ navbar ليكون متناسقًا مع RTL */
+    .right-section .nav {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: auto;
+      align-items: center;
+      background-color: var(--color-white);
+      padding: 0 var(--padding-1);
+      height: 4.6rem;
+      width: 100%;
+      z-index: 2;
+      box-shadow: 0 1rem 1rem var(--color-light);
+      margin: 0;
+      flex-direction: row-reverse;
+    }
+    
+    .right-section .nav .dark-mode {
+      width: 4.4rem;
+      position: absolute;
+    }
+    
+    .right-section .profile .info {
+      flex-direction: row-reverse;
+    }
+    
+    /* تحسين زر القائمة ليكون في اليمين */
+    .right-section .nav button {
+      display: inline-block;
+      background-color: transparent;
+      cursor: pointer;
+      color: var(--color-dark);
+      position: absolute;
+      right: 1rem;
+    }
+    
+    .right-section .nav button span {
+      font-size: 2rem;
+      right: auto;
+      left: 1rem;
+    }
+  }
+  
+/* ========== الخرائط والفلاتر ========== */
+#map {
+  width: 100%;
+  height: 430px;
+  border-radius: 10px;
+  border: 2px solid #ddd;
+}
+
+.filter-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  width: 100%;
+  overflow-x: auto;
+  padding: 10px;
+}
+
+.filter {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.btn-danger {
+  padding: 8px 12px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* ========== البطاقات الإحصائية ========== */
+.stats-container {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.stat-box1 {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  width: 150px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.stat-box {
+  background: #f1f3f5; /* لون رمادي فاتح لراحة العين */
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  width: calc(20% - 12px);
+  height: 40px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease-in-out;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid #ccc;
+}
+
+.stat-box1 p {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 3px 0 0;
+  color: #05668d; /* أزرق هادئ */
+}
+
+.stat-box1 h4 {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.stat-box1 p {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 5px 0 0;
+  color: #007bff;
+}
+
+.stat-box h4 {
+  margin: 0;
+  font-size: 12px;
+  color: #444; /* لون أغمق قليلاً للنص */
+}
+
+.stat-box p {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 3px 0 0;
+  color: #ccd4dc; /* لون أزرق هادئ */
+}
+
+.stats-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* تصغير المسافات بين البطاقات */
+  justify-content: center;
+}
+
+.stat-box:hover {
+  background: #e3e7ea; /* لون عند التمرير */
+}
+
+.stat-box.unit-box {
+  background: #ffffff;
+  border: 1px solid #bbb;
+}
+
+.stat-box.unit-box:hover {
+  background: #dae3f3;
+}
+
+.stat-box.unit-box.selected {
+  background: #b3d4f6; /* لون أزرق داكن للوحدة المختارة */
+  color: white;
+  border-color: #95b1d8;
+}
+
+/* ========== أزرار الإجراءات ========== */
+#remove {
+  background: white;
+  color: red;
+  cursor: grab;
+}
+
+#show {
+  background: white;
+  color: #1B9C85;
+}
+
+#edit {
+  background: white;
+  color: #5e84dd;
+}
+
+#remove,
+#show,
+#edit {
+  margin: 5px;
+}
