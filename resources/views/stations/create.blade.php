@@ -95,10 +95,11 @@
                                     <option value="كهرباء ومولدة"
                                         {{ old('energy_source') == 'كهرباء ومولدة' ? 'selected' : '' }}>كهرباء ومولدة
                                     </option>
-                                    <option value="متوقفة" {{ old('energy_source') == 'متوقفة' ? 'selected' : '' }}>متوقفة
+                                    {{-- <option value="متوقفة" {{ old('energy_source') == 'متوقفة' ? 'selected' : '' }}>متوقفة</option>
+                                    <option value="خارج الخدمة" {{ old('energy_source') == 'خارج الخدمة' ? 'selected' : '' }}>خارج الخدمة</option> --}}
+                                    <option value="لايوجد"
+                                        {{ old('energy_source') == 'لايوجد' ? 'selected' : '' }}>لايوجد
                                     </option>
-                                    <option value="خارج الخدمة"
-                                        {{ old('energy_source') == 'خارج الخدمة' ? 'selected' : '' }}>خارج الخدمة</option>
                                     <option value="مولدة" {{ old('energy_source') == 'مولدة' ? 'selected' : '' }}>مولدة
                                     </option>
                                     <option value="طاقة شمسية ومولدة"
