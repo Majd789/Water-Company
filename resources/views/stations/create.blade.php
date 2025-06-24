@@ -6,7 +6,7 @@
 
     <div class="recent-orders" style="text-align: center">
         <div class="login-card">
-            <h2>إضافة بئر جديدة</h2>
+            <h2>إضافة محطة جديدة</h2>
             @if (auth()->check() && auth()->user()->role_id == 'admin')
                 <div class="card-body">
                     <form action="{{ route('stations.import') }}" method="POST" enctype="multipart/form-data">
