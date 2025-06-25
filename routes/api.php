@@ -18,7 +18,7 @@ use App\Http\Controllers\Api\TownApiController;
 use App\Http\Controllers\Api\UnitApiController;
 use App\Http\Controllers\Api\WellApiController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\api\StatisticsController;
+use App\Http\Controllers\Api\StatisticsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
