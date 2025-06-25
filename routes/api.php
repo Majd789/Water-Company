@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\TownApiController;
 use App\Http\Controllers\Api\UnitApiController;
 use App\Http\Controllers\Api\WellApiController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Api\StatisticsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -226,5 +227,12 @@ Route::prefix('v1')->group(function () {
         Route::get('/electricityTransformers-export', [ElectricityTransformerApiController::class, 'export']);
         Route::post('/electricityTransformers-import', [ElectricityTransformerApiController::class, 'import']);
     });
+
+
+    // الاحصائيات
+    Route::middleware(['auth:sanctum', 'AdminRole:admin,super,superA'])->group(function(){
+        Route::get('/statistics',[StatisticsController::class,'index']);
+    });
+
 
 });
