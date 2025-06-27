@@ -55,6 +55,7 @@
         <table class="table">
             <thead>
                 <tr>
+                    <th>رقم</th>
                     <th>اسم المحطة</th>
                     <th>عدد ساعات الكهرباء</th>
                     <th>رقم ساعة الكهرباء</th>
@@ -66,6 +67,7 @@
             <tbody>
                 @foreach ($electricityHours as $electricityHour)
                     <tr>
+                        <td>{{ $electricityHour->id }}</td>
                         <td>{{ $electricityHour->station->station_name }}</td>
                         <td>{{ $electricityHour->electricity_hours }}</td>
                         <td>{{ $electricityHour->electricity_hour_number }}</td>

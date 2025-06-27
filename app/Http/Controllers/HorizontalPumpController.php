@@ -9,6 +9,7 @@ use App\Models\HorizontalPump;
 use App\Models\Station;
 use App\Models\Unit;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\Rule;
 
 class HorizontalPumpController extends Controller
 {
@@ -101,7 +102,25 @@ class HorizontalPumpController extends Controller
     }
     
     
+     private function getAllowedPumpBrands()
+    {
+        return [
+            'HALLER & SCHNEIDER', 'German Made', 'Italian Made', 'Turkish Made', 'STANDART',
+            'MEZ', 'CAPRARI', 'GAMAK', 'SEMPA', 'SEVER', 'Czech Made', 'WATT', 'European',
+            'SKM', 'GRUNDFOS', 'MAS', 'SIEMENS', 'ROVATTI', 'Spanish Made', 'DEMAK',
+            'Iranian Made', 'KLN', 'ELK', 'PENTAX', 'Chinese Made', 'LOWARA', 'JET',
+            'FLOWSERVE', 'KSB', 'ATURIA', 'غير معروف'
+        ];
+    }
 
+    // دالة مساعدة لمصادر الطاقة
+    private function getAllowedEnergySources()
+    {
+        return [
+            'لا يوجد', 'كهرباء', 'مولدة', 'طاقة شمسية', 'كهرباء و مولدة',
+            'كهرباء و طاقة شمسية', 'مولدة و طاقة شمسية', 'كهرباء و مولدة و طاقة شمسية'
+        ];
+    }
     /**
      * حفظ مضخة جديدة في قاعدة البيانات.
      */
@@ -114,9 +133,9 @@ class HorizontalPumpController extends Controller
             'pump_capacity_hp' => 'nullable|numeric|min:0',  // تعديل إلى numeric لدعم القيم العشرية
             'pump_flow_rate_m3h' => 'nullable|numeric|min:0',  // تعديل إلى numeric لدعم القيم العشرية
             'pump_head' => 'nullable|numeric|min:0',  // تعديل إلى numeric لدعم القيم العشرية
-            'pump_brand_model' => 'nullable|string|max:255',
+           'pump_brand_model' => ['nullable', Rule::in($this->getAllowedPumpBrands())],
             'technical_condition' => 'nullable|string|max:255',
-            'energy_source' => 'nullable|string|max:255',
+            'energy_source' => ['nullable', Rule::in($this->getAllowedEnergySources())],
             'notes' => 'nullable|string',
         ]);
         
@@ -155,9 +174,9 @@ class HorizontalPumpController extends Controller
             'pump_capacity_hp' => 'nullable|numeric|min:0',
             'pump_flow_rate_m3h' => 'nullable|numeric|min:0',
             'pump_head' => 'nullable|numeric|min:0',
-            'pump_brand_model' => 'nullable|string|max:255',
+            'pump_brand_model' => ['nullable', Rule::in($this->getAllowedPumpBrands())],
             'technical_condition' => 'nullable|string|max:255',
-            'energy_source' => 'nullable|string|max:255',
+            'energy_source' => ['nullable', Rule::in($this->getAllowedEnergySources())],
             'notes' => 'nullable|string',
         ]);
 

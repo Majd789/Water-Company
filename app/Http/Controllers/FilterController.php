@@ -9,6 +9,7 @@ use App\Models\Station; // استيراد نموذج Station
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\Rule;
 
 class FilterController extends Controller
 {
@@ -103,7 +104,14 @@ class FilterController extends Controller
         // إرسال المحطات إلى العرض
         return view('filters.create', compact('stations'));
     }
-    
+     private function getAllowedFilterTypes()
+    {
+        return [
+            'OSM-SF', 'OSM-CF', 'RO System', 'Sand Filter (رملي)', 'Carbon Filter (كربوني)',
+            'Cartridge Filter (كارتريدج)', 'Bag Filter', 'UV Sterilizer', 'Multi-media Filter',
+            'Micron Filter (مايكروني)', 'OSM-X Series', 'غير معروف'
+        ];
+    }
     /**
      * تخزين مرشح جديد
      */
@@ -114,7 +122,7 @@ class FilterController extends Controller
             'station_id' => 'required|exists:stations,id', // التحقق من وجود المحطة
             'filter_capacity' => 'required|numeric', // استطاعة المرشح
             'readiness_status' => 'required|numeric', // حالة الجاهزية
-            'filter_type' => 'required|string|max:255', // نوع المرشح
+            'filter_type' => ['required', Rule::in($this->getAllowedFilterTypes())],
         ]);
 
         // إنشاء المرشح الجديد في قاعدة البيانات
@@ -152,7 +160,7 @@ class FilterController extends Controller
             'station_id' => 'required|exists:stations,id', // التحقق من وجود المحطة
             'filter_capacity' => 'required|numeric', // استطاعة المرشح
             'readiness_status' => 'required|numeric', // حالة الجاهزية
-            'filter_type' => 'required|string|max:255', // نوع المرشح
+            'filter_type' => ['required', Rule::in($this->getAllowedFilterTypes())], 
         ]);
 
         // تحديث بيانات المرشح في قاعدة البيانات

@@ -9,6 +9,7 @@ use App\Models\Station;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\Rule;
 
 class InfiltratorController extends Controller
 {
@@ -96,6 +97,18 @@ class InfiltratorController extends Controller
         return view('infiltrators.create', compact('stations'));
     }
     
+     private function getAllowedInfiltratorTypes()
+    {
+        return [
+            'VEIKONG', 'USFULL', 'LS', 'ABB', 'GROWATT', 'SMA', 'HUAWEI', 'DANFOSS', 
+            'FRECON', 'BAISON', 'GMTCNT', 'CELIK', 'TREST', 'TRUST', 'STAR POWER', 
+            'STAR NEW', 'WINGS INTERNATIONAL', 'ORIGINAL COLD', 'NGGRID', 'POWER MAX PRO', 
+            'FREKON', 'GELEK', 'INVT', 'ENPHASE', 'SOLAREDGE', 'GOODWE', 'VICTRON ENERGY', 
+            'DELTA', 'SUNGROW', 'YASKAWA', 'KACO', 'FRONIUS', 'SOLAX', 'SOLIS', 'VFD-LS', 
+            'RUST', 'COM', 'SHIRE', 'CLICK', 'HLUX', 'MOLTO', 'ON-GRID', 'OFF-GRID', 
+            'HYBRID', 'غير معروف'
+        ];
+    }
 
     /**
      * تخزين انفلتر جديد
@@ -107,7 +120,7 @@ class InfiltratorController extends Controller
             'station_id' => 'required|exists:stations,id', // التحقق من وجود المحطة
             'infiltrator_capacity' => 'required|numeric', // استطاعة الانفلتر
             'readiness_status' => 'required|numeric', // حالة الجاهزية
-            'infiltrator_type' => 'required|string|max:255', // نوع الانفلتر
+           'infiltrator_type' => ['required', Rule::in($this->getAllowedInfiltratorTypes())], // نوع الانفلتر
             'notes' => 'nullable|string', // ملاحظات
         ]);
 
@@ -146,7 +159,7 @@ class InfiltratorController extends Controller
             'station_id' => 'required|exists:stations,id', // التحقق من وجود المحطة
             'infiltrator_capacity' => 'required|numeric', // استطاعة الانفلتر
             'readiness_status' => 'required|numeric', // حالة الجاهزية
-            'infiltrator_type' => 'required|string|max:255', // نوع الانفلتر
+           'infiltrator_type' => ['required', Rule::in($this->getAllowedInfiltratorTypes())], // نوع الانفلتر
             'notes' => 'nullable|string', // ملاحظات
         ]);
 

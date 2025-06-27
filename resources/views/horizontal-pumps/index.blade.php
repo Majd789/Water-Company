@@ -56,6 +56,7 @@
         <table class="table">
             <thead>
                 <tr>
+                    <th>رقم</th>
                     <th>اسم المضخة</th>
                     <th>الحالة التشغيلية</th>
                     <th>اسم المحطة</th>
@@ -65,6 +66,7 @@
             <tbody>
                 @forelse($horizontalPumps as $pump)
                     <tr>
+                        <td>{{ $pump->id }}</td>
                         <td>{{ $pump->pump_name ?? 'غير متوفر' }}</td>
                         <td>
                             @if ($pump->pump_status == 'يعمل')

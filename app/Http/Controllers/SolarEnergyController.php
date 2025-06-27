@@ -110,7 +110,7 @@ class SolarEnergyController extends Controller
             'panel_size' => 'required|numeric|min:0',  // قياس اللوح
             'panel_count' => 'required|integer|min:0',  // عدد الألواح
             'manufacturer' => 'required|string|max:255',  // الجهة المنشئة
-            'base_type' => 'required|string|max:255',  // نوع القاعدة
+           'base_type' => 'required|in:ثابتة,متحركة', // تقييد القيم  // نوع القاعدة
             'technical_condition' => 'required|string|max:255',  // الحالة الفنية
             'wells_supplied_count' => 'required|integer|min:0',  // عدد الآبار المغذاة
             'general_notes' => 'nullable|string',  // ملاحظات
@@ -154,7 +154,7 @@ class SolarEnergyController extends Controller
             'panel_size' => 'required|numeric|min:0',  // قياس اللوح
             'panel_count' => 'required|integer|min:0',  // عدد الألواح
             'manufacturer' => 'required|string|max:255',  // الجهة المنشئة
-            'base_type' => 'required|string|max:255',  // نوع القاعدة
+            'base_type' => 'required|in:ثابتة,متحركة', // تقييد القيم  // نوع القاعدة
             'technical_condition' => 'required|string|max:255',  // الحالة الفنية
             'wells_supplied_count' => 'required|integer|min:0',  // عدد الآبار المغذاة
             'general_notes' => 'nullable|string',  // ملاحظات

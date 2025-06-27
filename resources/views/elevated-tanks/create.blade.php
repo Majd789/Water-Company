@@ -119,9 +119,14 @@
 
                                 <!-- شكل الخزان -->
                                 <label for="tank_shape">شكل الخزان</label>
-                                <input type="text" name="tank_shape" id="tank_shape"
-                                    class="form-control @error('tank_shape') is-invalid @enderror"
-                                    value="{{ old('tank_shape') }}" placeholder="شكل الخزان" required>
+                                <select name="tank_shape" id="tank_shape"
+                                    class="form-control @error('tank_shape') is-invalid @enderror" required>
+                                    <option value="">-- اختر شكل الخزان --</option>
+                                    <option value="دائري" {{ old('tank_shape') == 'دائري' ? 'selected' : '' }}>دائري
+                                    </option>
+                                    <option value="مربع" {{ old('tank_shape') == 'مربع' ? 'selected' : '' }}>مربع
+                                    </option>
+                                </select>
                                 @error('tank_shape')
                                     <div class="alert alert-danger">{{ $message }}</div>
                                 @enderror

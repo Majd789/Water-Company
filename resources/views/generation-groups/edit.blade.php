@@ -50,16 +50,55 @@
 
                                 <!-- اسم المولدة -->
 
+                                <!-- في ملف resources/views/generation-groups/edit.blade.php -->
+                                <!-- ابحث عن حقل اسم المولدة واستبدله بهذا الكود: -->
+
                                 <label for="generator_name">اسم المولدة</label>
-                                <input type="text" name="generator_name" id="generator_name"
-                                    class="form-control @error('generator_name') is-invalid @enderror"
-                                    value="{{ old('generator_name', $generationGroup->generator_name) }}"
-                                    placeholder="اسم المولدة" required>
+                                <select name="generator_name" id="generator_name"
+                                    class="form-control @error('generator_name') is-invalid @enderror" required>
+                                    <option value="">-- اختر اسم المولدة --</option>
+                                    @php
+                                        $generators = [
+                                            'DOOSAN',
+                                            'PERKINS',
+                                            'SCANIA',
+                                            'VOLVO',
+                                            'CATERPILLAR',
+                                            'TEKSAN',
+                                            'CUMMINS',
+                                            'DAEWOO',
+                                            'JOHN DEERE',
+                                            'IVECO',
+                                            'FIAT',
+                                            'EMSA GENERATOR',
+                                            'AKSA',
+                                            'FPT',
+                                            'DORMAN',
+                                            'RICARDO (صيني)',
+                                            'BAUDOUIN',
+                                            'MARKON',
+                                            'KJPOWER',
+                                            'GENPOWER',
+                                            'DODS',
+                                            'AIFO',
+                                            'DOTZ',
+                                            'MAK',
+                                            'MITSUBISHI / MITORELA',
+                                            'IDEA',
+                                            'COELMO',
+                                            'غير معروف',
+                                        ];
+                                    @endphp
+                                    @foreach ($generators as $generator)
+                                        <option value="{{ $generator }}"
+                                            {{ old('generator_name', $generationGroup->generator_name) == $generator ? 'selected' : '' }}>
+                                            {{ $generator }}
+                                        </option>
+                                    @endforeach
+                                </select>
                                 @error('generator_name')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-
-
                                 <!-- استطاعة التوليد -->
 
                                 <label for="generation_capacity">استطاعة التوليد</label>

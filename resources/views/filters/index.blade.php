@@ -56,6 +56,7 @@
         <table class="table">
             <thead>
                 <tr>
+                    <th>رقم</th>
                     <th>المحطة</th>
                     <th>استطاعة المرشح</th>
                     <th>حالة الجاهزية</th>
@@ -66,6 +67,7 @@
             <tbody>
                 @foreach ($filters as $filter)
                     <tr>
+                        <td>{{ $filter->id }}</td>
                         <td>{{ $filter->station->station_name }}</td>
                         <td>{{ $filter->filter_capacity }}</td>
                         <td>{{ $filter->readiness_status }}</td>

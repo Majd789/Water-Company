@@ -54,6 +54,7 @@
         <table class="table">
             <thead>
                 <tr>
+                    <th>رقم</th>
                     <th style="font-size: 15px;">اسم الخزان</th>
                     <th style="font-size: 15px;">البلدة التي تشرب منه</th>
                     <th style="font-size: 15px;"> قطر البوري الداخل</th>
@@ -63,6 +64,7 @@
             <tbody>
                 @foreach ($elevatedTanks as $tank)
                     <tr>
+                        <td>{{ $tank->id }}</td>
                         <td>{{ $tank->tank_name }}</td>
                         <td>{{ $tank->town_supply }}</td>
                         <td>{{ $tank->in_pipe_diameter }} مم</td>

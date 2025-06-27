@@ -56,6 +56,7 @@
         <table class="table">
             <thead>
                 <tr>
+                    <th scope="col" style="margin: 10">رقم</th>
                     <th scope="col" style="margin: 10">اسم المحطة</th>
                     <th scope="col" style="margin: 10">كود المحطة</th>
                     <th scope="col" style="margin: 10">الوضع التشغيلي</th>
@@ -66,6 +67,7 @@
             <tbody>
                 @foreach ($stations as $station)
                     <tr>
+                        <td>{{ $station->id }}</td>
                         <td>{{ $station->station_name }}</td>
                         <td>{{ $station->station_code }}</td>
                         <td>{{ $station->operational_status }}</td>

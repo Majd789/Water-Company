@@ -59,6 +59,7 @@
         <table class="table table-striped">
             <thead>
                 <tr>
+                    <th>رقم</th>
                     <th>اسم المحطة</th>
                     <th>اسم المولدة</th>
                     <th>استطاعة التوليد (KVA)</th>
@@ -70,6 +71,7 @@
             <tbody>
                 @forelse($generationGroups as $group)
                     <tr>
+                        <td>{{ $group->id }}</td>
                         <td>{{ $group->station->station_name }}</td>
                         <td>{{ $group->generator_name }}</td>
                         <td>{{ $group->generation_capacity }}</td>
