@@ -87,37 +87,32 @@
                                 <!-- حقل مصدر الطاقة -->
                                 <label for="energy_source">مصدر الطاقة</label>
                                 <select name="energy_source"
-                                    class="form-control @error('energy_source') is-invalid @enderror" required>
+                                    class="form-control @error('energy_source') is-invalid @enderror">
                                     <option value="">-- اختر مصدر الطاقة --</option>
-                                    <option value="كهرباء ومولدة وطاقة شمسية"
-                                        {{ old('energy_source') == 'كهرباء ومولدة وطاقة شمسية' ? 'selected' : '' }}>كهرباء
-                                        ومولدة وطاقة شمسية</option>
-                                    <option value="كهرباء ومولدة"
-                                        {{ old('energy_source') == 'كهرباء ومولدة' ? 'selected' : '' }}>كهرباء ومولدة
-                                    </option>
-                                    {{-- <option value="متوقفة" {{ old('energy_source') == 'متوقفة' ? 'selected' : '' }}>متوقفة</option>
-                                    <option value="خارج الخدمة" {{ old('energy_source') == 'خارج الخدمة' ? 'selected' : '' }}>خارج الخدمة</option> --}}
-                                    <option value="لايوجد"
-                                        {{ old('energy_source') == 'لايوجد' ? 'selected' : '' }}>لايوجد
+                                    <option value="لا يوجد" {{ old('energy_source') == 'لا يوجد' ? 'selected' : '' }}>لا
+                                        يوجد</option>
+                                    <option value="كهرباء" {{ old('energy_source') == 'كهرباء' ? 'selected' : '' }}>كهرباء
                                     </option>
                                     <option value="مولدة" {{ old('energy_source') == 'مولدة' ? 'selected' : '' }}>مولدة
                                     </option>
-                                    <option value="طاقة شمسية ومولدة"
-                                        {{ old('energy_source') == 'طاقة شمسية ومولدة' ? 'selected' : '' }}>طاقة شمسية
-                                        ومولدة</option>
-                                    <option value="كهرباء وطاقة شمسية"
-                                        {{ old('energy_source') == 'كهرباء وطاقة شمسية' ? 'selected' : '' }}>كهرباء وطاقة
-                                        شمسية</option>
-                                    <option value="كهرباء" {{ old('energy_source') == 'كهرباء' ? 'selected' : '' }}>كهرباء
-                                    </option>
                                     <option value="طاقة شمسية"
                                         {{ old('energy_source') == 'طاقة شمسية' ? 'selected' : '' }}>طاقة شمسية</option>
+                                    <option value="كهرباء و مولدة"
+                                        {{ old('energy_source') == 'كهرباء و مولدة' ? 'selected' : '' }}>كهرباء و مولدة
+                                    </option>
+                                    <option value="كهرباء و طاقة شمسية"
+                                        {{ old('energy_source') == 'كهرباء و طاقة شمسية' ? 'selected' : '' }}>كهرباء و طاقة
+                                        شمسية</option>
+                                    <option value="مولدة و طاقة شمسية"
+                                        {{ old('energy_source') == 'مولدة و طاقة شمسية' ? 'selected' : '' }}>مولدة و طاقة
+                                        شمسية</option>
+                                    <option value="كهرباء و مولدة و طاقة شمسية"
+                                        {{ old('energy_source') == 'كهرباء و مولدة و طاقة شمسية' ? 'selected' : '' }}>
+                                        كهرباء و مولدة و طاقة شمسية</option>
                                 </select>
-
                                 @error('energy_source')
                                     <div class="alert alert-danger mt-2">{{ $message }}</div>
                                 @enderror
-
 
                                 <label for="operator_entity">جهة التشغيل:</label>
                                 <select name="operator_entity"
@@ -160,13 +155,18 @@
                                 <label for="water_delivery_method">طريقة توصيل المياه:</label>
                                 <select name="water_delivery_method"
                                     class="form-control @error('water_delivery_method') is-invalid @enderror">
-                                    <option value="شبكة">شبكة</option>
-                                    <option value="شبكة ومنهل">شبكة ومنهل</option>
+                                    <option value="">-- اختر طريقة التوصيل --</option>
+                                    <option value="شبكة" {{ old('water_delivery_method') == 'شبكة' ? 'selected' : '' }}>
+                                        شبكة</option>
+                                    <option value="منهل" {{ old('water_delivery_method') == 'منهل' ? 'selected' : '' }}>
+                                        منهل</option>
+                                    <option value="شبكة و منهل"
+                                        {{ old('water_delivery_method') == 'شبكة و منهل' ? 'selected' : '' }}>شبكة و منهل
+                                    </option>
                                 </select>
                                 @error('water_delivery_method')
                                     <div class="alert alert-danger">{{ $message }}</div>
                                 @enderror
-
                                 <!-- نسبة جاهزية الشبكة -->
                                 <label for="network_readiness_percentage">نسبة جاهزية الشبكة</label>
                                 <input type="number" step="0.01" name="network_readiness_percentage"
@@ -176,37 +176,53 @@
                                     <div class="alert alert-danger">{{ $message }}</div>
                                 @enderror
 
-                                <!-- نوع الشبكة -->
                                 <label for="network_type">نوع الشبكة:</label>
                                 <select name="network_type" id="network_type"
                                     class="form-control @error('network_type') is-invalid @enderror">
                                     <option value="">-- اختر نوع الشبكة --</option>
-                                    <option value="بولي ايتلين">بولي ايتلين</option>
-                                    <option value="بولي ايتلين فونط">بولي ايتلين فونط</option>
-                                    <option value="بولي ايتلين+ اترنيت+حديد">بولي ايتلين+ اترنيت+حديد</option>
-                                    <option value="بولي ايتلين اترنيت">بولي ايتلين اترنيت</option>
-                                    <option value="بولي اتلين+حديد">بولي اتلين+حديد</option>
-                                    <option value="اتلين + حديد+ اترنيت">اتلين + حديد+ اترنيت</option>
-                                    <option value="بولي ايتلين+حديد">بولي ايتلين+حديد</option>
-                                    <option value="فونط">فونط</option>
-                                    <option value="اترنيت">اترنيت</option>
-                                    <option value="حديد">حديد</option>
-                                    <option value="pvc">pvc</option>
-                                    <option value="اترنيت حديد">اترنيت حديد</option>
-                                    <option value="خط ضخ">خط ضخ</option>
-                                    <option value="فونت">فونت</option>
-                                    <option value="pvc اترنيت">pvc اترنيت</option>
-                                    <option value="other">أخرى</option>
+                                    <optgroup label="المواد الأساسية">
+                                        <option value="بولي إيثيلين"
+                                            {{ old('network_type') == 'بولي إيثيلين' ? 'selected' : '' }}>بولي إيثيلين
+                                        </option>
+                                        <option value="حديد" {{ old('network_type') == 'حديد' ? 'selected' : '' }}>حديد
+                                        </option>
+                                        <option value="فونط (حديد صب)"
+                                            {{ old('network_type') == 'فونط (حديد صب)' ? 'selected' : '' }}>فونط (حديد صب)
+                                        </option>
+                                        <option value="أترنيت" {{ old('network_type') == 'أترنيت' ? 'selected' : '' }}>
+                                            أترنيت</option>
+                                        <option value="PVC" {{ old('network_type') == 'PVC' ? 'selected' : '' }}>PVC
+                                        </option>
+                                    </optgroup>
+                                    <optgroup label="التوليفات الشائعة">
+                                        <option value="بولي إيثيلين و حديد"
+                                            {{ old('network_type') == 'بولي إيثيلين و حديد' ? 'selected' : '' }}>بولي
+                                            إيثيلين و حديد</option>
+                                        <option value="بولي إيثيلين و فونط"
+                                            {{ old('network_type') == 'بولي إيثيلين و فونط' ? 'selected' : '' }}>بولي
+                                            إيثيلين و فونط</option>
+                                        <option value="بولي إيثيلين و أترنيت"
+                                            {{ old('network_type') == 'بولي إيثيلين و أترنيت' ? 'selected' : '' }}>بولي
+                                            إيثيلين و أترنيت</option>
+                                        <option value="حديد و أترنيت"
+                                            {{ old('network_type') == 'حديد و أترنيت' ? 'selected' : '' }}>حديد و أترنيت
+                                        </option>
+                                        <option value="PVC و أترنيت"
+                                            {{ old('network_type') == 'PVC و أترنيت' ? 'selected' : '' }}>PVC و أترنيت
+                                        </option>
+                                        <option value="بولي إيثيلين و حديد و أترنيت"
+                                            {{ old('network_type') == 'بولي إيثيلين و حديد و أترنيت' ? 'selected' : '' }}>
+                                            بولي إيثيلين و حديد و أترنيت</option>
+                                    </optgroup>
+                                    <optgroup label="أنواع أخرى">
+                                        <option value="خط ضخ" {{ old('network_type') == 'خط ضخ' ? 'selected' : '' }}>خط
+                                            ضخ</option>
+                                        <option value="غير محدد / أخرى"
+                                            {{ old('network_type') == 'غير محدد / أخرى' ? 'selected' : '' }}>غير محدد /
+                                            أخرى</option>
+                                    </optgroup>
                                 </select>
                                 @error('network_type')
-                                    <div class="alert alert-danger">{{ $message }}</div>
-                                @enderror
-
-                                <!-- حقل لإدخال نوع شبكة جديد -->
-                                <input id="custom_network_type" type="text" name="custom_network_type"
-                                    class="form-control @error('custom_network_type') is-invalid @enderror"
-                                    placeholder="أدخل نوع الشبكة" style="display: none; margin-top: 10px;">
-                                @error('custom_network_type')
                                     <div class="alert alert-danger">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -327,3 +343,34 @@
     </div>
 
 @endsection
+{{--  إضافة السكريبت هنا --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // نحدد العناصر التي سنتعامل معها
+        const operatorEntitySelect = document.getElementById('operator_entity');
+        const operatorNameInput = document.getElementById('operator_name');
+
+        // وظيفة لتحديث حقل اسم المشغل
+        function updateOperatorName() {
+            // نتحقق من القيمة المختارة
+            if (operatorEntitySelect.value === 'المؤسسة العامة لمياه الشرب') {
+                // نملأ الحقل بنفس القيمة
+                operatorNameInput.value = 'المؤسسة العامة لمياه الشرب';
+                // نجعل الحقل للقراءة فقط لمنع التعديل
+                operatorNameInput.readOnly = true;
+            } else {
+                // نفرغ الحقل ونجعله قابلاً للكتابة
+                operatorNameInput.value = '';
+                operatorNameInput.readOnly = false;
+                // نضع التركيز على الحقل ليسهل على المستخدم الكتابة
+                operatorNameInput.placeholder = 'أدخل اسم جهة التشغيل (إن وجد)';
+            }
+        }
+
+        // نضيف مستمع حدث 'change' للقائمة المنسدلة
+        operatorEntitySelect.addEventListener('change', updateOperatorName);
+
+        // نقوم بتشغيل الوظيفة مرة واحدة عند تحميل الصفحة لضبط الحالة الأولية
+        updateOperatorName();
+    });
+</script>

@@ -10,6 +10,7 @@ use App\Models\Town;
 use App\Models\Unit;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\Rule;
 
 class StationController extends Controller
 {
@@ -96,21 +97,33 @@ class StationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+   public function store(Request $request)
     {
+        // قائمة مصادر الطاقة المسموح بها
+        $allowedEnergySources = [
+            'لا يوجد', 'كهرباء', 'مولدة', 'طاقة شمسية', 'كهرباء و مولدة',
+            'كهرباء و طاقة شمسية', 'مولدة و طاقة شمسية', 'كهرباء و مولدة و طاقة شمسية'
+        ];
+        $allowedNetworkTypes = [
+                'بولي إيثيلين', 'حديد', 'فونط (حديد صب)', 'أترنيت', 'PVC',
+                'بولي إيثيلين و حديد', 'بولي إيثيلين و فونط', 'بولي إيثيلين و أترنيت',
+                'حديد و أترنيت', 'PVC و أترنيت', 'بولي إيثيلين و حديد و أترنيت',
+                'خط ضخ', 'غير محدد / أخرى'
+            ];
         $request->validate([
             'station_code' => 'required|unique:stations,station_code|max:255',
             'station_name' => 'required|max:255',
-            'operational_status' => 'required|in:,خارج الخدمة,عاملة,متوقفة',
+            'operational_status' => 'required|in:خارج الخدمة,عاملة,متوقفة',
             'stop_reason' => 'nullable|max:255',
-            'energy_source' => 'nullable|max:255',
+            // --- التعديل هنا ---
+            'energy_source' => ['nullable', Rule::in($allowedEnergySources)],
             'operator_entity' => 'nullable|in:تشغيل تشاركي,المؤسسة العامة لمياه الشرب',
             'operator_name' => 'nullable|max:255',
             'general_notes' => 'nullable',
             'town_id' => 'required|exists:towns,id',
-            'water_delivery_method' => 'nullable|max:255',
+            'water_delivery_method' => ['nullable', 'in:شبكة,منهل,شبكة و منهل'],
             'network_readiness_percentage' => 'nullable|numeric|min:0|max:100',
-            'network_type' => 'nullable|max:255',
+            'network_type' => ['nullable', Rule::in($allowedNetworkTypes)],
             'beneficiary_families_count' => 'nullable|integer|min:0',
             'has_disinfection' => 'required|boolean',
             'disinfection_reason' => 'nullable|max:255',
@@ -130,7 +143,6 @@ class StationController extends Controller
 
         return redirect()->route('stations.index')->with('success', 'تم إضافة المحطة بنجاح');
     }
-
     /**
      * Display the specified resource.
      */
@@ -153,23 +165,35 @@ class StationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+     public function update(Request $request, string $id)
     {
         $station = Station::findOrFail($id);
+         $allowedNetworkTypes = [
+        'بولي إيثيلين', 'حديد', 'فونط (حديد صب)', 'أترنيت', 'PVC',
+        'بولي إيثيلين و حديد', 'بولي إيثيلين و فونط', 'بولي إيثيلين و أترنيت',
+        'حديد و أترنيت', 'PVC و أترنيت', 'بولي إيثيلين و حديد و أترنيت',
+        'خط ضخ', 'غير محدد / أخرى'
+    ];
+        // قائمة مصادر الطاقة المسموح بها
+        $allowedEnergySources = [
+            'لا يوجد', 'كهرباء', 'مولدة', 'طاقة شمسية', 'كهرباء و مولدة',
+            'كهرباء و طاقة شمسية', 'مولدة و طاقة شمسية', 'كهرباء و مولدة و طاقة شمسية'
+        ];
 
         $request->validate([
             'station_code' => 'required|unique:stations,station_code,' . $station->id . '|max:255',
             'station_name' => 'required|max:255',
             'operational_status' => 'required|in:خارج الخدمة,عاملة,متوقفة',
             'stop_reason' => 'nullable|max:255',
-            'energy_source' => 'nullable|max:255',
+            // --- التعديل هنا ---
+            'energy_source' => ['nullable', Rule::in($allowedEnergySources)],
             'operator_entity' => 'nullable|in:تشغيل تشاركي,المؤسسة العامة لمياه الشرب',
             'operator_name' => 'nullable|max:255',
             'general_notes' => 'nullable',
             'town_id' => 'required|exists:towns,id',
-            'water_delivery_method' => 'nullable|max:255',
+            'water_delivery_method' => ['nullable', 'in:شبكة,منهل,شبكة و منهل'],
             'network_readiness_percentage' => 'nullable|numeric|min:0|max:100',
-            'network_type' => 'nullable|max:255',
+           'network_type' => ['nullable', Rule::in($allowedNetworkTypes)],
             'beneficiary_families_count' => 'nullable|integer|min:0',
             'has_disinfection' => 'required|boolean',
             'disinfection_reason' => 'nullable|max:255',
@@ -184,13 +208,11 @@ class StationController extends Controller
             'longitude' => 'nullable|numeric',
             'is_verified' => 'required|boolean',
         ]);
-        
 
         $station->update($request->all());
 
         return redirect()->route('stations.index')->with('success', 'تم تحديث المحطة بنجاح');
     }
-
     /**
      * Remove the specified resource from storage.
      */
