@@ -112,11 +112,11 @@
                     </a>
 
                     @if (auth()->check() && in_array(auth()->user()->role_id, ['admin', 'super']))
-                        {{-- <a href="{{ route('waterwells2.index') }}"
+                        <a href="{{ route('waterwells2.index') }}"
                             class="{{ Request::is('waterwells2*') ? 'active' : '' }}">
                             <span class="material-icons-sharp">fact_check</span>
                             <h3>تدقيق تقارير</h3>
-                        </a> --}}
+                        </a>
                         {{-- <a href="{{ route('maintenances.index') }}"
                             class="{{ Request::is('maintenances*') ? 'active' : '' }}">
                             <span class="material-icons-sharp">build</span>

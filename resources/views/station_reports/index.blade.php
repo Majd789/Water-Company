@@ -23,7 +23,9 @@
         @endif
 
         <a id="btnb" href="{{ route('station_reports.create') }}" class="btn btn-primary mb-3">إضافة تقرير جديد</a>
-
+        <a href="{{ route('station_reports.export') }}" class="btn btn-success">
+            <i class="fas fa-file-excel"></i> تصدير التقرير الشامل (Excel)
+        </a>
         <!-- أزرار التبديل بين الجداول -->
         <div class="text-center mb-4">
             <button id="btnb" class="btn btn-secondary mx-3" onclick="showTable('unitTable')">إحصائيات الوحدات</button>

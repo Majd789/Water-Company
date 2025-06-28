@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\File;
 Route::get('/activity-log/export', [ActivityLogController::class, 'export'])->name('activity-log.export');
 // مسار لعرض واجهة الدردشة
 Route::get('/vanna-chat', [VannaChatController::class, 'index'])->name('vanna.chat.index');
+Route::get('/station-reports/export', [StationReportController::class, 'export'])->name('station_reports.export');
 
 // مسار للتعامل مع بث الدردشة (SSE)
 // يجب أن يتطابق هذا المسار مع ما يستدعيه JavaScript في الواجهة الأمامية
