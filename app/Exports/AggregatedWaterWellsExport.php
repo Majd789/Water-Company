@@ -7,8 +7,9 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithMapping; // <-- أضف هذا
 
-class AggregatedWaterWellsExport implements FromCollection, WithHeadings, WithTitle, ShouldAutoSize
+class AggregatedWaterWellsExport implements FromCollection, WithHeadings, WithTitle, ShouldAutoSize, WithMapping
 {
     protected $data;
 
@@ -22,28 +23,8 @@ class AggregatedWaterWellsExport implements FromCollection, WithHeadings, WithTi
     */
     public function collection()
     {
-        // سنقوم بإضافة الأعمدة المحسوبة هنا قبل التصدير
-        return $this->data->map(function ($well) {
-            $difference = $well['total_measured_qty'] - $well['total_sold_qty'];
-            
-            $differencePercentage = 0;
-            if ($well['total_sold_qty'] > 0) {
-                // حساب نسبة الفرق لتحديد نسبة الهدر أو الزيادة
-                $differencePercentage = round(($difference / $well['total_sold_qty']) * 100, 2) . '%';
-            }
-            
-            return [
-                'well_name'               => $well['well_name'],
-                'total_measured_qty'      => $well['total_measured_qty'],
-                'total_sold_qty'          => $well['total_sold_qty'],
-                'quantity_difference'     => $difference, // الفرق بين المقاس والمباع
-                'difference_percentage'   => $differencePercentage, // نسبة الفرق
-                'total_free_qty'          => $well['total_free_qty'],
-                'total_vehicle_qty'       => $well['total_vehicle_qty'],
-                'water_price'             => $well['water_price'],
-                'total_amount'            => $well['total_amount'],
-            ];
-        });
+        // نمرر البيانات كما هي لأن المعالجة تمت في الـ Controller
+        return $this->data;
     }
 
     /**
@@ -51,9 +32,15 @@ class AggregatedWaterWellsExport implements FromCollection, WithHeadings, WithTi
      */
     public function headings(): array
     {
-        // رؤوس الأعمدة في ملف Excel
+        // رؤوس الأعمدة الجديدة بالترتيب المطلوب
         return [
+            'وحدة المياه',
+            'البلدة',
+            'المحطة',
+            'كود المحطة',
             'اسم المنهل',
+            'أيام العمل',
+            'أيام التوقف',
             'إجمالي الكمية المقاسة (م3)',
             'إجمالي كمية البيع (م3)',
             'الفرق في الكمية (الهدر)',
@@ -66,11 +53,44 @@ class AggregatedWaterWellsExport implements FromCollection, WithHeadings, WithTi
     }
 
     /**
+     * @param mixed $well
+     * @return array
+     */
+    public function map($well): array
+    {
+        // نقوم بتنسيق كل صف هنا
+        $difference = $well['total_measured_qty'] - $well['total_sold_qty'];
+        
+        $differencePercentage = '0%';
+        if ($well['total_sold_qty'] > 0) {
+            $differencePercentage = round(($difference / $well['total_sold_qty']) * 100, 2) . '%';
+        }
+
+        return [
+            $well['unit_name'],
+            $well['town_name'],
+            $well['station_name'],
+            $well['station_code'],
+            $well['well_name'],
+            $well['days_working'],
+            $well['days_stopped'],
+            $well['total_measured_qty'],
+            $well['total_sold_qty'],
+            $difference, // الفرق المحسوب
+            $differencePercentage, // النسبة المحسوبة
+            $well['total_free_qty'],
+            $well['total_vehicle_qty'],
+            $well['water_price'],
+            $well['total_amount'],
+        ];
+    }
+
+
+    /**
      * @return string
      */
     public function title(): string
     {
-        // اسم ورقة العمل (Sheet)
         return 'ملخص المناهل المجمع';
     }
 }

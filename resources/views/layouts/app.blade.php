@@ -3,6 +3,10 @@
 
 <head>
     <meta charset="utf-8">
+    {{-- Other meta tags and links --}}
+    @stack('head_meta') {{-- A new stack for head content --}}
+    @stack('styles')
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
