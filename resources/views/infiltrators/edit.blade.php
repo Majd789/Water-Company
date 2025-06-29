@@ -65,10 +65,65 @@
 
                                 <!-- نوع الانفلتر -->
                                 <label for="infiltrator_type">نوع الانفلتر</label>
-                                <input type="text" name="infiltrator_type" id="infiltrator_type"
-                                    class="form-control @error('infiltrator_type') is-invalid @enderror"
-                                    value="{{ old('infiltrator_type', $infiltrator->infiltrator_type) }}"
-                                    placeholder="نوع الانفلتر" required>
+                                <select name="infiltrator_type" id="infiltrator_type"
+                                    class="form-control @error('infiltrator_type') is-invalid @enderror" required>
+                                    <option value="">-- اختر نوع الانفلتر --</option>
+                                    @php
+                                        $types = [
+                                            'VEIKONG',
+                                            'USFULL',
+                                            'LS',
+                                            'ABB',
+                                            'GROWATT',
+                                            'SMA',
+                                            'HUAWEI',
+                                            'DANFOSS',
+                                            'FRECON',
+                                            'BAISON',
+                                            'GMTCNT',
+                                            'CELIK',
+                                            'TREST',
+                                            'TRUST',
+                                            'STAR POWER',
+                                            'STAR NEW',
+                                            'WINGS INTERNATIONAL',
+                                            'ORIGINAL COLD',
+                                            'NGGRID',
+                                            'POWER MAX PRO',
+                                            'FREKON',
+                                            'GELEK',
+                                            'INVT',
+                                            'ENPHASE',
+                                            'SOLAREDGE',
+                                            'GOODWE',
+                                            'VICTRON ENERGY',
+                                            'DELTA',
+                                            'SUNGROW',
+                                            'YASKAWA',
+                                            'KACO',
+                                            'FRONIUS',
+                                            'SOLAX',
+                                            'SOLIS',
+                                            'VFD-LS',
+                                            'RUST',
+                                            'COM',
+                                            'SHIRE',
+                                            'CLICK',
+                                            'HLUX',
+                                            'MOLTO',
+                                            'ON-GRID',
+                                            'OFF-GRID',
+                                            'HYBRID',
+                                            'غير معروف',
+                                        ];
+                                    @endphp
+                                    @foreach ($types as $type)
+                                        <option value="{{ $type }}"
+                                            {{ old('infiltrator_type', $infiltrator->infiltrator_type) == $type ? 'selected' : '' }}>
+                                            {{ $type }}
+                                        </option>
+                                    @endforeach
+                                </select>
                                 @error('infiltrator_type')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

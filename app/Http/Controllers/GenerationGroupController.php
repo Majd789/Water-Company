@@ -10,6 +10,7 @@ use App\Models\Station;
 use App\Models\Town;
 use App\Models\Unit;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\Rule;
 
 class GenerationGroupController extends Controller
 {
@@ -109,8 +110,16 @@ class GenerationGroupController extends Controller
     
         return view('generation-groups.create', compact('stations'));
     }
-    
 
+     private function getAllowedGeneratorNames()
+    {
+        return [
+            'DOOSAN', 'PERKINS', 'SCANIA', 'VOLVO', 'CATERPILLAR', 'TEKSAN', 'CUMMINS', 
+            'DAEWOO', 'JOHN DEERE', 'IVECO', 'FIAT', 'EMSA GENERATOR', 'AKSA', 'FPT', 
+            'DORMAN', 'RICARDO (صيني)', 'BAUDOUIN', 'MARKON', 'KJPOWER', 'GENPOWER', 
+            'DODS', 'AIFO', 'DOTZ', 'MAK', 'MITSUBISHI / MITORELA', 'IDEA', 'COELMO', 'غير معروف'
+        ];
+    }
     /**
      * تخزين مجموعة توليد جديدة في قاعدة البيانات.
      */
@@ -118,7 +127,7 @@ class GenerationGroupController extends Controller
     {
         $request->validate([
             'station_id' => 'required|exists:stations,id',
-            'generator_name' => 'required|string|max:255',
+           'generator_name' => ['required', Rule::in($this->getAllowedGeneratorNames())],
             'generation_capacity' => 'required|numeric|min:0',
             'actual_operating_capacity' => 'required|numeric|min:0',
             'generation_group_readiness_percentage' => 'nullable|numeric|min:0|max:100',
@@ -159,7 +168,7 @@ class GenerationGroupController extends Controller
     {
         $request->validate([
             'station_id' => 'required|exists:stations,id',
-            'generator_name' => 'required|string|max:255',
+            'generator_name' => ['required', Rule::in($this->getAllowedGeneratorNames())],
             'generation_capacity' => 'required|numeric|min:0',
             'actual_operating_capacity' => 'required|numeric|min:0',
             'generation_group_readiness_percentage' => 'nullable|numeric|min:0|max:100',

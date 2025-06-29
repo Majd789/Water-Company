@@ -77,9 +77,32 @@
 
                                 <!-- ماركة وطراز المضخة -->
                                 <label for="pump_brand_model">ماركة وطراز المضخة</label>
-                                <input type="text" name="pump_brand_model" id="pump_brand_model"
-                                    class="form-control @error('pump_brand_model') is-invalid @enderror"
-                                    value="{{ old('pump_brand_model') }}" placeholder="ماركة وطراز المضخة">
+                                <select name="pump_brand_model" id="pump_brand_model"
+                                    class="form-control @error('pump_brand_model') is-invalid @enderror">
+                                    <option value="">-- اختر الماركة --</option>
+                                    <option value="TEKNA EVO"
+                                        {{ old('pump_brand_model') == 'TEKNA EVO' ? 'selected' : '' }}>TEKNA EVO</option>
+                                    <option value="SEKO" {{ old('pump_brand_model') == 'SEKO' ? 'selected' : '' }}>SEKO
+                                    </option>
+                                    <option value="AQUA" {{ old('pump_brand_model') == 'AQUA' ? 'selected' : '' }}>AQUA
+                                    </option>
+                                    <option value="BETA" {{ old('pump_brand_model') == 'BETA' ? 'selected' : '' }}>BETA
+                                    </option>
+                                    <option value="Sempom" {{ old('pump_brand_model') == 'Sempom' ? 'selected' : '' }}>
+                                        Sempom</option>
+                                    <option value="SACO" {{ old('pump_brand_model') == 'SACO' ? 'selected' : '' }}>SACO
+                                    </option>
+                                    <option value="Grundfos" {{ old('pump_brand_model') == 'Grundfos' ? 'selected' : '' }}>
+                                        Grundfos</option>
+                                    <option value="Antech" {{ old('pump_brand_model') == 'Antech' ? 'selected' : '' }}>
+                                        Antech</option>
+                                    <option value="FCE" {{ old('pump_brand_model') == 'FCE' ? 'selected' : '' }}>FCE
+                                    </option>
+                                    <option value="SEL" {{ old('pump_brand_model') == 'SEL' ? 'selected' : '' }}>SEL
+                                    </option>
+                                    <option value="غير معروف"
+                                        {{ old('pump_brand_model') == 'غير معروف' ? 'selected' : '' }}>غير معروف</option>
+                                </select>
                                 @error('pump_brand_model')
                                     <div class="alert alert-danger">{{ $message }}</div>
                                 @enderror

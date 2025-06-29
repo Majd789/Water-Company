@@ -57,6 +57,7 @@
         <table class="table" style="width: 950px;">
             <thead>
                 <tr>
+                    <th>رقم</th>
                     <th>اسم المحطة</th>
                     <th>الاسم</th>
                     <th>عدد الآبار</th>
@@ -68,6 +69,7 @@
             <tbody>
                 @foreach ($wells as $well)
                     <tr>
+                        <td>{{ $well->id }}</td>
                         <td>{{ $well->station->station_name }}</td>
                         <td>{{ $well->well_name }}</td>
                         <td>{{ $well->well_count }}</td>

@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 use App\Models\StationReport;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\StationReportsSummaryExport;
+use App\Models\Station;
+use App\Models\WaterWell2;
+use Carbon\Carbon;
 
 
 
@@ -126,7 +130,68 @@ class StationReportController extends Controller
     
     
     
-    
+    public function export(Request $request) // أضف Request $request هنا
+    {
+        // ======================================================================
+        // الجزء الأول: حساب بيانات المناهل المجمعة (منسوخ من WaterWell2Controller)
+        // ======================================================================
+        $userUnitId = auth()->user()->unit_id;
+
+        $stationCodes = $userUnitId 
+            ? Station::whereHas('town', function ($query) use ($userUnitId) {
+                $query->where('unit_id', $userUnitId);
+            })->pluck('station_code')
+            : null;
+
+        $waterWells = WaterWell2::where('has_flow_meter', 'نعم')
+            ->when($stationCodes, function ($query) use ($stationCodes) {
+                return $query->whereIn('station_code', $stationCodes);
+            })->get();
+        
+        // تطبيق فلتر التاريخ إذا كان موجوداً في الرابط
+        if ($request->date_filter) {
+            $filterDate = Carbon::parse($request->date_filter)->format('Y-m-d');
+            $nextDate   = Carbon::parse($filterDate)->addDay()->format('Y-m-d');
+            $waterWells = $waterWells->filter(function ($well) use ($filterDate, $nextDate) {
+                $wellDate = Carbon::createFromFormat('Y-m-d', '1970-01-01')
+                    ->addDays($well->date - 25569)
+                    ->format('Y-m-d');
+                return $wellDate === $filterDate || $wellDate === $nextDate;
+            });
+        }
+
+        $groupedWells = $waterWells->groupBy('well_name');
+
+        $aggregatedResults = $groupedWells->map(function ($wells, $wellName) {
+            $totalMeasuredQuantity = $wells->sum(fn($w) => $w->flow_meter_end - $w->flow_meter_start);
+            $totalSoldQuantity = $wells->sum('water_sold_quantity');
+            $totalFreeQuantity = $wells->sum('free_filling_quantity');
+            $totalVehicleQuantity = $wells->sum('vehicle_filling_quantity');
+            $waterPrice = $wells->first()->water_price ?? 0;
+            $totalAmount = ($totalSoldQuantity * $waterPrice) - ($totalFreeQuantity * $waterPrice) - ($totalVehicleQuantity * $waterPrice);
+
+            return [
+                'well_name'          => $wellName,
+                'total_measured_qty' => $totalMeasuredQuantity,
+                'total_sold_qty'     => $totalSoldQuantity,
+                'total_free_qty'     => $totalFreeQuantity,
+                'total_vehicle_qty'  => $totalVehicleQuantity,
+                'water_price'        => $waterPrice,
+                'total_amount'       => $totalAmount,
+            ];
+        })->values();
+
+
+        // ======================================================================
+        // الجزء الثاني: استدعاء عملية التصدير مع تمرير بيانات المناهل
+        // ======================================================================
+        
+        // اسم الملف سيكون ديناميكياً بناءً على التاريخ الحالي
+        $fileName = 'full_summary_report_' . now()->format('Y-m-d') . '.xlsx';
+
+        // استدعاء فئة التصدير الرئيسية وتمرير البيانات المجمعة لها
+        return Excel::download(new StationReportsSummaryExport($aggregatedResults), $fileName);
+    }
     
     public function create()
     {

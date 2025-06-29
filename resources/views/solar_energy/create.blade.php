@@ -73,9 +73,14 @@
 
                                 <!-- حقل نوع القاعدة -->
                                 <label for="base_type">نوع القاعدة</label>
-                                <input type="text" name="base_type" id="base_type"
-                                    class="form-control @error('base_type') is-invalid @enderror"
-                                    value="{{ old('base_type') }}" placeholder="أدخل نوع القاعدة" required>
+                                <select name="base_type" id="base_type"
+                                    class="form-control @error('base_type') is-invalid @enderror" required>
+                                    <option value="">-- اختر نوع القاعدة --</option>
+                                    <option value="ثابتة" {{ old('base_type') == 'ثابتة' ? 'selected' : '' }}>ثابتة
+                                    </option>
+                                    <option value="متحركة" {{ old('base_type') == 'متحركة' ? 'selected' : '' }}>متحركة
+                                    </option>
+                                </select>
                                 @error('base_type')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

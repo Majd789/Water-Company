@@ -125,8 +125,41 @@
                                     value="{{ old('pump_lifting') }}" placeholder="أدخل رفع المضخة">
 
                                 <label for="pump_brand_model">ماركة وموديل المضخة</label>
-                                <input type="text" class="form-control" name="pump_brand_model"
-                                    value="{{ old('pump_brand_model') }}" placeholder="أدخل ماركة وموديل المضخة">
+                                <select name="pump_brand_model" class="form-control">
+                                    <option value="">-- اختر الماركة --</option>
+                                    <option value="ATURIA" {{ old('pump_brand_model') == 'ATURIA' ? 'selected' : '' }}>
+                                        ATURIA</option>
+                                    <option value="CHINESE" {{ old('pump_brand_model') == 'CHINESE' ? 'selected' : '' }}>
+                                        CHINESE</option>
+                                    <option value="GRUNDFOS"
+                                        {{ old('pump_brand_model') == 'GRUNDFOS' ? 'selected' : '' }}>GRUNDFOS</option>
+                                    <option value="RED JACKET"
+                                        {{ old('pump_brand_model') == 'RED JACKET' ? 'selected' : '' }}>RED JACKET</option>
+                                    <option value="JET" {{ old('pump_brand_model') == 'JET' ? 'selected' : '' }}>JET
+                                    </option>
+                                    <option value="LOWARA" {{ old('pump_brand_model') == 'LOWARA' ? 'selected' : '' }}>
+                                        LOWARA</option>
+                                    <option value="LOWARA/EU"
+                                        {{ old('pump_brand_model') == 'LOWARA/EU' ? 'selected' : '' }}>LOWARA/EU</option>
+                                    <option value="LOWARA/FRANKLIN"
+                                        {{ old('pump_brand_model') == 'LOWARA/FRANKLIN' ? 'selected' : '' }}>
+                                        LOWARA/FRANKLIN</option>
+                                    <option value="LOWARA/VOGEL"
+                                        {{ old('pump_brand_model') == 'LOWARA/VOGEL' ? 'selected' : '' }}>LOWARA/VOGEL
+                                    </option>
+                                    <option value="PLUGER" {{ old('pump_brand_model') == 'PLUGER' ? 'selected' : '' }}>
+                                        PLUGER</option>
+                                    <option value="RITZ" {{ old('pump_brand_model') == 'RITZ' ? 'selected' : '' }}>RITZ
+                                    </option>
+                                    <option value="ROVATTI" {{ old('pump_brand_model') == 'ROVATTI' ? 'selected' : '' }}>
+                                        ROVATTI</option>
+                                    <option value="VANSAN" {{ old('pump_brand_model') == 'VANSAN' ? 'selected' : '' }}>
+                                        VANSAN</option>
+                                    <option value="WILLO" {{ old('pump_brand_model') == 'WILLO' ? 'selected' : '' }}>
+                                        WILLO</option>
+                                    <option value="غير معروف"
+                                        {{ old('pump_brand_model') == 'غير معروف' ? 'selected' : '' }}>غير معروف</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -157,8 +190,29 @@
                             </div>
                             <div class="card-body">
                                 <label for="energy_source">مصدر الطاقة</label>
-                                <input type="text" class="form-control" name="energy_source"
-                                    value="{{ old('energy_source') }}" placeholder="أدخل مصدر الطاقة">
+                                <select name="energy_source" class="form-control">
+                                    <option value="">-- اختر مصدر الطاقة --</option>
+                                    <option value="لا يوجد" {{ old('energy_source') == 'لا يوجد' ? 'selected' : '' }}>لا
+                                        يوجد</option>
+                                    <option value="كهرباء" {{ old('energy_source') == 'كهرباء' ? 'selected' : '' }}>كهرباء
+                                    </option>
+                                    <option value="مولدة" {{ old('energy_source') == 'مولدة' ? 'selected' : '' }}>مولدة
+                                    </option>
+                                    <option value="طاقة شمسية"
+                                        {{ old('energy_source') == 'طاقة شمسية' ? 'selected' : '' }}>طاقة شمسية</option>
+                                    <option value="كهرباء و مولدة"
+                                        {{ old('energy_source') == 'كهرباء و مولدة' ? 'selected' : '' }}>كهرباء و مولدة
+                                    </option>
+                                    <option value="كهرباء و طاقة شمسية"
+                                        {{ old('energy_source') == 'كهرباء و طاقة شمسية' ? 'selected' : '' }}>كهرباء و طاقة
+                                        شمسية</option>
+                                    <option value="مولدة و طاقة شمسية"
+                                        {{ old('energy_source') == 'مولدة و طاقة شمسية' ? 'selected' : '' }}>مولدة و طاقة
+                                        شمسية</option>
+                                    <option value="كهرباء و مولدة و طاقة شمسية"
+                                        {{ old('energy_source') == 'كهرباء و مولدة و طاقة شمسية' ? 'selected' : '' }}>
+                                        كهرباء و مولدة و طاقة شمسية</option>
+                                </select>
 
                                 <label for="well_address">عنوان البئر</label>
                                 <input type="text" class="form-control" name="well_address"

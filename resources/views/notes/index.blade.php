@@ -7,6 +7,7 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
+                    <th>رقم</th>
                     <th>الاسم</th>
                     <th>الموضوع</th>
                     <th>الحالة</th>
@@ -17,6 +18,7 @@
             <tbody>
                 @foreach ($notes as $note)
                     <tr>
+                        <td>{{ $note->id }}</td>
                         <td>{{ $note->user->name ?? 'مجهول' }}</td>
                         <td>{{ $note->subject }}</td>
 

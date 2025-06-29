@@ -11,10 +11,18 @@ use App\Models\Station;
 use App\Models\Town;
 use App\Models\Unit;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
 class WellController extends Controller
 {
+     private function getAllowedEnergySources()
+    {
+        return [
+            'لا يوجد', 'كهرباء', 'مولدة', 'طاقة شمسية', 'كهرباء و مولدة',
+            'كهرباء و طاقة شمسية', 'مولدة و طاقة شمسية', 'كهرباء و مولدة و طاقة شمسية'
+        ];
+    }
     public function index(Request $request)
     {
         // استرجاع جميع الوحدات
@@ -110,6 +118,11 @@ class WellController extends Controller
     // حفظ بئر جديد
     public function store(Request $request)
     {
+         $allowedPumpBrands = [
+            'ATURIA', 'CHINESE', 'GRUNDFOS', 'RED JACKET', 'JET', 'LOWARA', 
+            'LOWARA/EU', 'LOWARA/FRANKLIN', 'LOWARA/VOGEL', 'PLUGER', 'RITZ', 
+            'ROVATTI', 'VANSAN', 'WILLO', 'غير معروف'
+        ];
         // التحقق من صحة المدخلات
         $validated = $request->validate([
             'station_id' => 'required|exists:stations,id', // يجب أن يكون معتمدًا على المحطات
@@ -128,8 +141,8 @@ class WellController extends Controller
             'pump_capacity' => 'nullable|numeric',
             'actual_pump_flow' => 'nullable|numeric',
             'pump_lifting' => 'nullable|numeric',
-            'pump_brand_model' => 'nullable|string',
-            'energy_source' => 'nullable|string',
+            'pump_brand_model' => ['nullable', Rule::in($allowedPumpBrands)],
+           'energy_source' => ['nullable', Rule::in($this->getAllowedEnergySources())],
             'well_address' => 'nullable|string',
             'general_notes' => 'nullable|string',
             'well_location' => 'nullable|string', // تأكد من تنسيق الـ point
@@ -152,6 +165,11 @@ class WellController extends Controller
     // تحديث بيانات البئر
     public function update(Request $request, Well $well)
     {
+        $allowedPumpBrands = [
+            'ATURIA', 'CHINESE', 'GRUNDFOS', 'RED JACKET', 'JET', 'LOWARA', 
+            'LOWARA/EU', 'LOWARA/FRANKLIN', 'LOWARA/VOGEL', 'PLUGER', 'RITZ', 
+            'ROVATTI', 'VANSAN', 'WILLO', 'غير معروف'
+        ];
         // التحقق من صحة المدخلات
         $validated = $request->validate([
            'station_id' => 'required|exists:stations,id', // يجب أن يكون معتمدًا على المحطات
@@ -170,8 +188,8 @@ class WellController extends Controller
             'pump_capacity' => 'nullable|numeric',
             'actual_pump_flow' => 'nullable|numeric',
             'pump_lifting' => 'nullable|numeric',
-            'pump_brand_model' => 'nullable|string',
-            'energy_source' => 'nullable|string',
+            'pump_brand_model' => ['nullable', Rule::in($allowedPumpBrands)],
+            'energy_source' => ['nullable', Rule::in($this->getAllowedEnergySources())],
             'well_address' => 'nullable|string',
             'general_notes' => 'nullable|string',
             'well_location' => 'nullable|string', // تأكد من تنسيق الـ point

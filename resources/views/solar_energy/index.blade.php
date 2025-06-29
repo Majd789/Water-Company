@@ -46,6 +46,7 @@
         <table class="table">
             <thead>
                 <tr>
+                    <th>رقم</th>
                     <th>المحطة</th>
                     <th>حجم اللوح متر مربع</th>
                     <th>عدد الألواح</th>
@@ -59,6 +60,7 @@
             <tbody>
                 @foreach ($solarEnergies as $solarEnergy)
                     <tr>
+                        <td>{{ $solarEnergy->id }}</td>
                         <td>{{ $solarEnergy->station->station_name }}</td>
                         <td>{{ $solarEnergy->panel_size }} </td>
                         <td>{{ $solarEnergy->panel_count }}</td>

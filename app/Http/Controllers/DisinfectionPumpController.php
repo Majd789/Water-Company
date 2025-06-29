@@ -9,6 +9,7 @@ use App\Models\Station;
 use App\Models\Town;
 use App\Models\Unit;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
 class DisinfectionPumpController extends Controller
@@ -106,7 +107,13 @@ class DisinfectionPumpController extends Controller
         return view('disinfection_pumps.create', compact('stations'));
     }
     
-
+    private function getAllowedPumpBrands()
+        {
+            return [
+                'TEKNA EVO', 'SEKO', 'AQUA', 'BETA', 'Sempom', 'SACO',
+                'Grundfos', 'Antech', 'FCE', 'SEL', 'غير معروف'
+            ];
+        }
     /**
      * تخزين مضخة تعقيم جديدة
      */
@@ -115,7 +122,7 @@ class DisinfectionPumpController extends Controller
         $request->validate([
             'station_id' => 'required|exists:stations,id',
             'disinfection_pump_status' => 'nullable|in:يعمل,متوقف',
-            'pump_brand_model' => 'nullable|string|max:255',
+           'pump_brand_model' => ['nullable', Rule::in($this->getAllowedPumpBrands())],
             'pump_flow_rate' => 'nullable|numeric|min:0',
             'operating_pressure' => 'nullable|numeric|min:0',
             'technical_condition' => 'nullable|string|max:255',
@@ -160,7 +167,7 @@ class DisinfectionPumpController extends Controller
         $request->validate([
             'station_id' => 'required|exists:stations,id',
             'disinfection_pump_status' => 'nullable|in:يعمل,متوقف',
-            'pump_brand_model' => 'nullable|string|max:255',
+            'pump_brand_model' => ['nullable', Rule::in($this->getAllowedPumpBrands())],
             'pump_flow_rate' => 'nullable|numeric|min:0',
             'operating_pressure' => 'nullable|numeric|min:0',
             'technical_condition' => 'nullable|string|max:255',
