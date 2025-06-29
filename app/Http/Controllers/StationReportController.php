@@ -130,10 +130,10 @@ class StationReportController extends Controller
     
     
     
-    public function export(Request $request) // أضف Request $request هنا
+ public function export(Request $request)
     {
         // ======================================================================
-        // الجزء الأول: حساب بيانات المناهل المجمعة (منسوخ من WaterWell2Controller)
+        // الجزء الأول: حساب بيانات المناهل المجمعة
         // ======================================================================
         $userUnitId = auth()->user()->unit_id;
 
@@ -143,35 +143,47 @@ class StationReportController extends Controller
             })->pluck('station_code')
             : null;
 
-        $waterWells = WaterWell2::where('has_flow_meter', 'نعم')
-            ->when($stationCodes, function ($query) use ($stationCodes) {
-                return $query->whereIn('station_code', $stationCodes);
-            })->get();
+        $waterWellsQuery = WaterWell2::with(['station.town.unit'])
+            ->where('has_flow_meter', 'نعم');
+
+        if ($stationCodes) {
+            $waterWellsQuery->whereIn('station_code', $stationCodes);
+        }
         
-        // تطبيق فلتر التاريخ إذا كان موجوداً في الرابط
+        $waterWells = $waterWellsQuery->get();
+        
         if ($request->date_filter) {
             $filterDate = Carbon::parse($request->date_filter)->format('Y-m-d');
-            $nextDate   = Carbon::parse($filterDate)->addDay()->format('Y-m-d');
-            $waterWells = $waterWells->filter(function ($well) use ($filterDate, $nextDate) {
-                $wellDate = Carbon::createFromFormat('Y-m-d', '1970-01-01')
-                    ->addDays($well->date - 25569)
-                    ->format('Y-m-d');
-                return $wellDate === $filterDate || $wellDate === $nextDate;
+            $waterWells = $waterWells->filter(function ($well) use ($filterDate) {
+                $wellDate = Carbon::createFromFormat('Y-m-d', '1970-01-01')->addDays($well->date - 25569)->format('Y-m-d');
+                return $wellDate === $filterDate;
             });
         }
 
-        $groupedWells = $waterWells->groupBy('well_name');
+        $groupedWells = $waterWells->groupBy(fn($well) => $well->station_code . '|' . $well->well_name);
 
-        $aggregatedResults = $groupedWells->map(function ($wells, $wellName) {
+        $aggregatedResults = $groupedWells->map(function ($wells) {
+            $firstWell = $wells->first();
+
+            // الوصول إلى الخاصية ذات الاسم العربي باستخدام الأقواس المعقوفة
+            $daysWorking = $wells->filter(fn($w) => optional($w)->{'الوضع التشغيلي'} && str_contains($w->{'الوضع التشغيلي'}, 'تعمل'))->count();
+            $daysStopped = $wells->filter(fn($w) => optional($w)->{'الوضع التشغيلي'} && str_contains($w->{'الوضع التشغيلي'}, 'متوقفة'))->count();
+
             $totalMeasuredQuantity = $wells->sum(fn($w) => $w->flow_meter_end - $w->flow_meter_start);
             $totalSoldQuantity = $wells->sum('water_sold_quantity');
             $totalFreeQuantity = $wells->sum('free_filling_quantity');
             $totalVehicleQuantity = $wells->sum('vehicle_filling_quantity');
-            $waterPrice = $wells->first()->water_price ?? 0;
+            $waterPrice = $firstWell->water_price ?? 0;
             $totalAmount = ($totalSoldQuantity * $waterPrice) - ($totalFreeQuantity * $waterPrice) - ($totalVehicleQuantity * $waterPrice);
 
             return [
-                'well_name'          => $wellName,
+                'unit_name'          => $firstWell->station?->town?->unit?->unit_name ?? 'غير محدد',
+                'town_name'          => $firstWell->station?->town?->town_name ?? 'غير محدد',
+                'station_name'       => $firstWell->station?->station_name ?? 'غير محدد',
+                'station_code'       => $firstWell->station_code,
+                'well_name'          => $firstWell->well_name,
+                'days_working'       => $daysWorking,
+                'days_stopped'       => $daysStopped,
                 'total_measured_qty' => $totalMeasuredQuantity,
                 'total_sold_qty'     => $totalSoldQuantity,
                 'total_free_qty'     => $totalFreeQuantity,
@@ -181,15 +193,10 @@ class StationReportController extends Controller
             ];
         })->values();
 
-
         // ======================================================================
-        // الجزء الثاني: استدعاء عملية التصدير مع تمرير بيانات المناهل
+        // الجزء الثاني: استدعاء عملية التصدير
         // ======================================================================
-        
-        // اسم الملف سيكون ديناميكياً بناءً على التاريخ الحالي
         $fileName = 'full_summary_report_' . now()->format('Y-m-d') . '.xlsx';
-
-        // استدعاء فئة التصدير الرئيسية وتمرير البيانات المجمعة لها
         return Excel::download(new StationReportsSummaryExport($aggregatedResults), $fileName);
     }
     
