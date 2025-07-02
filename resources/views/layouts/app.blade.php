@@ -103,10 +103,10 @@
                         <span class="material-icons-sharp">people</span>
                         <h3>التقرير الاسبوعي</h3>
                     </a>}}
-                    
+
                     <a href="{{ route('weekly_reports.news') }}"
                         class="{{ Request::is('weekly_reports/news') ? 'active' : '' }}">
-                        <span class="material-icons-sharp">article</span> {{-- Changed icon for clarity 
+                        <span class="material-icons-sharp">article</span> {{-- Changed icon for clarity
                         <h3>استعراض التقارير</h3>
                     </a> --}}
                     <a href="{{ route('station_reports.index') }}"
@@ -218,7 +218,7 @@
                         </a>
                         {{--   <a href="{{ route('stations.map') }}"
                             class="{{ Request::is('stations/map') ? 'active' : '' }}">
-                            <span class="material-icons-sharp">map</span> 
+                            <span class="material-icons-sharp">map</span>
                             <h3>مرجع المواقع</h3>
                         </a> --}}
 
