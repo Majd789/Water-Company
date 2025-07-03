@@ -106,17 +106,17 @@ class RolePermissionSeeder extends Seeder
             'invoices.view', 'invoices.create', 'invoices.edit'
         ]);
 
-          // إنشاء مستخدم مدير
-        $admin = User::create([
-            'name' => 'مدير النظام',
-            'email' => 'admin@example.com',
-            'password' => bcrypt('password'),
-            'phone' => '1234567890',
-            'position' => 'مدير',
-            'department' => 'الإدارة',
-            'is_active' => true
-        ]);
-        $admin->assignRole($adminRole);
+        //   // إنشاء مستخدم مدير
+        // $admin = User::create([
+        //     'name' => 'مدير النظام',
+        //     'email' => 'admin@example.com',
+        //     'password' => bcrypt('password'),
+        //     'phone' => '1234567890',
+        //     'position' => 'مدير',
+        //     'department' => 'الإدارة',
+        //     'is_active' => true
+        // ]);
+        // $admin->assignRole($adminRole);
 
 
     }
