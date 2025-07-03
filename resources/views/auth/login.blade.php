@@ -1,47 +1,98 @@
 <x-guest-layout>
-    <!-- Session Status -->
+    {{-- عرض رسائل الحالة، مثل رابط إعادة تعيين كلمة المرور --}}
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form method="POST" action="{{ route('login') }}">
+    <div class="pt-2 pb-2">
+        <h5 class="card-title text-center pb-0 fs-4">أهلاً بك مجدداً</h5>
+        <p class="text-center small">سجّل الدخول للمتابعة إلى حسابك</p>
+    </div>
+
+    {{-- تم الإبقاء على كل خصائص Laravel كما هي --}}
+    <form method="POST" action="{{ route('login') }}" class="row g-2 needs-validation" novalidate>
         @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        {{-- حقل البريد الإلكتروني --}}
+        <div class="col-12">
+            <label for="email" class="form-label">البريد الإلكتروني</label>
+            <div class="input-group has-validation">
+                <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
+                    id="email" value="{{ old('email') }}" required autofocus autocomplete="username">
+
+                @error('email')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @else
+                    <div class="invalid-feedback">الرجاء إدخال البريد الإلكتروني.</div>
+                @enderror
+            </div>
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+        {{-- حقل كلمة المرور مع أيقونة العين --}}
+        <div class="col-12">
+            <label for="password" class="form-label">كلمة المرور</label>
+            <div class="input-group has-validation">
+                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
+                    id="password" required autocomplete="current-password">
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+                {{-- أيقونة إظهار/إخفاء كلمة المرور --}}
+                {{-- أيقونة إظهار/إخفاء كلمة المرور --}}
+                <span id="togglePassword" class="password-toggle-icon">
+                    <i class="bi bi-eye-slash-fill" id="eye-icon"></i>
+                </span>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                @error('password')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @else
+                    <div class="invalid-feedback">الرجاء إدخال كلمة المرور!</div>
+                @enderror
+            </div>
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
-            </label>
+        {{-- حقل تذكرني --}}
+        <div class="col-12">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="remember" id="remember_me">
+                <label class="form-check-label" for="remember_me">تذكرني</label>
+            </div>
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
+        {{-- زر تسجيل الدخول --}}
+        <div class="col-12 mt-4">
+            <button class="btn btn-primary w-100" type="submit">تسجيل الدخول</button>
         </div>
+
+        {{-- رابط تسجيل حساب جديد --}}
+        @if (Route::has('register'))
+            <div class="col-12 text-center" style="margin-top: 1rem">
+                <p class="small mb-0">ليس لديك حساب؟ <a href="{{ route('register') }}">إنشاء حساب جديد</a></p>
+            </div>
+        @endif
     </form>
 </x-guest-layout>
+
+{{-- أضف هذا الكود في نهاية ملف Blade أو في ملف JS مخصص --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eye-icon');
+
+        togglePassword.addEventListener('click', function() {
+            // تحقق من نوع حقل الإدخال
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+
+            // تغيير شكل الأيقونة
+            if (type === 'text') {
+                // إذا كانت كلمة المرور ظاهرة، اعرض أيقونة العين المفتوحة
+                eyeIcon.classList.remove('bi-eye-slash-fill');
+                eyeIcon.classList.add('bi-eye-fill');
+            } else {
+                // إذا كانت كلمة المرور مخفية، اعرض أيقونة العين المغلقة
+                eyeIcon.classList.remove('bi-eye-fill');
+                eyeIcon.classList.add('bi-eye-slash-fill');
+            }
+        });
+    });
+</script>
