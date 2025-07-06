@@ -34,8 +34,6 @@
                 <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
                 <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
                     id="password" required autocomplete="current-password">
-
-                {{-- أيقونة إظهار/إخفاء كلمة المرور --}}
                 {{-- أيقونة إظهار/إخفاء كلمة المرور --}}
                 <span id="togglePassword" class="password-toggle-icon">
                     <i class="bi bi-eye-slash-fill" id="eye-icon"></i>

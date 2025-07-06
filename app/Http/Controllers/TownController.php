@@ -44,7 +44,7 @@ class TownController extends Controller
         }
     
         // استرجاع البلدات مع الوحدات، مع تحديد الصفحات
-        $towns = $towns->with('unit')->paginate(10000);
+        $towns = $towns->with('unit')->get();
     
         return view('towns.index', compact('towns', 'units'));
     }

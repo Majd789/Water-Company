@@ -1,84 +1,185 @@
-<link href="{{ asset('css/show.css') }}" rel="stylesheet">
 @extends('layouts.app')
+@section('title', 'تفاصيل عداد الكهرباء: ' . $electricityHour->electricity_hour_number)
+
+@push('styles')
+    {{-- أنماط التصميم الموحد --}}
+    <style>
+        .widget-user .widget-user-header {
+            height: 200px;
+            background-size: cover;
+            background-position: center center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #fff !important;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .widget-user .widget-user-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 0;
+        }
+
+        .widget-user .widget-user-username,
+        .widget-user .widget-user-desc {
+            position: relative;
+            z-index: 1;
+        }
+
+        .widget-user .widget-user-image {
+            position: absolute;
+            top: 150px;
+            left: 50%;
+            margin-left: -50px;
+        }
+
+        .widget-user .widget-user-image>img,
+        .widget-user .widget-user-image>.icon-circle {
+            width: 100px;
+            height: 100px;
+            border: 3px solid #fff;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .widget-user .widget-user-image>.icon-circle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 45px;
+            color: #fff;
+        }
+
+        .card-footer {
+            padding-top: 60px;
+        }
+
+        .description-block {
+            margin-bottom: 1.5rem;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .description-text {
+            display: block;
+            color: #6c757d;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .description-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #343a40;
+            display: block;
+        }
+
+        .section-divider {
+            border-top: 1px solid #dee2e6;
+            margin: 2rem 0;
+        }
+    </style>
+@endpush
+
+@section('content_header')
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">تفاصيل: <span class="text-primary">{{ $electricityHour->electricity_hour_number }}</span>
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">الرئيسية</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('electricity-hours.index') }}">عدادات الكهرباء</a></li>
+                    <li class="breadcrumb-item active">{{ $electricityHour->electricity_hour_number }}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+@endsection
 
 @section('content')
-    <h1 style="text-align: center">تفاصيل ساعة الكهرباء</h1>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-widget widget-user shadow-lg rounded">
+                    <div class="widget-user-header" style="background-image: url('{{ asset('dist/img/photo7.jpg') }}');">
+                        <div class="d-flex flex-column align-items-center">
+                            <h3 class="widget-user-username display-4 mb-0" style="font-weight: bold;">
+                                {{ $electricityHour->electricity_hour_number }}</h3>
+                            <h5 class="widget-user-desc mt-2">تابع لمحطة:
+                                {{ $electricityHour->station->station_name ?? 'غير محدد' }}
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="widget-user-image">
+                        <div class="icon-circle img-circle elevation-2 bg-warning"><i class="fas fa-tachometer-alt"></i>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        {{-- المعلومات الأساسية --}}
+                        <div class="row">
+                            <div class="col-md-4 col-sm-6 border-right">
+                                <div class="description-block">
+                                    <span class="description-text">عدد ساعات الكهرباء</span>
+                                    <h5 class="description-header">{{ $electricityHour->electricity_hours ?? '0' }}
+                                        <small>ساعة</small>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-6 border-right">
+                                <div class="description-block">
+                                    <span class="description-text">نوع العداد</span>
+                                    <h5 class="description-header">{{ $electricityHour->meter_type ?? 'N/A' }}</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-12">
+                                <div class="description-block">
+                                    <span class="description-text">الجهة المشغلة</span>
+                                    <h5 class="description-header">{{ $electricityHour->operating_entity ?? 'N/A' }}</h5>
+                                </div>
+                            </div>
+                        </div>
 
-    <!-- حاوية الكروت -->
-    <div class="cards-container">
-        <!-- الكرت 1: اسم المحطة -->
-        <div class="card-box">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    اسم المحطة
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm table-borderless">
-                        <tr>
-                            <th>المحطة</th>
-                            <td>{{ $electricityHour->station->station_name }}</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
+                        {{-- قسم الملاحظات (يظهر بشكل شرطي) --}}
+                        @if ($electricityHour->notes)
+                            <hr class="section-divider">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="description-block">
+                                        <i class="fas fa-info-circle text-muted fa-2x mb-2"></i>
+                                        <span class="description-text">ملاحظات</span>
+                                        <h5 class="description-header"
+                                            style="text-transform: none; font-size: 1rem; font-weight: normal;">
+                                            {{ $electricityHour->notes }}</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
 
-        <!-- الكرت 2: بيانات العداد -->
-        <div class="card-box">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    بيانات العداد
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm table-borderless">
-                        <tr>
-                            <th>رقم ساعة الكهرباء</th>
-                            <td>{{ $electricityHour->electricity_hour_number }}</td>
-                        </tr>
-                        <tr>
-                            <th>نوع العداد</th>
-                            <td>{{ $electricityHour->meter_type }}</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
+                    </div> {{-- نهاية card-footer --}}
+                </div> {{-- نهاية card --}}
+            </div> {{-- نهاية col-md-12 --}}
+        </div> {{-- نهاية row --}}
 
-        <!-- الكرت 3: عدد ساعات الكهرباء -->
-        <div class="card-box">
-            <div class="card">
-                <div class="card-header bg-warning text-dark">
-                    عدد ساعات الكهرباء
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm table-borderless">
-                        <tr>
-                            <th>عدد ساعات الكهرباء</th>
-                            <td>{{ $electricityHour->electricity_hours }}</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- الكرت 4: الجهة المشغلة والملاحظات -->
-        <div class="card-box">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    الجهة المشغلة والملاحظات
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm table-borderless">
-                        <tr>
-                            <th>الجهة المشغلة</th>
-                            <td>{{ $electricityHour->operating_entity }}</td>
-                        </tr>
-                        <tr>
-                            <th>الملاحظات</th>
-                            <td>{{ $electricityHour->notes ?? 'لا توجد ملاحظات' }}</td>
-                        </tr>
-                    </table>
-                </div>
+        {{-- قسم الأزرار --}}
+        <div class="row mt-3 mb-4">
+            <div class="col-12 text-center">
+                <a href="{{ route('electricity-hours.edit', $electricityHour->id) }}" class="btn btn-lg btn-warning"><i
+                        class="fas fa-edit ml-1"></i> تعديل</a>
+                <a href="{{ route('electricity-hours.index') }}" class="btn btn-lg btn-secondary"><i
+                        class="fas fa-arrow-left ml-1"></i> العودة للقائمة</a>
             </div>
         </div>
     </div>
