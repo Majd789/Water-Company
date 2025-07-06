@@ -23,18 +23,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
-    Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-        return $request->user();
+
+
+   Route::prefix('auth')->group(function () {
+        Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::get('/me', [\App\Http\Controllers\Api\AuthController::class, 'me']);
+            Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
+        });
     });
 
-
-
-    // Route::post('/register', [AuthController::class, 'register']);
-    // Route::post('/login', [AuthController::class, 'login']);
-    // Route::middleware('auth:sanctum')->group(function () {
-    //     Route::post('/logout', [AuthController::class, 'logout']);
-    //     Route::get('/user', [AuthController::class, 'user']);
-    // });
 
     // تعريف مسارات API للوحدات
     Route::middleware('auth:sanctum')->group(function(){
