@@ -1,179 +1,333 @@
-<link href="{{ asset('css/createoffice.css') }}" rel="stylesheet">
-
 @extends('layouts.app')
 
-@section('content')
+{{-- CSS لتلوين الحقول بشكل تفاعلي عند الإدخال --}}
+@push('styles')
+    <style>
+        /* لا يتم تطبيق الألوان إلا بعد أن يبدأ المستخدم بالكتابة */
+        .form-control:not(:placeholder-shown):invalid {
+            border-color: #dc3545 !important;
+        }
 
-    <div class="recent-orders" style="text-align: center">
-        <div class="login-card">
-            <h2>إضافة مجموعة توليد جديدة</h2>
-            @if (auth()->check() && auth()->user()->role_id == 'admin')
-                <form action="{{ route('generation_groups.import') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="form-group">
-                        <label for="file">اختر ملف مجموعات التوليد (Excel أو CSV)</label>
-                        <input type="file" name="file" class="form-control" required>
-                    </div>
+        .form-control:not(:placeholder-shown):valid {
+            border-color: #28a745 !important;
+        }
 
-                    <button type="submit" class="btn btn-primary mt-3">استيراد</button>
-                </form>
-            @endif
-            <!-- عرض الأخطاء -->
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+        /* استهداف خاص لـ Select2 */
+        .select2-container--bootstrap4 .select2-selection {
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        }
 
-            <!-- نموذج إضافة مجموعة توليد جديدة -->
-            <form action="{{ route('generation-groups.store') }}" method="POST" class="login-form">
-                @csrf
-                <!-- حاوية الكروت -->
-                <div class="cards-container">
+        .form-control.is-valid~.select2-container--bootstrap4 .select2-selection {
+            border-color: #28a745 !important;
+        }
 
-                    <!-- الكرت 1: معلومات البلدة -->
-                    <div class="card-box" style="width: 400px">
-                        <div class="card">
-                            <div class="card-header bg-primary">
-                                معلومات المولدة
-                            </div>
-                            <!-- المحطة -->
-                            <div class="card-body">
-                                <label for="station_id">اختر المحطة</label>
-                                <select name="station_id" class="form-control @error('station_id') is-invalid @enderror"
-                                    required>
-                                    <option value="">اختر المحطة</option>
-                                    @foreach ($stations as $station)
-                                        <option value="{{ $station->id }}"
-                                            {{ old('station_id') == $station->id ? 'selected' : '' }}>
-                                            {{ $station->station_name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('station_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+        .form-control.is-invalid~.select2-container--bootstrap4 .select2-selection {
+            border-color: #dc3545 !important;
+        }
+    </style>
+@endpush
 
-                                <!-- اسم المولدة -->
-                                <label for="generator_name">اسم المولدة</label>
-                                <select name="generator_name" id="generator_name"
-                                    class="form-control @error('generator_name') is-invalid @enderror" required>
-                                    <option value="">-- اختر اسم المولدة --</option>
-                                    @foreach (['DOOSAN', 'PERKINS', 'SCANIA', 'VOLVO', 'CATERPILLAR', 'TEKSAN', 'CUMMINS', 'DAEWOO', 'JOHN DEERE', 'IVECO', 'FIAT', 'EMSA GENERATOR', 'AKSA', 'FPT', 'DORMAN', 'RICARDO (صيني)', 'BAUDOUIN', 'MARKON', 'KJPOWER', 'GENPOWER', 'DODS', 'AIFO', 'DOTZ', 'MAK', 'MITSUBISHI / MITORELA', 'IDEA', 'COELMO', 'غير معروف'] as $generator)
-                                        <option value="{{ $generator }}"
-                                            {{ old('generator_name') == $generator ? 'selected' : '' }}>{{ $generator }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('generator_name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                <!-- استطاعة التوليد -->
-                                <label for="generation_capacity">استطاعة التوليد</label>
-                                <input type="number" step="0.01" name="generation_capacity"
-                                    class="form-control @error('generation_capacity') is-invalid @enderror"
-                                    value="{{ old('generation_capacity') }}" placeholder="استطاعة التوليد" required>
-                                @error('generation_capacity')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                <!-- استطاعة العمل الفعلية -->
-                                <label for="actual_operating_capacity">استطاعة العمل الفعلية</label>
-                                <input type="number" step="0.01" name="actual_operating_capacity"
-                                    class="form-control @error('actual_operating_capacity') is-invalid @enderror"
-                                    value="{{ old('actual_operating_capacity') }}" placeholder="استطاعة العمل الفعلية"
-                                    required>
-                                @error('actual_operating_capacity')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-
-                                <!-- نسبة الجاهزية -->
-                                <label for="generation_group_readiness_percentage">نسبة الجاهزية (0-100)</label>
-                                <input type="number" step="0.01" name="generation_group_readiness_percentage"
-                                    class="form-control @error('generation_group_readiness_percentage') is-invalid @enderror"
-                                    value="{{ old('generation_group_readiness_percentage') }}"
-                                    placeholder="نسبة الجاهزية (0-100)">
-                                @error('generation_group_readiness_percentage')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-box" style="width: 400px">
-                        <div class="card">
-                            <div class="card-header bg-success">
-                                بيانات المولدة
-                            </div>
-                            <div class="card-body">
-
-                                <!-- استهلاك الوقود -->
-                                <label for="fuel_consumption">استهلاك الوقود</label>
-                                <input type="number" step="0.01" name="fuel_consumption"
-                                    class="form-control @error('fuel_consumption') is-invalid @enderror"
-                                    value="{{ old('fuel_consumption') }}" placeholder="استهلاك الوقود" required>
-                                @error('fuel_consumption')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-
-                                <!-- مدة استخدام الزيت -->
-                                <label for="oil_usage_duration">مدة استخدام الزيت</label>
-                                <input type="number" name="oil_usage_duration"
-                                    class="form-control @error('oil_usage_duration') is-invalid @enderror"
-                                    value="{{ old('oil_usage_duration') }}" placeholder="مدة استخدام الزيت" required>
-                                @error('oil_usage_duration')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-
-                                <!-- كمية الزيت للتبديل -->
-                                <label for="oil_quantity_for_replacement">كمية الزيت للتبديل</label>
-                                <input type="number" step="0.01" name="oil_quantity_for_replacement"
-                                    class="form-control @error('oil_quantity_for_replacement') is-invalid @enderror"
-                                    value="{{ old('oil_quantity_for_replacement') }}" placeholder="كمية الزيت للتبديل"
-                                    required>
-                                @error('oil_quantity_for_replacement')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-
-                                <!-- الوضع التشغيلي -->
-                                <label for="operational_status">الوضع التشغيلي</label>
-                                <select name="operational_status"
-                                    class="form-control @error('operational_status') is-invalid @enderror" required>
-                                    <option value="عاملة" {{ old('operational_status') == 'عاملة' ? 'selected' : '' }}>
-                                        يعمل
-                                    </option>
-                                    <option value="متوقفة" {{ old('operational_status') == 'متوقفة' ? 'selected' : '' }}>
-                                        متوقف
-                                    </option>
-                                </select>
-                                @error('operational_status')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-
-                                <!-- سبب التوقف -->
-                                <label for="stop_reason">سبب التوقف</label>
-                                <textarea name="stop_reason" class="form-control @error('stop_reason') is-invalid @enderror" placeholder="سبب التوقف">{{ old('stop_reason') }}</textarea>
-                                @error('stop_reason')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-
-                                <!-- ملاحظات -->
-                                <label for="notes">ملاحظات</label>
-                                <textarea name="notes" class="form-control @error('notes') is-invalid @enderror" placeholder="ملاحظات">{{ old('notes') }}</textarea>
-                                @error('notes')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- زر الحفظ -->
-                <button type="submit" class="btn btn-primary mt-3">اضافة مجموعة التوليد</button>
-            </form>
+@section('content_header')
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">إضافة مجموعة توليد جديدة</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">الرئيسية</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('generation-groups.index') }}">مجموعات التوليد</a></li>
+                    <li class="breadcrumb-item active">إضافة جديدة</li>
+                </ol>
+            </div>
         </div>
     </div>
-
 @endsection
+
+
+@section('content')
+    <div class="container-fluid pt-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-11 col-xl-10">
+
+                <!-- رسائل الحالة والأخطاء -->
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                        <h5><i class="icon fas fa-check ml-1"></i> نجاح!</h5>
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="alert alert-danger alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                        <h5><i class="icon fas fa-ban ml-1"></i> خطأ!</h5>
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <!-- قسم استيراد مجموعات التوليد -->
+                @if (auth()->check() && auth()->user()->role_id == 'admin')
+                    <div class="card card-success collapsed-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title mb-0">
+                                <i class="fas fa-file-excel ml-1"></i>
+                                استيراد من ملف Excel
+                            </h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <form action="{{ route('generation_groups.import') }}" method="POST"
+                                enctype="multipart/form-data">
+                                @csrf
+                                <p class="text-muted">يمكنك استيراد قائمة بمجموعات التوليد دفعة واحدة من ملف إكسل.</p>
+                                <div class="form-group">
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="importFile" name="file"
+                                            required>
+                                        <label class="custom-file-label" for="importFile">اختر ملف Excel</label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-success"><i class="fas fa-upload ml-1"></i> بدء
+                                    الاستيراد</button>
+                            </form>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- الفورم الرئيسي لإضافة مجموعة توليد جديدة -->
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-edit ml-1"></i>
+                            بيانات مجموعة التوليد
+                        </h3>
+                    </div>
+                    <!-- /.card-header -->
+
+                    <!-- بدء الفورم -->
+                    <form action="{{ route('generation-groups.store') }}" method="POST" novalidate>
+                        @csrf
+                        <div class="card-body">
+
+                            {{-- 1. المعلومات الأساسية --}}
+                            <h5 class="mt-2 mb-3" style="border-bottom: 1px solid #ddd; padding-bottom: 10px;"><i
+                                    class="fas fa-info-circle text-primary ml-2"></i>المعلومات الأساسية</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="station_id">المحطة التابعة لها<span class="text-danger">*</span></label>
+                                        <select name="station_id" class="form-control select2" required>
+                                            <option value="" disabled selected>-- اختر المحطة --</option>
+                                            @foreach ($stations as $station)
+                                                <option value="{{ $station->id }}"
+                                                    {{ old('station_id') == $station->id ? 'selected' : '' }}>
+                                                    {{ $station->station_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="generator_name">اسم المولدة<span class="text-danger">*</span></label>
+                                        <select name="generator_name" id="generator_name" class="form-control select2"
+                                            required>
+                                            <option value="" disabled selected>-- اختر اسم المولدة --</option>
+                                            @foreach (['DOOSAN', 'PERKINS', 'SCANIA', 'VOLVO', 'CATERPILLAR', 'TEKSAN', 'CUMMINS', 'DAEWOO', 'JOHN DEERE', 'IVECO', 'FIAT', 'EMSA GENERATOR', 'AKSA', 'FPT', 'DORMAN', 'RICARDO (صيني)', 'BAUDOUIN', 'MARKON', 'KJPOWER', 'GENPOWER', 'DODS', 'AIFO', 'DOTZ', 'MAK', 'MITSUBISHI / MITORELA', 'IDEA', 'COELMO', 'غير معروف'] as $generator)
+                                                <option value="{{ $generator }}"
+                                                    {{ old('generator_name') == $generator ? 'selected' : '' }}>
+                                                    {{ $generator }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="generation_capacity">استطاعة التوليد (KVA)<span
+                                                class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend"><span class="input-group-text"><i
+                                                        class="fas fa-bolt"></i></span></div>
+                                            <input type="number" step="0.01" name="generation_capacity"
+                                                class="form-control" value="{{ old('generation_capacity') }}"
+                                                placeholder="أدخل استطاعة التوليد" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="actual_operating_capacity">استطاعة العمل الفعلية (KVA)<span
+                                                class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend"><span class="input-group-text"><i
+                                                        class="fas fa-tachometer-alt"></i></span></div>
+                                            <input type="number" step="0.01" name="actual_operating_capacity"
+                                                class="form-control" value="{{ old('actual_operating_capacity') }}"
+                                                placeholder="أدخل استطاعة العمل الفعلية" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="generation_group_readiness_percentage">نسبة الجاهزية (%)</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend"><span class="input-group-text"><i
+                                                        class="fas fa-percentage"></i></span></div>
+                                            <input type="number" step="0.01"
+                                                name="generation_group_readiness_percentage" class="form-control"
+                                                value="{{ old('generation_group_readiness_percentage') }}"
+                                                placeholder="أدخل نسبة الجاهزية (0-100)">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- 2. بيانات التشغيل والاستهلاك --}}
+                            <h5 class="mt-4 mb-3" style="border-bottom: 1px solid #ddd; padding-bottom: 10px;"><i
+                                    class="fas fa-cogs text-success ml-2"></i>بيانات التشغيل والاستهلاك</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="fuel_consumption">استهلاك الوقود (لتر/ساعة)<span
+                                                class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend"><span class="input-group-text"><i
+                                                        class="fas fa-gas-pump"></i></span></div>
+                                            <input type="number" step="0.01" name="fuel_consumption"
+                                                class="form-control" value="{{ old('fuel_consumption') }}"
+                                                placeholder="أدخل استهلاك الوقود" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="oil_usage_duration">مدة استخدام الزيت (ساعة)<span
+                                                class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend"><span class="input-group-text"><i
+                                                        class="fas fa-hourglass-half"></i></span></div>
+                                            <input type="number" name="oil_usage_duration" class="form-control"
+                                                value="{{ old('oil_usage_duration') }}"
+                                                placeholder="أدخل مدة استخدام الزيت" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="oil_quantity_for_replacement">كمية الزيت للتبديل (لتر)<span
+                                                class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend"><span class="input-group-text"><i
+                                                        class="fas fa-oil-can"></i></span></div>
+                                            <input type="number" step="0.01" name="oil_quantity_for_replacement"
+                                                class="form-control" value="{{ old('oil_quantity_for_replacement') }}"
+                                                placeholder="أدخل كمية الزيت للتبديل" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="operational_status">الوضع التشغيلي<span
+                                                class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend"><span class="input-group-text"><i
+                                                        class="fas fa-power-off"></i></span></div>
+                                            <select name="operational_status" id="operational_status"
+                                                class="form-control" required>
+                                                <option value="عاملة"
+                                                    {{ old('operational_status') == 'عاملة' ? 'selected' : '' }}>عاملة
+                                                </option>
+                                                <option value="متوقفة"
+                                                    {{ old('operational_status') == 'متوقفة' ? 'selected' : '' }}>متوقفة
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12" id="stop_reason_container" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="stop_reason">سبب التوقف</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend"><span class="input-group-text"><i
+                                                        class="fas fa-exclamation-triangle"></i></span></div>
+                                            <textarea name="stop_reason" class="form-control" placeholder="أدخل سبب التوقف">{{ old('stop_reason') }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="notes">ملاحظات</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend"><span class="input-group-text"><i
+                                                        class="fas fa-pencil-alt"></i></span></div>
+                                            <textarea name="notes" class="form-control" placeholder="أدخل أي ملاحظات إضافية">{{ old('notes') }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- /.card-body -->
+
+                        <div class="card-footer text-right">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save ml-1"></i>
+                                حفظ المجموعة
+                            </button>
+                            <a href="{{ route('generation-groups.index') }}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times ml-1"></i>
+                                إلغاء
+                            </a>
+                        </div>
+                    </form>
+                    <!-- نهاية الفورم -->
+                </div>
+                <!-- /.card -->
+
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+@endsection
+
+@push('scripts')
+    <script>
+        $(function() {
+            // تفعيل Select2
+            $('.select2').select2({
+                theme: 'bootstrap4',
+                dir: "rtl"
+            });
+
+            // تفعيل bs-custom-file-input
+            bsCustomFileInput.init();
+
+            // منطق إظهار/إخفاء حقل سبب التوقف
+            const operationalStatusSelect = document.getElementById('operational_status');
+            const stopReasonContainer = document.getElementById('stop_reason_container');
+
+            function toggleStopReason() {
+                if (operationalStatusSelect.value === 'متوقفة') {
+                    stopReasonContainer.style.display = 'block';
+                } else {
+                    stopReasonContainer.style.display = 'none';
+                }
+            }
+
+            // استدعاء الوظيفة عند تغيير القيمة
+            operationalStatusSelect.addEventListener('change', toggleStopReason);
+
+            // استدعاء الوظيفة عند تحميل الصفحة لضبط الحالة الأولية بناءً على old()
+            toggleStopReason();
+        });
+    </script>
+@endpush

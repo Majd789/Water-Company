@@ -15,6 +15,7 @@ use App\Http\Controllers\{
     WaterWellController,
     WeeklyReportController
 };
+use App\Http\Controllers\Api\StatisticsController;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\File;
 /*
@@ -29,7 +30,7 @@ use Illuminate\Support\Facades\File;
 */
 
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard.home');
 
 // Route::middleware('auth')->group(function () {
 //     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

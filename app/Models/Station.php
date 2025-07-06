@@ -69,5 +69,8 @@ class Station extends Model
         // PumpingSector::class هو الموديل المرتبط
         return $this->hasMany(PumpingSector::class, 'station_id');
     }
-
+    public function solarEnergies()
+    {
+    return $this->hasMany(SolarEnergy::class);
+    }
 }

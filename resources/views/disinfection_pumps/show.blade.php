@@ -1,109 +1,226 @@
-<link href="{{ asset('css/show.css') }}" rel="stylesheet">
 @extends('layouts.app')
+@section('title', 'تفاصيل مضخة التعقيم: ' . $disinfectionPump->pump_brand_model)
 
-@section('content')
-    <h1 style="text-align: center">تفاصيل مضخة التعقيم</h1>
+@push('styles')
+    {{-- أنماط التصميم الموحد --}}
+    <style>
+        .widget-user .widget-user-header {
+            height: 200px;
+            background-size: cover;
+            background-position: center center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #fff !important;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+        }
 
-    <!-- حاوية الكروت -->
-    <div class="cards-container">
-        <!-- الكرت 1: المعلومات الأساسية -->
-        <div class="card-box">
-            <div class="card">
-                <div class="card-header bg-primary">
-                    المعلومات الأساسية
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm table-borderless">
-                        <tr>
-                            <th>رقم المضخة</th>
-                            <td>{{ $disinfectionPump->id }}</td>
-                        </tr>
-                        <tr>
-                            <th>اسم المحطة</th>
-                            <td>{{ $disinfectionPump->station->station_name }}</td>
-                        </tr>
-                        <tr>
-                            <th>الوضع التشغيلي</th>
-                            <td>{{ $disinfectionPump->disinfection_pump_status }}</td>
-                        </tr>
-                    </table>
-                </div>
+        .widget-user .widget-user-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 0;
+        }
+
+        .widget-user .widget-user-username,
+        .widget-user .widget-user-desc {
+            position: relative;
+            z-index: 1;
+        }
+
+        .widget-user .widget-user-image {
+            position: absolute;
+            top: 150px;
+            left: 50%;
+            margin-left: -50px;
+        }
+
+        .widget-user .widget-user-image>img,
+        .widget-user .widget-user-image>.icon-circle {
+            width: 100px;
+            height: 100px;
+            border: 3px solid #fff;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .widget-user .widget-user-image>.icon-circle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 45px;
+            color: #fff;
+        }
+
+        .card-footer {
+            padding-top: 60px;
+        }
+
+        .description-block {
+            margin-bottom: 1.5rem;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .description-text {
+            display: block;
+            color: #6c757d;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .description-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #343a40;
+            display: block;
+        }
+
+        .section-divider {
+            border-top: 1px solid #dee2e6;
+            margin: 2rem 0;
+        }
+    </style>
+@endpush
+
+@section('content_header')
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">تفاصيل: <span class="text-primary">{{ $disinfectionPump->pump_brand_model }}</span></h1>
             </div>
-        </div>
-
-        <!-- الكرت 2: بيانات المضخة -->
-        <div class="card-box">
-            <div class="card">
-                <div class="card-header bg-success">
-                    بيانات المضخة
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm table-borderless">
-                        <tr>
-                            <th>ماركة وطراز المضخة</th>
-                            <td>{{ $disinfectionPump->pump_brand_model }}</td>
-                        </tr>
-                        <tr>
-                            <th>غزارة المضخة</th>
-                            <td>{{ $disinfectionPump->pump_flow_rate }} لتر/ساعة</td>
-                        </tr>
-                        <tr>
-                            <th>ضغط العمل</th>
-                            <td>{{ $disinfectionPump->operating_pressure }} بار</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- الكرت 3: الحالة الفنية والملاحظات -->
-        <div class="card-box">
-            <div class="card">
-                <div class="card-header bg-warning">
-                    الحالة الفنية والملاحظات
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm table-borderless">
-                        <tr>
-                            <th>الحالة الفنية</th>
-                            <td>{{ $disinfectionPump->technical_condition }}</td>
-                        </tr>
-                        <tr>
-                            <th>ملاحظات</th>
-                            <td>{{ $disinfectionPump->notes ?? 'لا توجد ملاحظات' }}</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- الكرت 4: مصدر الطاقة -->
-        <div class="card-box">
-            <div class="card">
-                <div class="card-header bg-info">
-                    مصدر الطاقة
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm table-borderless">
-                        <tr>
-                            <th>نوع مصدر الطاقة</th>
-                            <td>{{ $disinfectionPump->power_source }}</td>
-                        </tr>
-                        <tr>
-                            <th>القدرة الكهربائية</th>
-                            <td>{{ $disinfectionPump->power_capacity }} كيلوواط</td>
-                        </tr>
-                        <tr>
-                            <th>ملاحظات حول الطاقة</th>
-                            <td>{{ $disinfectionPump->power_notes ?? 'لا توجد ملاحظات' }}</td>
-                        </tr>
-                    </table>
-                </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">الرئيسية</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('disinfection_pumps.index') }}">مضخات التعقيم</a></li>
+                    <li class="breadcrumb-item active">{{ $disinfectionPump->pump_brand_model }}</li>
+                </ol>
             </div>
         </div>
     </div>
+@endsection
 
-    <div style="text-align: center" class="text-center">
-        <a href="{{ route('disinfection_pumps.index') }}" class="btn btn-primary">عودة إلى القائمة</a>
+@section('content')
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-widget widget-user shadow-lg rounded">
+                    <div class="widget-user-header" style="background-image: url('{{ asset('dist/img/photo5.jpg') }}');">
+                        <div class="d-flex flex-column align-items-center">
+                            <h3 class="widget-user-username display-4 mb-0" style="font-weight: bold;">
+                                {{ $disinfectionPump->pump_brand_model }}</h3>
+                            <h5 class="widget-user-desc mt-2">تابع لمحطة:
+                                {{ $disinfectionPump->station->station_name ?? 'غير محدد' }}
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="widget-user-image">
+                        <div class="icon-circle img-circle elevation-2 bg-success"><i class="fas fa-syringe"></i></div>
+                    </div>
+                    <div class="card-footer">
+                        {{-- الملخص الرئيسي --}}
+                        <div class="row">
+                            <div class="col-md-4 col-sm-6 border-right">
+                                <div class="description-block">
+                                    <span class="description-text">الحالة التشغيلية</span>
+                                    <h5 class="description-header">{{ $disinfectionPump->disinfection_pump_status }}</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-6 border-right">
+                                <div class="description-block">
+                                    <span class="description-text">غزارة المضخة</span>
+                                    <h5 class="description-header">{{ $disinfectionPump->pump_flow_rate ?? '0' }}
+                                        <small>لتر/س</small>
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-12">
+                                <div class="description-block">
+                                    <span class="description-text">ضغط العمل</span>
+                                    <h5 class="description-header">{{ $disinfectionPump->operating_pressure ?? '0' }}
+                                        <small>بار</small>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="section-divider">
+                        {{-- تفاصيل الطاقة والحالة الفنية --}}
+                        <div class="row">
+                            <div class="col-md-4 col-6">
+                                <div class="description-block"><i
+                                        class="fas fa-shield-alt text-success fa-2x mb-2"></i><span
+                                        class="description-text">الحالة الفنية</span>
+                                    <h5 class="description-header">{{ $disinfectionPump->technical_condition ?? 'N/A' }}
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-6">
+                                <div class="description-block"><i class="fas fa-bolt text-warning fa-2x mb-2"></i><span
+                                        class="description-text">مصدر الطاقة</span>
+                                    <h5 class="description-header">{{ $disinfectionPump->power_source ?? 'N/A' }}</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-6">
+                                <div class="description-block"><i class="fas fa-plug text-info fa-2x mb-2"></i><span
+                                        class="description-text">القدرة الكهربائية</span>
+                                    <h5 class="description-header">{{ $disinfectionPump->power_capacity ?? '0' }}
+                                        <small>كيلوواط</small>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- قسم الملاحظات (يظهر بشكل شرطي) --}}
+                        @if ($disinfectionPump->notes || $disinfectionPump->power_notes)
+                            <hr class="section-divider">
+                            <div class="row d-flex justify-content-center">
+                                @if ($disinfectionPump->notes)
+                                    <div class="col-md-6">
+                                        <div class="description-block">
+                                            <i class="fas fa-info-circle text-muted fa-2x mb-2"></i>
+                                            <span class="description-text">ملاحظات عامة</span>
+                                            <h5 class="description-header"
+                                                style="text-transform: none; font-size: 1rem; font-weight: normal;">
+                                                {{ $disinfectionPump->notes }}</h5>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if ($disinfectionPump->power_notes)
+                                    <div class="col-md-6">
+                                        <div class="description-block">
+                                            <i class="fas fa-lightbulb text-warning fa-2x mb-2"></i>
+                                            <span class="description-text">ملاحظات الطاقة</span>
+                                            <h5 class="description-header"
+                                                style="text-transform: none; font-size: 1rem; font-weight: normal;">
+                                                {{ $disinfectionPump->power_notes }}</h5>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+
+                    </div> {{-- نهاية card-footer --}}
+                </div> {{-- نهاية card --}}
+            </div> {{-- نهاية col-md-12 --}}
+        </div> {{-- نهاية row --}}
+
+        {{-- قسم الأزرار --}}
+        <div class="row mt-3 mb-4">
+            <div class="col-12 text-center">
+                <a href="{{ route('disinfection_pumps.edit', $disinfectionPump->id) }}" class="btn btn-lg btn-warning"><i
+                        class="fas fa-edit ml-1"></i> تعديل</a>
+                <a href="{{ route('disinfection_pumps.index') }}" class="btn btn-lg btn-secondary"><i
+                        class="fas fa-arrow-left ml-1"></i> العودة للقائمة</a>
+            </div>
+        </div>
     </div>
 @endsection
