@@ -2,9 +2,9 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{
+use App\Http\Controllers\Dashboard\{
     ActivityLogController,
-    AuthController, DailyStationReportController, DashboardController, DataExportController, DieselTankController,
+    DailyStationReportController, DashboardController, DataExportController, DieselTankController,
     DisinfectionPumpController, ElectricityHourController, ElectricityTransformerController,
     UnitController, TownController, StationController, WellController,
     GenerationGroupController, HorizontalPumpController, GroundTankController,
