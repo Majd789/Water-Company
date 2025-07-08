@@ -9,18 +9,16 @@ use Illuminate\Support\Facades\Auth;
 
 class CheckRole
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next ,$roles): Response
     {
-        // تحويل سلسلة الأدوار إلى مصفوفة باستخدام |
         $roles = explode('|', $roles);
+        
+        /** @var \App\Models\User|null $user */ // <-- أضف هذا السطر
         $user = Auth::user();
+
         foreach ($roles as $role) {
-            if ($user?->hasRole($role)) {
+            // الآن سيفهم المحرر أن hasRole موجودة
+            if ($user?->hasRole($role)) { 
                 return $next($request);
             }
         }

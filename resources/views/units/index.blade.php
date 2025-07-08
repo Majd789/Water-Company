@@ -57,10 +57,18 @@
                                 <tbody>
                                     @foreach ($units as $unit)
                                         @php
-                                            // Generate a random percentage for demonstration
-                                            $progress = rand(10, 100);
-                                            $badge_color = 'bg-danger'; // Default color
-                                            if ($progress > 75) {
+                                            // حساب نسبة التقدم الحقيقية
+                                            if ($unit->stations_count > 0) {
+                                                $progress =
+                                                    ($unit->completed_stations_count / $unit->stations_count) * 100;
+                                            } else {
+                                                $progress = 0; // لا توجد محطات، فالتقدم صفر
+                                            }
+                                            $progress = round($progress); // تقريب النسبة لأقرب عدد صحيح
+
+                                            // تحديد لون الشريط بناءً على النسبة
+                                            $badge_color = 'bg-danger'; // اللون الافتراضي (أقل من 41%)
+                                            if ($progress == 100) {
                                                 $badge_color = 'bg-success';
                                             } elseif ($progress > 40) {
                                                 $badge_color = 'bg-warning';

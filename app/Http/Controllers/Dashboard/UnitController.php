@@ -14,10 +14,20 @@ class UnitController extends Controller
     /**
      * عرض قائمة الوحدات
      */
-    public function index()
+   public function index()
     {
-        $units = Unit::with('governorate')->paginate(1000);
-        return view('units.index', compact('units'));
+      $units = Unit::with('governorate')
+        // 1. جلب العدد الإجمالي للمحطات
+        ->withCount('stations')
+
+        // 2. جلب عدد المحطات التي تم التحقق منها (is_verified = true)
+        ->withCount(['stations as completed_stations_count' => function ($query) {
+            // هنا التعديل: استخدمنا اسم العمود الصحيح (is_verified) والقيمة الصحيحة (true)
+            $query->where('is_verified', true);
+        }])
+        ->paginate(1000);
+
+    return view('units.index', compact('units'));
     }
 
     /**

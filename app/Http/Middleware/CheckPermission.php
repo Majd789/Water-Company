@@ -9,19 +9,15 @@ use Illuminate\Support\Facades\Auth;
 
 class CheckPermission
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next, $permissions): Response
     {
-
-        // التحقق من أن المستخدم لديه أي من الصلاحيات المطلوبة
-        // في حال كان يتمتلك واحدة من الصلاحيات المدخلة يتم القبول
+        /** @var \App\Models\User|null $user */ // <-- أضف هذا السطر
+        $user = Auth::user();
+        
         $permissions = explode('|', $permissions);
         foreach ($permissions as $perm) {
-            if (Auth::user()->can($perm)) {
+            // الآن سيفهم المحرر أن can موجودة
+            if ($user?->can($perm)) { 
                 return $next($request);
             }
         }

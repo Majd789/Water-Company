@@ -24,5 +24,10 @@ public function governorate()
 {
     return $this->belongsTo(Governorate::class);
 }
+ public function stations()
+    {
+        // نصل إلى نموذج Station::class من خلال نموذج Town::class
+        return $this->hasManyThrough(Station::class, Town::class);
+    }
 
 }
