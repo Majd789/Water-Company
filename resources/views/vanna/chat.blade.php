@@ -155,7 +155,9 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'VANNA-API-KEY':'vn-b260d770df8e44508a922ab225a64bc6'
+
                     },
                     body: JSON.stringify({
                         question

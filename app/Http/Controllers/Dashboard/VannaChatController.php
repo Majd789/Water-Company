@@ -19,7 +19,7 @@ class VannaChatController extends Controller
 
         // يُنصح بشدة بتخزين مفتاح API الخاص بك في ملف .env
         // والوصول إليه باستخدام env('VANNA_API_KEY') أو config('services.vanna.key')
-        $vannaApiKey = env('VANNA_API_KEY', 'vn-24bed53a7da5482493061ddf6927e56a');
+        $vannaApiKey = env('VANNA_API_KEY', 'vn-b260d770df8e44508a922ab225a64bc6');
 
       // ...
 // في VannaChatController.php، داخل دالة stream

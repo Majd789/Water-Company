@@ -11,7 +11,7 @@ use App\Http\Controllers\Dashboard\{
     ElevatedTankController, FilterController, InfiltratorController,
     InstitutionPropertyController, MaintenanceController, ManholeController, ManholeReportController,
     NoteController, PrivateWellController, PumpingSectionController,
-    SolarEnergyController, StationMapController, StationReportController, VannaChatController, WaterWell2Controller,
+    SolarEnergyController, StationMapController, StationReportController, UserController, VannaChatController, WaterWell2Controller,
     WaterWellController,
     WeeklyReportController
 };
@@ -268,15 +268,15 @@ Route::middleware(['auth','AdminRole:admin'])->group(function () {
         Route::post('solar_energy/import', [SolarEnergyController::class, 'import'])->name('import.solar_energies');
         Route::post('diesel_tanks/import', [DieselTankController::class, 'import'])->name('import.diesel_tanks');
 
+
+
     });
 
     //user routes
-    Route::middleware(['auth', 'AdminRole:user,admin'])->group(function () {
-
+    Route::middleware(['auth'])->group(function () {
+        Route::resource('users', UserController::class);
     });
-    Route::middleware(['auth','AdminRole:unknown'])->group(function (){
 
-    });
 
 Route::get('/storage/{folder}/{filename}', function ($folder, $filename) {
     $path = storage_path("app/public/{$folder}/{$filename}");
