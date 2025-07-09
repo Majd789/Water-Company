@@ -14,10 +14,10 @@ class ActivityLogController extends Controller
 {
       public function __construct()
     {
-        $this->middleware('permission:activity-log.view')->only(['index', 'show']);
-        $this->middleware('permission:activity-log.create')->only(['create', 'store']);
-        $this->middleware('permission:activity-log.edit')->only(['edit', 'update']);
-        $this->middleware('permission:activity-log.delete')->only('destroy');
+        $this->middleware('permission:activities_logs.view')->only(['index', 'show']);
+        $this->middleware('permission:activities_logs.create')->only(['create', 'store']);
+        $this->middleware('permission:activities_logs.edit')->only(['edit', 'update']);
+        $this->middleware('permission:activities_logs.delete')->only('destroy');
     }
    public function index(Request $request)
 {

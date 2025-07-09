@@ -15,10 +15,10 @@ class PrivateWellController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:private-wells.view')->only(['index', 'show']);
-        $this->middleware('permission:private-wells.create')->only(['create', 'store']);
-        $this->middleware('permission:private-wells.edit')->only(['edit', 'update']);
-        $this->middleware('permission:private-wells.delete')->only('destroy');
+        $this->middleware('permission:privet_wells.view')->only(['index', 'show']);
+        $this->middleware('permission:privet_wells.create')->only(['create', 'store']);
+        $this->middleware('permission:privet_wells.edit')->only(['edit', 'update']);
+        $this->middleware('permission:privet_wells.delete')->only('destroy');
     }
     /**
      * عرض قائمة الآبار.
