@@ -13,11 +13,12 @@ class RolePermissionSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+  public function run(): void
     {
        // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
+     
         //  // إنشاء الصلاحيات
         // $permissions = [
         //     // إدارة المستخدمين

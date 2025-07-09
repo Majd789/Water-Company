@@ -13,6 +13,14 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ElectricityTransformerController extends Controller
 {
+    
+      public function __construct()
+    {
+        $this->middleware('permission:electricity_transformers.view')->only(['index', 'show']);
+        $this->middleware('permission:electricity_transformers.create')->only(['create', 'store']);
+        $this->middleware('permission:electricity_transformers.edit')->only(['edit', 'update']);
+        $this->middleware('permission:electricity_transformers.delete')->only('destroy');
+    }
     /**
      * عرض جميع المحولات الكهربائية
      */
@@ -52,7 +60,7 @@ class ElectricityTransformerController extends Controller
         $transformers = $query->paginate(10000);
 
         // تمرير البيانات إلى العرض مع الوحدات لاستخدامها في الفلترة
-        return view('electricity-transformers.index', compact('transformers', 'units', 'selectedUnitId'));
+        return view('dashboard.electricity-transformers.index', compact('transformers', 'units', 'selectedUnitId'));
     }
 
 
@@ -71,7 +79,7 @@ class ElectricityTransformerController extends Controller
         // استيراد البيانات
         Excel::import(new ElectricityTransformersImport, $request->file('file'));
 
-        return redirect()->route('electricity-transformers.index')->with('success', 'تم استيراد محولات الكهرباء بنجاح.');
+        return redirect()->route('dashboard.electricity-transformers.index')->with('success', 'تم استيراد محولات الكهرباء بنجاح.');
     }
     /**
      * عرض نموذج إنشاء محولة جديدة
@@ -94,7 +102,7 @@ class ElectricityTransformerController extends Controller
         }
 
         // إرسال المحطات إلى العرض
-        return view('electricity-transformers.create', compact('stations'));
+        return view('dashboard.electricity-transformers.create', compact('stations'));
     }
 
     /**
@@ -116,7 +124,7 @@ class ElectricityTransformerController extends Controller
 
         ElectricityTransformer::create($request->all());
 
-        return redirect()->route('electricity-transformers.index')->with('success', 'تمت إضافة المحولة بنجاح.');
+        return redirect()->route('dashboard.electricity-transformers.index')->with('success', 'تمت إضافة المحولة بنجاح.');
     }
 
     /**
@@ -124,7 +132,7 @@ class ElectricityTransformerController extends Controller
      */
     public function show(ElectricityTransformer $electricityTransformer)
     {
-        return view('electricity-transformers.show', compact('electricityTransformer'));
+        return view('dashboard.electricity-transformers.show', compact('electricityTransformer'));
     }
 
     /**
@@ -133,7 +141,7 @@ class ElectricityTransformerController extends Controller
     public function edit(ElectricityTransformer $electricityTransformer)
     {
         $stations = Station::all();
-        return view('electricity-transformers.edit', compact('electricityTransformer', 'stations'));
+        return view('dashboard.electricity-transformers.edit', compact('electricityTransformer', 'stations'));
     }
 
     /**
@@ -155,7 +163,7 @@ class ElectricityTransformerController extends Controller
 
         $electricityTransformer->update($request->all());
 
-        return redirect()->route('electricity-transformers.index')->with('success', 'تم تحديث المحولة بنجاح.');
+        return redirect()->route('dashboard.electricity-transformers.index')->with('success', 'تم تحديث المحولة بنجاح.');
     }
 
     /**
@@ -165,6 +173,6 @@ class ElectricityTransformerController extends Controller
     {
         $electricityTransformer->delete();
 
-        return redirect()->route('electricity-transformers.index')->with('success', 'تم حذف المحولة بنجاح.');
+        return redirect()->route('dashboard.electricity-transformers.index')->with('success', 'تم حذف المحولة بنجاح.');
     }
 }

@@ -17,6 +17,15 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class WellController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:wells.view')->only(['index', 'show']);
+        $this->middleware('permission:wells.create')->only(['create', 'store']);
+        $this->middleware('permission:wells.edit')->only(['edit', 'update']);
+        $this->middleware('permission:wells.delete')->only('destroy');
+        $this->middleware('permission:wells.export')->only('export');
+        $this->middleware('permission:wells.import')->only('import');
+    }
      private function getAllowedEnergySources()
     {
         return [
@@ -72,7 +81,7 @@ class WellController extends Controller
         // استرجاع الآبار مع المحطات
         $wells = $wells->with('station')->paginate(5000);
 
-        return view('wells.index', compact('wells', 'units', 'towns'));
+        return view('dashboard.wells.index', compact('wells', 'units', 'towns'));
     }
 
 
@@ -93,7 +102,7 @@ class WellController extends Controller
         // استيراد البيانات
         Excel::import(new WellsImport, $request->file('file'));
 
-        return redirect()->route('wells.index')->with('success', 'تم استيراد الآبار بنجاح.');
+        return redirect()->route('dashboard.wells.index')->with('success', 'تم استيراد الآبار بنجاح.');
     }
 
     public function create()
@@ -114,7 +123,7 @@ class WellController extends Controller
             $towns = Town::all();  // عرض جميع البلدات في حالة عدم وجود وحدة للمستخدم
         }
 
-        return view('wells.create', compact('stations', 'towns'));
+        return view('dashboard.wells.create', compact('stations', 'towns'));
     }
     // حفظ بئر جديد
     public function store(Request $request)
@@ -153,14 +162,14 @@ class WellController extends Controller
         Well::create($validated);
 
         // إعادة التوجيه إلى صفحة الآبار مع رسالة نجاح
-        return redirect()->route('wells.index')->with('success', 'تم إضافة البئر بنجاح');
+        return redirect()->route('dashboard.wells.index')->with('success', 'تم إضافة البئر بنجاح');
     }
 
     // عرض نموذج تعديل بئر
     public function edit(Well $well)
     {
         $stations = Station::all(); // جلب جميع المحطات
-        return view('wells.edit', compact('well', 'stations')); // إرجاع العرض مع البيانات
+        return view('dashboard.wells.edit', compact('well', 'stations')); // إرجاع العرض مع البيانات
     }
 
     // تحديث بيانات البئر
@@ -200,7 +209,7 @@ class WellController extends Controller
         $well->update($validated);
 
         // إعادة التوجيه إلى صفحة الآبار مع رسالة نجاح
-        return redirect()->route('wells.index')->with('success', 'تم تحديث بيانات البئر بنجاح');
+        return redirect()->route('dashboard.wells.index')->with('success', 'تم تحديث بيانات البئر بنجاح');
     }
 
     // حذف بئر
@@ -210,12 +219,12 @@ class WellController extends Controller
         $well->delete();
 
         // إعادة التوجيه إلى صفحة الآبار مع رسالة نجاح
-        return redirect()->route('wells.index')->with('success', 'تم حذف البئر بنجاح');
+        return redirect()->route('dashboard.wells.index')->with('success', 'تم حذف البئر بنجاح');
     }
 
     // عرض تفاصيل البئر
     public function show(Well $well)
     {
-        return view('wells.show', compact('well')); // إرجاع عرض تفاصيل البئر
+        return view('dashboard.wells.show', compact('well')); // إرجاع عرض تفاصيل البئر
     }
 }

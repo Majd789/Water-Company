@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -13,17 +14,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        // الخطوة 1: تشغيل seeder الأدوار والصلاحيات أولاً
+        // هذا سيقوم بإنشاء دور 'admin' وجميع الصلاحيات.
+        $this->call(RolePermissionSeeder::class);
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-                \App\Models\User::factory()->create([
-            'name' => 'Majd admin',
-            'email' => 'majdadmin@gmail.com',
-            'role_id'=>'admin',
-            'password'=>Hash::make('12345')
-        ]);
+        // الخطوة 2: إنشاء المستخدم المدير وتعيين الدور له
+        // ابحث عن المستخدم إذا كان موجوداً، أو قم بإنشائه
+        $user = User::firstOrCreate(
+            ['email' => 'majdadmin@gmail.com'], // ابحث بهذا البريد
+            [
+                'name' => 'Majd Admin',
+                'password' => Hash::make('12345'),
+                // لا تضع role_id هنا
+            ]
+        );
+
+        // الخطوة 3: تعيين دور 'admin' للمستخدم
+        // هذه هي الطريقة الصحيحة باستخدام Spatie
+        $user->assignRole('admin');
     }
 }

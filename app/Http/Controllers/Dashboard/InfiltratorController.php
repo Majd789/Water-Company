@@ -14,6 +14,13 @@ use Illuminate\Validation\Rule;
 
 class InfiltratorController extends Controller
 {
+         public function __construct()
+    {
+        $this->middleware('permission:infiltrators.view')->only(['index', 'show']);
+        $this->middleware('permission:infiltrators.create')->only(['create', 'store']);
+        $this->middleware('permission:infiltrators.edit')->only(['edit', 'update']);
+        $this->middleware('permission:infiltrators.delete')->only('destroy');
+    }
     /**
      * عرض جميع الانفلترات
      */
@@ -53,13 +60,13 @@ class InfiltratorController extends Controller
         $infiltrators = $query->paginate(100); // استخدام الترقيم لعرض البيانات
 
         // تمرير البيانات إلى العرض مع الوحدات لاستخدامها في الفلترة
-        return view('infiltrators.index', compact('infiltrators', 'units', 'selectedUnitId'));
+        return view('dashboard.infiltrators.index', compact('infiltrators', 'units', 'selectedUnitId'));
     }
 
 
     public function export()
     {
-        return Excel::download(new InfiltratorsExport, 'infiltrators.xlsx');
+        return Excel::download(new InfiltratorsExport, 'dashboard.infiltrators.xlsx');
     }
 
     public function import(Request $request)
@@ -72,7 +79,7 @@ class InfiltratorController extends Controller
         // استيراد البيانات
         Excel::import(new InfiltratorsImport, $request->file('file'));
 
-        return redirect()->route('infiltrators.index')->with('success', 'تم استيراد الإنفلترات بنجاح.');
+        return redirect()->route('dashboard.infiltrators.index')->with('success', 'تم استيراد الإنفلترات بنجاح.');
     }
     /**
      * عرض نموذج إنشاء انفلتر جديد
@@ -95,7 +102,7 @@ class InfiltratorController extends Controller
         }
 
         // إرسال المحطات إلى العرض
-        return view('infiltrators.create', compact('stations'));
+        return view('dashboard.infiltrators.create', compact('stations'));
     }
 
      private function getAllowedInfiltratorTypes()
@@ -129,7 +136,7 @@ class InfiltratorController extends Controller
         Infiltrator::create($validated);
 
         // إعادة التوجيه إلى صفحة الفهرس مع رسالة نجاح
-        return redirect()->route('infiltrators.index')->with('success', 'تمت إضافة الانفلتر بنجاح.');
+        return redirect()->route('dashboard.infiltrators.index')->with('success', 'تمت إضافة الانفلتر بنجاح.');
     }
 
     /**
@@ -137,7 +144,7 @@ class InfiltratorController extends Controller
      */
     public function show(Infiltrator $infiltrator)
     {
-        return view('infiltrators.show', compact('infiltrator'));
+        return view('dashboard.infiltrators.show', compact('infiltrator'));
     }
 
     /**
@@ -147,7 +154,7 @@ class InfiltratorController extends Controller
     {
         // جلب جميع المحطات
         $stations = Station::all();
-        return view('infiltrators.edit', compact('infiltrator', 'stations'));
+        return view('dashboard.infiltrators.edit', compact('infiltrator', 'stations'));
     }
 
     /**
@@ -168,7 +175,7 @@ class InfiltratorController extends Controller
         $infiltrator->update($validated);
 
         // إعادة التوجيه إلى صفحة الفهرس مع رسالة نجاح
-        return redirect()->route('infiltrators.index')->with('success', 'تم تحديث الانفلتر بنجاح.');
+        return redirect()->route('dashboard.infiltrators.index')->with('success', 'تم تحديث الانفلتر بنجاح.');
     }
 
     /**
@@ -180,6 +187,6 @@ class InfiltratorController extends Controller
         $infiltrator->delete();
 
         // إعادة التوجيه إلى صفحة الفهرس مع رسالة نجاح
-        return redirect()->route('infiltrators.index')->with('success', 'تم حذف الانفلتر بنجاح.');
+        return redirect()->route('dashboard.infiltrators.index')->with('success', 'تم حذف الانفلتر بنجاح.');
     }
 }

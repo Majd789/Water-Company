@@ -14,6 +14,13 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class DisinfectionPumpController extends Controller
 {
+      public function __construct()
+    {
+        $this->middleware('permission:disinfection_pumps.view')->only(['index', 'show']);
+        $this->middleware('permission:disinfection_pumps.create')->only(['create', 'store']);
+        $this->middleware('permission:disinfection_pumps.edit')->only(['edit', 'update']);
+        $this->middleware('permission:disinfection_pumps.delete')->only('destroy');
+    }
     /**
      * عرض جميع مضخات التعقيم
      */
@@ -63,7 +70,7 @@ class DisinfectionPumpController extends Controller
         $disinfectionPumps = $query->paginate(10000);
 
         // عرض البيانات في الصفحة
-        return view('disinfection_pumps.index', compact('disinfectionPumps', 'units'));
+        return view('dashboard.disinfection_pumps.index', compact('disinfectionPumps', 'units'));
     }
 
 
@@ -82,7 +89,7 @@ class DisinfectionPumpController extends Controller
         // استيراد البيانات
         Excel::import(new DisinfectionPumpsImport, $request->file('file'));
 
-        return redirect()->route('disinfection_pumps.index')->with('success', 'تم استيراد مضخات التعقيم بنجاح.');
+        return redirect()->route('dashboard.disinfection_pumps.index')->with('success', 'تم استيراد مضخات التعقيم بنجاح.');
     }
 
     /**
@@ -104,7 +111,7 @@ class DisinfectionPumpController extends Controller
             $stations = Station::all();
         }
 
-        return view('disinfection_pumps.create', compact('stations'));
+        return view('dashboard.disinfection_pumps.create', compact('stations'));
     }
 
     private function getAllowedPumpBrands()
@@ -131,7 +138,7 @@ class DisinfectionPumpController extends Controller
 
         DisinfectionPump::create($request->all());
 
-        return redirect()->route('disinfection_pumps.index')->with('success', 'تمت إضافة مضخة التعقيم بنجاح.');
+        return redirect()->route('dashboard.disinfection_pumps.index')->with('success', 'تمت إضافة مضخة التعقيم بنجاح.');
     }
 
     /**
@@ -142,10 +149,10 @@ class DisinfectionPumpController extends Controller
         $disinfectionPump = DisinfectionPump::find($id);
 
         if (!$disinfectionPump) {
-            return redirect()->route('disinfection_pumps.index')->with('error', 'السجل غير موجود.');
+            return redirect()->route('dashboard.disinfection_pumps.index')->with('error', 'السجل غير موجود.');
         }
 
-        return view('disinfection_pumps.show', compact('disinfectionPump'));
+        return view('dashboard.disinfection_pumps.show', compact('disinfectionPump'));
     }
 
 
@@ -156,7 +163,7 @@ class DisinfectionPumpController extends Controller
     public function edit(DisinfectionPump $disinfectionPump)
     {
         $stations = Station::all();
-        return view('disinfection_pumps.edit', compact('disinfectionPump', 'stations'));
+        return view('dashboard.disinfection_pumps.edit', compact('disinfectionPump', 'stations'));
     }
 
     /**
@@ -176,7 +183,7 @@ class DisinfectionPumpController extends Controller
 
         $disinfectionPump->update($request->all());
 
-        return redirect()->route('disinfection_pumps.index')->with('success', 'تم تحديث بيانات مضخة التعقيم بنجاح.');
+        return redirect()->route('dashboard.disinfection_pumps.index')->with('success', 'تم تحديث بيانات مضخة التعقيم بنجاح.');
     }
 
     /**
@@ -186,6 +193,6 @@ class DisinfectionPumpController extends Controller
     {
         $disinfectionPump->delete();
 
-        return redirect()->route('disinfection_pumps.index')->with('success', 'تم حذف مضخة التعقيم بنجاح.');
+        return redirect()->route('dashboard.disinfection_pumps.index')->with('success', 'تم حذف مضخة التعقيم بنجاح.');
     }
 }

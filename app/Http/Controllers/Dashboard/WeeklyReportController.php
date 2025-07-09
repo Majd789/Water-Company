@@ -13,6 +13,14 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class WeeklyReportController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:weekly_reports.view')->only(['index', 'show']);
+        $this->middleware('permission:weekly_reports.create')->only(['create', 'store']);
+        $this->middleware('permission:weekly_reports.edit')->only(['edit', 'update']);
+        $this->middleware('permission:weekly_reports.delete')->only('destroy');
+        $this->middleware('permission:weekly_reports.export')->only('export');
+    }
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -48,7 +56,7 @@ class WeeklyReportController extends Controller
             ? Unit::all()
             : Unit::where('id', $user->unit_id)->get();
 
-        return view('weekly_reports.index', compact('reports', 'units'));
+        return view('dashboard.weekly_reports.index', compact('reports', 'units'));
     }
 
     public function export()
@@ -59,13 +67,13 @@ class WeeklyReportController extends Controller
     public function show($id)
     {
         $report = WeeklyReport::with('unit')->findOrFail($id);
-        return view('weekly_reports.show', compact('report'));
+        return view('dashboard.weekly_reports.show', compact('report'));
     }
 
     public function create()
     {
         $units = Unit::all();
-        return view('weekly_reports.create', compact('units'));
+        return view('dashboard.weekly_reports.create', compact('units'));
     }
 
   public function store(Request $request)
@@ -95,7 +103,7 @@ class WeeklyReportController extends Controller
     WeeklyReport::create($validated);
 
     return redirect()
-        ->route('weekly_reports.index')
+        ->route('dashboard.weekly_reports.index')
         ->with('success', 'تم إنشاء التقرير بنجاح');
 }
 
@@ -105,7 +113,7 @@ class WeeklyReportController extends Controller
     {
         $report = WeeklyReport::findOrFail($id);
         $units = Unit::all();
-        return view('weekly_reports.edit', compact('report', 'units'));
+        return view('dashboard.weekly_reports.edit', compact('report', 'units'));
     }
 
    public function update(Request $request, $id)
@@ -143,7 +151,7 @@ class WeeklyReportController extends Controller
     $report->update($validated);
 
     return redirect()
-        ->route('weekly_reports.index')
+        ->route('dashboard.weekly_reports.index')
         ->with('success', 'تم تحديث التقرير بنجاح');
 }
 
@@ -164,7 +172,7 @@ class WeeklyReportController extends Controller
     $report->delete();
 
     return redirect()
-        ->route('weekly_reports.index')
+        ->route('dashboard.weekly_reports.index')
         ->with('success', 'تم حذف التقرير بنجاح');
 }
 
@@ -197,6 +205,6 @@ class WeeklyReportController extends Controller
 
         $units = Unit::all();
 
-        return view('weekly_reports.news', compact('reports', 'units'));
+        return view('dashboard.weekly_reports.news', compact('reports', 'units'));
     }
 }

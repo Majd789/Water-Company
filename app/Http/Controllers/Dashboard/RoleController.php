@@ -21,59 +21,75 @@ class RoleController extends Controller
     public function index()
     {
         $roles = Role::with('permissions')->get();
-        return view('roles.index', compact('roles'));
+        return view('dashboard.roles.index', compact('roles'));
     }
 
     public function create()
     {
         $permissions = Permission::all()->groupBy('group');
-        return view('roles.create', compact('permissions'));
+        return view('dashboard.roles.create', compact('permissions'));
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|unique:roles,name',
-            'display_name' => 'required|string',
-            'permissions' => 'required|array',
-            'permissions.*' => 'exists:permissions,id',
-        ]);
+   public function store(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|unique:roles,name',
+        'display_name' => 'required|string',
+        'permissions' => 'required|array',
+        'permissions.*' => 'exists:permissions,id',
+    ]);
 
-        $role = Role::create($request->only('name', 'display_name', 'description'));
-        $role->syncPermissions($request->permissions);
+    $role = Role::create($request->only('name', 'display_name', 'description'));
 
-        return redirect()->route('roles.index')->with('success', 'تم إنشاء الدور بنجاح');
-    }
+    // $role->syncPermissions($request->permissions); // 👈 السطر القديم الذي يسبب المشكلة
+
+    // --- الحل ---
+    // ابحث عن كائنات الصلاحيات باستخدام الـ IDs التي تم إرسالها
+    $permissions = Permission::whereIn('id', $request->permissions)->get();
+    // مرّر مجموعة الصلاحيات (وليس الـ IDs) إلى الدالة
+    $role->syncPermissions($permissions);
+
+    // ❗️ ملاحظة هامة: يجب تحديث اسم المسار هنا
+    return redirect()->route('dashboard.roles.index')->with('success', 'تم إنشاء الدور بنجاح');
+}
 
     public function edit(Role $role)
     {
         $permissions = Permission::all()->groupBy('group');
-        return view('roles.edit', compact('role', 'permissions'));
+        return view('dashboard.roles.edit', compact('role', 'permissions'));
     }
 
-    public function update(Request $request, Role $role)
-    {
-        $request->validate([
-            'name' => ['required', 'string', Rule::unique('roles')->ignore($role->id)],
-            'display_name' => 'required|string',
-            'permissions' => 'required|array',
-            'permissions.*' => 'exists:permissions,id',
-        ]);
+   public function update(Request $request, Role $role)
+{
+    $request->validate([
+        'name' => ['required', 'string', Rule::unique('roles')->ignore($role->id)],
+        'display_name' => 'required|string',
+        'permissions' => 'required|array',
+        'permissions.*' => 'exists:permissions,id',
+    ]);
 
-        $role->update($request->only('name', 'display_name', 'description'));
-        $role->syncPermissions($request->permissions);
+    $role->update($request->only('name', 'display_name', 'description'));
 
-        return redirect()->route('roles.index')->with('success', 'تم تحديث الدور بنجاح');
-    }
+    // $role->syncPermissions($request->permissions); // 👈 السطر القديم الذي يسبب المشكلة
+
+    // --- الحل ---
+    // ابحث عن كائنات الصلاحيات باستخدام الـ IDs التي تم إرسالها
+    $permissions = Permission::whereIn('id', $request->permissions)->get();
+    // مرّر مجموعة الصلاحيات (وليس الـ IDs) إلى الدالة
+    $role->syncPermissions($permissions);
+    
+    // ❗️ ملاحظة هامة: يجب تحديث اسم المسار هنا
+    return redirect()->route('dashboard.roles.index')->with('success', 'تم تحديث الدور بنجاح');
+}
 
     public function destroy(Role $role)
     {
         if (in_array($role->name, ['admin', 'super-admin'])) {
-            return redirect()->route('roles.index')->with('error', 'لا يمكن حذف هذا الدور.');
+            return redirect()->route('dashboard.roles.index')->with('error', 'لا يمكن حذف هذا الدور.');
         }
 
         $role->delete();
-        return redirect()->route('roles.index')->with('success', 'تم حذف الدور بنجاح');
+        return redirect()->route('dashboard.roles.index')->with('success', 'تم حذف الدور بنجاح');
     }
 
 }

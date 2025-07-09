@@ -14,6 +14,13 @@ use App\Models\Unit;
 
 class MaintenanceController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:maintenances.view')->only(['index', 'show']);
+        $this->middleware('permission:maintenances.create')->only(['create', 'store']);
+        $this->middleware('permission:maintenances.edit')->only(['edit', 'update']);
+        $this->middleware('permission:maintenances.delete')->only('destroy');
+    }
     /**
      * عرض جميع عمليات الصيانة
      */
@@ -53,7 +60,7 @@ class MaintenanceController extends Controller
         $maintenances = $query->paginate(10000); // تحديد عدد النتائج لكل صفحة
 
         // تمرير البيانات إلى العرض
-        return view('maintenances.index', compact('maintenances', 'units', 'selectedUnitId'));
+        return view('dashboard.maintenances.index', compact('maintenances', 'units', 'selectedUnitId'));
     }
 
     /**
@@ -61,7 +68,7 @@ class MaintenanceController extends Controller
      */
     public function export()
     {
-        return Excel::download(new MaintenancesExport, 'maintenances.xlsx');
+        return Excel::download(new MaintenancesExport, 'dashboard.maintenances.xlsx');
     }
 
     /**
@@ -71,7 +78,7 @@ class MaintenanceController extends Controller
     {
         $request->validate(['file' => 'required|mimes:xlsx,csv']);
         Excel::import(new MaintenancesImport, $request->file('file'));
-        return redirect()->route('maintenances.index')->with('success', 'تم استيراد بيانات الصيانة بنجاح.');
+        return redirect()->route('dashboard.maintenances.index')->with('success', 'تم استيراد بيانات الصيانة بنجاح.');
     }
 
     /**
@@ -81,7 +88,7 @@ class MaintenanceController extends Controller
     {
         $stations = Station::all();
         $maintenanceTypes = MaintenanceType::all();
-        return view('maintenances.create', compact('stations', 'maintenanceTypes'));
+        return view('dashboard.maintenances.create', compact('stations', 'maintenanceTypes'));
     }
 
     /**
@@ -103,7 +110,7 @@ class MaintenanceController extends Controller
         ]);
 
         Maintenance::create($validated);
-        return redirect()->route('maintenances.index')->with('success', 'تمت إضافة الصيانة بنجاح.');
+        return redirect()->route('dashboard.maintenances.index')->with('success', 'تمت إضافة الصيانة بنجاح.');
     }
 
     /**
@@ -111,7 +118,7 @@ class MaintenanceController extends Controller
      */
     public function show(Maintenance $maintenance)
     {
-        return view('maintenances.show', compact('maintenance'));
+        return view('dashboard.maintenances.show', compact('maintenance'));
     }
 
     /**
@@ -121,7 +128,7 @@ class MaintenanceController extends Controller
     {
         $stations = Station::all();
         $maintenanceTypes = MaintenanceType::all();
-        return view('maintenances.edit', compact('maintenance', 'stations', 'maintenanceTypes'));
+        return view('dashboard.maintenances.edit', compact('maintenance', 'stations', 'maintenanceTypes'));
     }
 
     /**
@@ -143,7 +150,7 @@ class MaintenanceController extends Controller
         ]);
 
         $maintenance->update($validated);
-        return redirect()->route('maintenances.index')->with('success', 'تم تحديث بيانات الصيانة بنجاح.');
+        return redirect()->route('dashboard.maintenances.index')->with('success', 'تم تحديث بيانات الصيانة بنجاح.');
     }
 
     /**
@@ -152,6 +159,6 @@ class MaintenanceController extends Controller
     public function destroy(Maintenance $maintenance)
     {
         $maintenance->delete();
-        return redirect()->route('maintenances.index')->with('success', 'تم حذف سجل الصيانة بنجاح.');
+        return redirect()->route('dashboard.maintenances.index')->with('success', 'تم حذف سجل الصيانة بنجاح.');
     }
 }

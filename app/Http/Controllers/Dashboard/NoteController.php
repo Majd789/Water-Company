@@ -9,20 +9,27 @@ use Illuminate\Support\Facades\Auth;
 
 class NoteController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:notes.view')->only(['index', 'show']);
+        $this->middleware('permission:notes.create')->only(['create', 'store']);
+        $this->middleware('permission:notes.edit')->only(['updateStatus']);
+        $this->middleware('permission:notes.delete')->only('destroy');
+    }
     public function index()
     {
         $notes = Note::with('user')->orderBy('created_at', 'desc')->paginate(20);
-        return view('notes.index', compact('notes'));
+        return view('dashboard.notes.index', compact('notes'));
     }
 
      public function create()
         {
-            return view('notes.create');
+            return view('dashboard.notes.create');
         }
 
         public function show(Note $note)
         {
-            return view('notes.show', compact('note'));
+            return view('dashboard.notes.show', compact('note'));
         }
 
     public function store(Request $request)
@@ -41,7 +48,7 @@ class NoteController extends Controller
             'status' => 'معلقة',
         ]);
 
-        return redirect()->route('notes.index')->with('success', 'تمت إضافة الملاحظة بنجاح.');
+        return redirect()->route('dashboard.notes.index')->with('success', 'تمت إضافة الملاحظة بنجاح.');
     }
 
     public function updateStatus(Request $request, Note $note)

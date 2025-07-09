@@ -11,6 +11,13 @@ use App\Enum\UserStatusEnum;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:users.view')->only(['index', 'show']);
+        $this->middleware('permission:users.create')->only(['create', 'store']);
+        $this->middleware('permission:users.edit')->only(['edit', 'update']);
+        $this->middleware('permission:users.delete')->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -50,7 +57,7 @@ class UserController extends Controller
         unset($validated['role']);
         $user = User::create($validated);
         $user->assignRole($role);
-        return redirect()->route('users.index')->with('success', 'تم إضافة المستخدم بنجاح');
+        return redirect()->route('dashboard.users.index')->with('success', 'تم إضافة المستخدم بنجاح');
     }
 
     /**
@@ -98,7 +105,7 @@ class UserController extends Controller
         unset($validated['role']);
         $user->update($validated);
         $user->syncRoles([$role]);
-        return redirect()->route('users.index')->with('success', 'تم تحديث بيانات المستخدم بنجاح');
+        return redirect()->route('dashboard.users.index')->with('success', 'تم تحديث بيانات المستخدم بنجاح');
     }
 
     /**
@@ -108,6 +115,6 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $user->delete();
-        return redirect()->route('users.index')->with('success', 'تم حذف المستخدم بنجاح');
+        return redirect()->route('dashboard.users.index')->with('success', 'تم حذف المستخدم بنجاح');
     }
 }

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Dashboard;
-use App\Http\Controllers\Controller;s
+use App\Http\Controllers\Controller;
 
 use App\Exports\ElectricityHoursExport;
 use App\Imports\ElectricityHoursImport;
@@ -13,6 +13,14 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ElectricityHourController extends Controller
 {
+    
+      public function __construct()
+    {
+        $this->middleware('permission:electricity_hours.view')->only(['index', 'show']);
+        $this->middleware('permission:electricity_hours.create')->only(['create', 'store']);
+        $this->middleware('permission:electricity_hours.edit')->only(['edit', 'update']);
+        $this->middleware('permission:electricity_hours.delete')->only('destroy');
+    }
     /**
      * عرض جميع ساعات الكهرباء
      */
@@ -52,7 +60,7 @@ class ElectricityHourController extends Controller
         $electricityHours = $query->with('station')->paginate(10000);
 
         // تمرير البيانات إلى العرض مع الوحدات لاستخدامها في الفلترة
-        return view('electricity-hours.index', compact('electricityHours', 'units', 'selectedUnitId'));
+        return view('dashboard.electricity-hours.index', compact('electricityHours', 'units', 'selectedUnitId'));
     }
 
 
@@ -71,7 +79,7 @@ class ElectricityHourController extends Controller
         // استيراد البيانات
         Excel::import(new ElectricityHoursImport, $request->file('file'));
 
-        return redirect()->route('electricity-hours.index')->with('success', 'تم استيراد ساعات الكهرباء بنجاح.');
+        return redirect()->route('dashboard.electricity-hours.index')->with('success', 'تم استيراد ساعات الكهرباء بنجاح.');
     }
     /**
      * عرض نموذج إنشاء ساعة كهرباء جديدة
@@ -94,7 +102,7 @@ class ElectricityHourController extends Controller
         }
 
         // إرسال المحطات إلى العرض
-        return view('electricity-hours.create', compact('stations'));
+        return view('dashboard.electricity-hours.create', compact('stations'));
     }
 
 
@@ -114,7 +122,7 @@ class ElectricityHourController extends Controller
 
         ElectricityHour::create($request->all());
 
-        return redirect()->route('electricity-hours.index')->with('success', 'تمت إضافة ساعة الكهرباء بنجاح.');
+        return redirect()->route('dashboard.electricity-hours.index')->with('success', 'تمت إضافة ساعة الكهرباء بنجاح.');
     }
 
     /**
@@ -122,7 +130,7 @@ class ElectricityHourController extends Controller
      */
     public function show(ElectricityHour $electricityHour)
     {
-        return view('electricity-hours.show', compact('electricityHour'));
+        return view('dashboard.electricity-hours.show', compact('electricityHour'));
     }
 
     /**
@@ -131,7 +139,7 @@ class ElectricityHourController extends Controller
     public function edit(ElectricityHour $electricityHour)
     {
         $stations = Station::all();
-        return view('electricity-hours.edit', compact('electricityHour', 'stations'));
+        return view('dashboard.electricity-hours.edit', compact('electricityHour', 'stations'));
     }
 
     /**
@@ -150,7 +158,7 @@ class ElectricityHourController extends Controller
 
         $electricityHour->update($request->all());
 
-        return redirect()->route('electricity-hours.index')->with('success', 'تم تحديث ساعة الكهرباء بنجاح.');
+        return redirect()->route('dashboard.electricity-hours.index')->with('success', 'تم تحديث ساعة الكهرباء بنجاح.');
     }
 
     /**
@@ -160,6 +168,6 @@ class ElectricityHourController extends Controller
     {
         $electricityHour->delete();
 
-        return redirect()->route('electricity-hours.index')->with('success', 'تم حذف ساعة الكهرباء بنجاح.');
+        return redirect()->route('dashboard.electricity-hours.index')->with('success', 'تم حذف ساعة الكهرباء بنجاح.');
     }
 }

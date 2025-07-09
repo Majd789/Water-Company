@@ -7,13 +7,20 @@ use Illuminate\Http\Request;
 
 class InstitutionPropertyController extends Controller
 {
+     public function __construct()
+    {
+        $this->middleware('permission:institution_properties.view')->only(['index', 'show']);
+        $this->middleware('permission:institution_properties.create')->only(['create', 'store']);
+        $this->middleware('permission:institution_properties.edit')->only(['edit', 'update']);
+        $this->middleware('permission:institution_properties.delete')->only('destroy');
+    }
     /**
      * عرض جميع العقارات المؤسسية.
      */
     public function index()
     {
         $institutionProperties = InstitutionProperty::with('station')->get();
-        return view('institution_properties.index', compact('institutionProperties'));
+        return view('dashboard.institution_properties.index', compact('institutionProperties'));
     }
 
     /**
@@ -22,7 +29,7 @@ class InstitutionPropertyController extends Controller
     public function create()
     {
         $stations = Station::all();
-        return view('institution_properties.create', compact('stations'));
+        return view('dashboard.institution_properties.create', compact('stations'));
     }
 
     /**
@@ -42,7 +49,7 @@ class InstitutionPropertyController extends Controller
 
         InstitutionProperty::create($request->all());
 
-        return redirect()->route('institution_properties.index')->with('success', 'تمت إضافة العقار بنجاح.');
+        return redirect()->route('dashboard.institution_properties.index')->with('success', 'تمت إضافة العقار بنجاح.');
     }
 
     /**
@@ -50,7 +57,7 @@ class InstitutionPropertyController extends Controller
      */
     public function show(InstitutionProperty $institutionProperty)
     {
-        return view('institution_properties.show', compact('stations', 'property'));
+        return view('dashboard.institution_properties.show', compact('stations', 'property'));
     }
 
     /**
@@ -60,7 +67,7 @@ class InstitutionPropertyController extends Controller
     {
         $stations = Station::all(); // جلب جميع المحطات
         $property = InstitutionProperty::findOrFail($id); // جلب بيانات العقار المطلوب
-        return view('institution_properties.edit', compact('stations', 'property'));
+        return view('dashboard.institution_properties.edit', compact('stations', 'property'));
     }
 
     /**
@@ -80,7 +87,7 @@ class InstitutionPropertyController extends Controller
 
         $institutionProperty->update($request->all());
 
-        return redirect()->route('institution_properties.index')->with('success', 'تم تحديث العقار بنجاح.');
+        return redirect()->route('dashboard.institution_properties.index')->with('success', 'تم تحديث العقار بنجاح.');
     }
 
     /**
@@ -90,6 +97,6 @@ class InstitutionPropertyController extends Controller
     {
         $institutionProperty->delete();
 
-        return redirect()->route('institution_properties.index')->with('success', 'تم حذف العقار بنجاح.');
+        return redirect()->route('dashboard.institution_properties.index')->with('success', 'تم حذف العقار بنجاح.');
     }
 }

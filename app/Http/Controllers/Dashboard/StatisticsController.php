@@ -25,6 +25,10 @@ use Illuminate\View\View; // استيراد View
 
 class StatisticsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:statistics.view')->only('index');
+    }
     /**
      * عرض لوحة المعلومات الرئيسية مع الإحصائيات العامة أو الخاصة بمحطة.
      *
@@ -91,6 +95,6 @@ class StatisticsController extends Controller
         }
 
         // تمرير البيانات إلى الـ View
-        return view('statistics', compact('statistics', 'message', 'selectedStation'));
+        return view('dashboard.statistics', compact('statistics', 'message', 'selectedStation'));
     }
 }

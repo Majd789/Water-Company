@@ -8,9 +8,14 @@ use Symfony\Component\HttpFoundation\StreamedResponse; // تأكد من استي
 
 class VannaChatController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:vanna_chat.view')->only(['index', 'stream']);
+        $this->middleware('permission:vanna_chat.create')->only(['stream']);
+    }
     public function index()
     {
-        return view('vanna.chat');
+        return view('dashboard.vanna.chat');
     }
 
     public function stream(Request $request)

@@ -14,6 +14,13 @@ use Illuminate\Validation\Rule;
 
 class FilterController extends Controller
 {
+      public function __construct()
+    {
+        $this->middleware('permission:filters.view')->only(['index', 'show']);
+        $this->middleware('permission:filters.create')->only(['create', 'store']);
+        $this->middleware('permission:filters.edit')->only(['edit', 'update']);
+        $this->middleware('permission:filters.delete')->only('destroy');
+    }
     /**
      * عرض جميع المرشحات
      */
@@ -59,7 +66,7 @@ class FilterController extends Controller
         $filters = $query->paginate(1000); // استخدام الترقيم لعرض البيانات
 
         // تمرير البيانات إلى العرض
-        return view('filters.index', compact('filters', 'units'));
+        return view('dashboard.filters.index', compact('filters', 'units'));
     }
 
 
@@ -79,7 +86,7 @@ class FilterController extends Controller
         // استيراد البيانات
         Excel::import(new FiltersImport, $request->file('file'));
 
-        return redirect()->route('filters.index')->with('success', 'تم استيراد المرشحات بنجاح.');
+        return redirect()->route('dashboard.filters.index')->with('success', 'تم استيراد المرشحات بنجاح.');
     }
 
     /**
@@ -103,7 +110,7 @@ class FilterController extends Controller
         }
 
         // إرسال المحطات إلى العرض
-        return view('filters.create', compact('stations'));
+        return view('dashboard.filters.create', compact('stations'));
     }
      private function getAllowedFilterTypes()
     {
@@ -130,7 +137,7 @@ class FilterController extends Controller
         Filter::create($validated);
 
         // إعادة التوجيه إلى صفحة الفهرس مع رسالة نجاح
-        return redirect()->route('filters.index')->with('success', 'تمت إضافة المرشح بنجاح.');
+        return redirect()->route('dashboard.filters.index')->with('success', 'تمت إضافة المرشح بنجاح.');
     }
 
     /**
@@ -138,7 +145,7 @@ class FilterController extends Controller
      */
     public function show(Filter $filter)
     {
-        return view('filters.show', compact('filter'));
+        return view('dashboard.filters.show', compact('filter'));
     }
 
     /**
@@ -148,7 +155,7 @@ class FilterController extends Controller
     {
         // جلب جميع المحطات
         $stations = Station::all();
-        return view('filters.edit', compact('filter', 'stations'));
+        return view('dashboard.filters.edit', compact('filter', 'stations'));
     }
 
     /**
@@ -168,7 +175,7 @@ class FilterController extends Controller
         $filter->update($validated);
 
         // إعادة التوجيه إلى صفحة الفهرس مع رسالة نجاح
-        return redirect()->route('filters.index')->with('success', 'تم تحديث المرشح بنجاح.');
+        return redirect()->route('dashboard.filters.index')->with('success', 'تم تحديث المرشح بنجاح.');
     }
 
     /**
@@ -180,6 +187,6 @@ class FilterController extends Controller
         $filter->delete();
 
         // إعادة التوجيه إلى صفحة الفهرس مع رسالة نجاح
-        return redirect()->route('filters.index')->with('success', 'تم حذف المرشح بنجاح.');
+        return redirect()->route('dashboard.filters.index')->with('success', 'تم حذف المرشح بنجاح.');
     }
 }
