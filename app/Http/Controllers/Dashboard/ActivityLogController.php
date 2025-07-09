@@ -12,6 +12,13 @@ use Spatie\Activitylog\Models\Activity;
 
 class ActivityLogController extends Controller
 {
+      public function __construct()
+    {
+        $this->middleware('permission:activity-log.view')->only(['index', 'show']);
+        $this->middleware('permission:activity-log.create')->only(['create', 'store']);
+        $this->middleware('permission:activity-log.edit')->only(['edit', 'update']);
+        $this->middleware('permission:activity-log.delete')->only('destroy');
+    }
    public function index(Request $request)
 {
     $query = Activity::query()->latest();
@@ -30,7 +37,7 @@ class ActivityLogController extends Controller
     $users = User::select('id', 'name')->get();
     $models = Activity::select(DB::raw('DISTINCT(subject_type)'))->pluck('subject_type');
 
-    return view('activity-log.index', compact('activities', 'users', 'models'));
+    return view('dashboard.activity-log.index', compact('activities', 'users', 'models'));
 }
  // --- New Export Method ---
     public function export(Request $request)

@@ -45,8 +45,9 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'status' => \App\Enum\UserStatusEnum::class, // <-- أضف هذا السطر
     ];
-
+    
     public function unit()
     {
         return $this->belongsTo(Unit::class);

@@ -10,6 +10,6 @@ class StationMapController extends Controller
     public function index()
     {
         // لا حاجة لتمرير بيانات حالياً
-        return view('stations-map.map');
+        return view('dashboard.stations-map.map');
     }
 }

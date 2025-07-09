@@ -14,6 +14,13 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ManholeController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:manholes.view')->only(['index', 'show']);
+        $this->middleware('permission:manholes.create')->only(['create', 'store']);
+        $this->middleware('permission:manholes.edit')->only(['edit', 'update']);
+        $this->middleware('permission:manholes.delete')->only('destroy');
+    }
     /**
      * عرض جميع المنهلات
      */
@@ -56,7 +63,7 @@ class ManholeController extends Controller
     $manholes = $query->with(['station', 'unit', 'town'])->paginate(10000); // استخدام الترقيم لعرض البيانات
 
     // تمرير البيانات إلى العرض مع الوحدات لاستخدامها في الفلترة
-    return view('manholes.index', compact('manholes', 'units', 'selectedUnitId'));
+    return view('dashboard.manholes.index', compact('manholes', 'units', 'selectedUnitId'));
 }
 
 
@@ -75,7 +82,7 @@ class ManholeController extends Controller
         // استيراد البيانات
         Excel::import(new ManholesImport, $request->file('file'));
 
-        return redirect()->route('manholes.index')->with('success', 'تم استيراد المنهولات بنجاح.');
+        return redirect()->route('dashboard.manholes.index')->with('success', 'تم استيراد المنهولات بنجاح.');
     }
 
     /**
@@ -100,7 +107,7 @@ class ManholeController extends Controller
         }
 
         // إرسال المحطات، الوحدات، والبلدات إلى العرض
-        return view('manholes.create', compact('stations', 'unit', 'towns'));
+        return view('dashboard.manholes.create', compact('stations', 'unit', 'towns'));
     }
 
 
@@ -132,7 +139,7 @@ class ManholeController extends Controller
         Manhole::create($validated);
 
         // إعادة التوجيه إلى صفحة الفهرس مع رسالة نجاح
-        return redirect()->route('manholes.index')->with('success', 'تمت إضافة المنهل بنجاح.');
+        return redirect()->route('dashboard.manholes.index')->with('success', 'تمت إضافة المنهل بنجاح.');
     }
 
         /**
@@ -140,7 +147,7 @@ class ManholeController extends Controller
      */
     public function show(Manhole $manhole)
     {
-        return view('manholes.show', compact('manhole'));
+        return view('dashboard.manholes.show', compact('manhole'));
     }
 
     /**
@@ -152,7 +159,7 @@ class ManholeController extends Controller
         $stations = Station::all();
         $units = Unit::all();
         $towns = Town::all();
-        return view('manholes.edit', compact('manhole', 'stations', 'units', 'towns'));
+        return view('dashboard.manholes.edit', compact('manhole', 'stations', 'units', 'towns'));
     }
 
     /**
@@ -182,7 +189,7 @@ class ManholeController extends Controller
         $manhole->update($validated);
 
         // إعادة التوجيه إلى صفحة الفهرس مع رسالة نجاح
-        return redirect()->route('manholes.index')->with('success', 'تم تحديث المنهل بنجاح.');
+        return redirect()->route('dashboard.manholes.index')->with('success', 'تم تحديث المنهل بنجاح.');
     }
 
     /**
@@ -194,6 +201,6 @@ class ManholeController extends Controller
         $manhole->delete();
 
         // إعادة التوجيه إلى صفحة الفهرس مع رسالة نجاح
-        return redirect()->route('manholes.index')->with('success', 'تم حذف المنهل بنجاح.');
+        return redirect()->route('dashboard.manholes.index')->with('success', 'تم حذف المنهل بنجاح.');
     }
 }

@@ -12,6 +12,13 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class DieselTankController extends Controller
 {
+      public function __construct()
+    {
+        $this->middleware('permission:diesel_tanks.view')->only(['index', 'show']);
+        $this->middleware('permission:diesel_tanks.create')->only(['create', 'store']);
+        $this->middleware('permission:diesel_tanks.edit')->only(['edit', 'update']);
+        $this->middleware('permission:diesel_tanks.delete')->only('destroy');
+    }
     /**
      * عرض جميع خزانات الديزل.
      */
@@ -52,7 +59,7 @@ class DieselTankController extends Controller
         $dieselTanks = $dieselTanks->paginate(50000);
 
         // تمرير البيانات إلى العرض مع الوحدات لاستخدامها في الفلترة
-        return view('diesel_tanks.index', compact('dieselTanks', 'units', 'selectedUnitId'));
+        return view('dashboard.diesel_tanks.index', compact('dieselTanks', 'units', 'selectedUnitId'));
     }
 
 
@@ -70,7 +77,7 @@ class DieselTankController extends Controller
     // استيراد البيانات من الملف
     Excel::import(new DieselTanksImport, $request->file('file'));
 
-    return redirect()->route('diesel_tanks.index')->with('success', 'تم استيراد البيانات بنجاح');
+    return redirect()->route('dashboard.diesel_tanks.index')->with('success', 'تم استيراد البيانات بنجاح');
     }
 
     /**
@@ -94,7 +101,7 @@ class DieselTankController extends Controller
         }
 
         // إرسال المحطات إلى العرض
-        return view('diesel_tanks.create', compact('stations'));
+        return view('dashboard.diesel_tanks.create', compact('stations'));
     }
 
 
@@ -115,7 +122,7 @@ class DieselTankController extends Controller
 
         DieselTank::create($request->all());
 
-        return redirect()->route('diesel_tanks.index')->with('success', 'تمت إضافة خزان الديزل بنجاح.');
+        return redirect()->route('dashboard.diesel_tanks.index')->with('success', 'تمت إضافة خزان الديزل بنجاح.');
     }
 
     /**
@@ -123,7 +130,7 @@ class DieselTankController extends Controller
      */
     public function show(DieselTank $dieselTank)
     {
-        return view('diesel_tanks.show', compact('dieselTank'));
+        return view('dashboard.diesel_tanks.show', compact('dieselTank'));
     }
 
     /**
@@ -132,7 +139,7 @@ class DieselTankController extends Controller
     public function edit(DieselTank $dieselTank)
     {
         $stations = Station::all(); // جلب جميع المحطات
-        return view('diesel_tanks.edit', compact('dieselTank', 'stations'));
+        return view('dashboard.diesel_tanks.edit', compact('dieselTank', 'stations'));
     }
 
     /**
@@ -151,7 +158,7 @@ class DieselTankController extends Controller
 
         $dieselTank->update($request->all());
 
-        return redirect()->route('diesel_tanks.index')->with('success', 'تم تحديث بيانات خزان الديزل بنجاح.');
+        return redirect()->route('dashboard.diesel_tanks.index')->with('success', 'تم تحديث بيانات خزان الديزل بنجاح.');
     }
 
     /**
@@ -161,6 +168,6 @@ class DieselTankController extends Controller
     {
         $dieselTank->delete();
 
-        return redirect()->route('diesel_tanks.index')->with('success', 'تم حذف خزان الديزل بنجاح.');
+        return redirect()->route('dashboard.diesel_tanks.index')->with('success', 'تم حذف خزان الديزل بنجاح.');
     }
 }

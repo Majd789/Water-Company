@@ -15,6 +15,13 @@ use Illuminate\Validation\Rule;
 
 class GenerationGroupController extends Controller
 {
+        public function __construct()
+    {
+        $this->middleware('permission:generation_groups.view')->only(['index', 'show']);
+        $this->middleware('permission:generation_groups.create')->only(['create', 'store']);
+        $this->middleware('permission:generation_groups.edit')->only(['edit', 'update']);
+        $this->middleware('permission:generation_groups.delete')->only('destroy');
+    }
    /**
      * عرض قائمة مجموعات التوليد.
      */
@@ -68,7 +75,7 @@ class GenerationGroupController extends Controller
         // استرجاع البيانات مع المحطات والفلترة
         $generationGroups = $generationGroups->with('station')->paginate(10000);
 
-        return view('generation-groups.index', compact('generationGroups', 'units', 'towns'));
+        return view('dashboard.generation-groups.index', compact('generationGroups', 'units', 'towns'));
     }
 
 
@@ -88,7 +95,7 @@ class GenerationGroupController extends Controller
             // استيراد البيانات
             Excel::import(new GenerationGroupsImport, $request->file('file'));
 
-            return redirect()->route('generation-groups.index')->with('success', 'تم استيراد مجموعات التوليد بنجاح.');
+            return redirect()->route('dashboard.generation-groups.index')->with('success', 'تم استيراد مجموعات التوليد بنجاح.');
         }
     /**
      * عرض نموذج إنشاء مجموعة توليد جديدة.
@@ -109,7 +116,7 @@ class GenerationGroupController extends Controller
             $stations = Station::all();
         }
 
-        return view('generation-groups.create', compact('stations'));
+        return view('dashboard.generation-groups.create', compact('stations'));
     }
 
      private function getAllowedGeneratorNames()
@@ -142,7 +149,7 @@ class GenerationGroupController extends Controller
 
         GenerationGroup::create($request->all());
 
-        return redirect()->route('generation-groups.index')->with('success', 'تم إنشاء مجموعة التوليد بنجاح.');
+        return redirect()->route('dashboard.generation-groups.index')->with('success', 'تم إنشاء مجموعة التوليد بنجاح.');
     }
 
     /**
@@ -150,7 +157,7 @@ class GenerationGroupController extends Controller
      */
     public function show(GenerationGroup $generationGroup)
     {
-        return view('generation-groups.show', compact('generationGroup'));
+        return view('dashboard.generation-groups.show', compact('generationGroup'));
     }
 
     /**
@@ -159,7 +166,7 @@ class GenerationGroupController extends Controller
     public function edit(GenerationGroup $generationGroup)
     {
         $stations = Station::all();
-        return view('generation-groups.edit', compact('generationGroup', 'stations'));
+        return view('dashboard.generation-groups.edit', compact('generationGroup', 'stations'));
     }
 
     /**
@@ -183,7 +190,7 @@ class GenerationGroupController extends Controller
 
         $generationGroup->update($request->all());
 
-        return redirect()->route('generation-groups.index')->with('success', 'تم تحديث مجموعة التوليد بنجاح.');
+        return redirect()->route('dashboard.generation-groups.index')->with('success', 'تم تحديث مجموعة التوليد بنجاح.');
     }
 
     /**
@@ -193,6 +200,6 @@ class GenerationGroupController extends Controller
     {
         $generationGroup->delete();
 
-        return redirect()->route('generation-groups.index')->with('success', 'تم حذف مجموعة التوليد بنجاح.');
+        return redirect()->route('dashboard.generation-groups.index')->with('success', 'تم حذف مجموعة التوليد بنجاح.');
     }
 }

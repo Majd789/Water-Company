@@ -16,12 +16,12 @@ class CheckAdminRole
      */
     public function handle(Request $request, Closure $next,...$roles)
     {
-        $userRole = auth()->user()->role_id;
+        // $userRole = auth()->user()->role_id;
 
-        if (in_array($userRole, $roles) || $userRole == 'admin') {
-            return $next($request);
-        }
+        // if (in_array($userRole, $roles) || $userRole == 'admin') {
+        //     return $next($request);
+        // }
 
-        abort(403, 'Unauthorized action.');
+        // abort(403, 'Unauthorized action.');
     }
 }

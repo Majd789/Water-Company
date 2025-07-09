@@ -23,28 +23,8 @@ class HomeController extends Controller
      */
     public function index()
     {
-
-                $users = User::all();
-
-                foreach ($users as $user) {
-                    if (strpos($user->email, '@admin.com') !== false) {
-                        // إذا كان البريد يحتوي على '@admin.com'، قم بتحديث الدور إلى 'admin'
-                        $user->role_id = 'admin';
-                    }
-                    else if(strpos($user->email, '@super.com') !== false) {
-                        // إذا كان البريد يحتوي على '@super.com'، قم بتحديث الدور إلى 'admin'
-                        $user->role_id = 'super';
-                    }
-                    else {
-                        // إذا كان البريد لا يحتوي على '@admin.com'، قم بتحديث الدور إلى القيمة الباقية (مثل 'user')
-                        $user->role_id = 'user';
-                    }
-
-                    $user->save();
-                }
-
-
-            return view('home');
-        }
+       
+        return view('home');    
+    }
 
     }

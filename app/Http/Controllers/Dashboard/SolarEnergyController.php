@@ -13,6 +13,15 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class SolarEnergyController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:solar_energies.view')->only(['index', 'show']);
+        $this->middleware('permission:solar_energies.create')->only(['create', 'store']);
+        $this->middleware('permission:solar_energies.edit')->only(['edit', 'update']);
+        $this->middleware('permission:solar_energies.delete')->only('destroy');
+        $this->middleware('permission:solar_energies.export')->only('export');
+        $this->middleware('permission:solar_energies.import')->only('import');
+    }
     /**
      * عرض جميع بيانات الطاقة الشمسية
      */
@@ -55,7 +64,7 @@ class SolarEnergyController extends Controller
         $solarEnergies = $query->with('station')->paginate(10000); // الترقيم
 
         // تمرير البيانات إلى العرض مع الوحدات لاستخدامها في الفلترة
-        return view('solar_energy.index', compact('solarEnergies', 'units', 'selectedUnitId'));
+        return view('dashboard.solar_energy.index', compact('solarEnergies', 'units', 'selectedUnitId'));
     }
 
 
@@ -73,7 +82,7 @@ class SolarEnergyController extends Controller
     // استيراد البيانات من الملف
     Excel::import(new SolarEnergiesImport, $request->file('file'));
 
-    return redirect()->route('solar_energy.index')->with('success', 'تم استيراد البيانات بنجاح');
+    return redirect()->route('dashboard.solar_energy.index')->with('success', 'تم استيراد البيانات بنجاح');
     }
     /**
      * عرض نموذج إنشاء بيانات الطاقة الشمسية جديدة
@@ -96,7 +105,7 @@ class SolarEnergyController extends Controller
         }
 
         // إرسال المحطات إلى العرض
-        return view('solar_energy.create', compact('stations'));
+        return view('dashboard.solar_energy.create', compact('stations'));
     }
 
 
@@ -123,7 +132,7 @@ class SolarEnergyController extends Controller
         SolarEnergy::create($request->all());
 
         // إعادة التوجيه مع رسالة نجاح
-        return redirect()->route('solar_energy.index')->with('success', 'تمت إضافة بيانات الطاقة الشمسية بنجاح.');
+        return redirect()->route('dashboard.solar_energy.index')->with('success', 'تمت إضافة بيانات الطاقة الشمسية بنجاح.');
     }
 
     /**
@@ -131,7 +140,7 @@ class SolarEnergyController extends Controller
      */
     public function show(SolarEnergy $solarEnergy)
     {
-        return view('solar_energy.show', compact('solarEnergy'));
+        return view('dashboard.solar_energy.show', compact('solarEnergy'));
     }
 
     /**
@@ -141,7 +150,7 @@ class SolarEnergyController extends Controller
     {
         // استرجاع جميع المحطات لتمكين المستخدم من الاختيار
         $stations = Station::all();
-        return view('solar_energy.edit', compact('solarEnergy', 'stations'));
+        return view('dashboard.solar_energy.edit', compact('solarEnergy', 'stations'));
     }
 
     /**
@@ -167,7 +176,7 @@ class SolarEnergyController extends Controller
         $solarEnergy->update($request->all());
 
         // إعادة التوجيه مع رسالة نجاح
-        return redirect()->route('solar_energy.index')->with('success', 'تم تحديث بيانات الطاقة الشمسية بنجاح.');
+        return redirect()->route('dashboard.solar_energy.index')->with('success', 'تم تحديث بيانات الطاقة الشمسية بنجاح.');
     }
 
     /**
@@ -179,6 +188,6 @@ class SolarEnergyController extends Controller
         $solarEnergy->delete();
 
         // إعادة التوجيه مع رسالة نجاح
-        return redirect()->route('solar_energy.index')->with('success', 'تم حذف بيانات الطاقة الشمسية بنجاح.');
+        return redirect()->route('dashboard.solar_energy.index')->with('success', 'تم حذف بيانات الطاقة الشمسية بنجاح.');
     }
 }

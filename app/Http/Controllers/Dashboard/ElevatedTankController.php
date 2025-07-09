@@ -13,6 +13,14 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ElevatedTankController extends Controller
 {
+    
+      public function __construct()
+    {
+        $this->middleware('permission:elevated_tanks.view')->only(['index', 'show']);
+        $this->middleware('permission:elevated_tanks.create')->only(['create', 'store']);
+        $this->middleware('permission:elevated_tanks.edit')->only(['edit', 'update']);
+        $this->middleware('permission:elevated_tanks.delete')->only('destroy');
+    }
     public function index(Request $request)
     {
         // استرجاع جميع الوحدات لاستخدامها في الفلترة
@@ -58,7 +66,7 @@ class ElevatedTankController extends Controller
         $elevatedTanks = $query->paginate(10000);
 
         // تمرير البيانات إلى العرض وتمرير الوحدات للفلترة
-        return view('elevated-tanks.index', compact('elevatedTanks', 'units'));
+        return view('dashboard.elevated-tanks.index', compact('elevatedTanks', 'units'));
     }
 
 
@@ -77,7 +85,7 @@ class ElevatedTankController extends Controller
         // استيراد البيانات
         Excel::import(new ElevatedTanksImport, $request->file('file'));
 
-        return redirect()->route('elevated-tanks.index')->with('success', 'تم استيراد الخزانات المرتفعة بنجاح.');
+        return redirect()->route('dashboard.elevated-tanks.index')->with('success', 'تم استيراد الخزانات المرتفعة بنجاح.');
     }
 
     public function create()
@@ -95,7 +103,7 @@ class ElevatedTankController extends Controller
         }
 
         // إرسال المحطات إلى العرض
-        return view('elevated-tanks.create', compact('stations'));
+        return view('dashboard.elevated-tanks.create', compact('stations'));
     }
 
 
@@ -126,20 +134,20 @@ class ElevatedTankController extends Controller
         // تخزين الخزان الجديد في قاعدة البيانات
         ElevatedTank::create($request->all());
 
-        return redirect()->route('elevated-tanks.index')->with('success', 'تم إضافة الخزان بنجاح');
+        return redirect()->route('dashboard.elevated-tanks.index')->with('success', 'تم إضافة الخزان بنجاح');
     }
 
     public function show(ElevatedTank $elevatedTank)
     {
         // عرض تفاصيل الخزان
-        return view('elevated-tanks.show', compact('elevatedTank'));
+        return view('dashboard.elevated-tanks.show', compact('elevatedTank'));
     }
 
     public function edit(ElevatedTank $elevatedTank)
     {
         // عرض صفحة تعديل الخزان مع المحطات المتاحة
         $stations = Station::all();
-        return view('elevated-tanks.edit', compact('elevatedTank', 'stations'));
+        return view('dashboard.elevated-tanks.edit', compact('elevatedTank', 'stations'));
     }
 
     public function update(Request $request, ElevatedTank $elevatedTank)
@@ -168,7 +176,7 @@ class ElevatedTankController extends Controller
         // تحديث الخزان في قاعدة البيانات
         $elevatedTank->update($request->all());
 
-        return redirect()->route('elevated-tanks.index')->with('success', 'تم تحديث الخزان بنجاح');
+        return redirect()->route('dashboard.elevated-tanks.index')->with('success', 'تم تحديث الخزان بنجاح');
     }
 
     public function destroy(ElevatedTank $elevatedTank)
@@ -176,6 +184,6 @@ class ElevatedTankController extends Controller
         // حذف الخزان من قاعدة البيانات
         $elevatedTank->delete();
 
-        return redirect()->route('elevated-tanks.index')->with('success', 'تم حذف الخزان بنجاح');
+        return redirect()->route('dashboard.elevated-tanks.index')->with('success', 'تم حذف الخزان بنجاح');
     }
 }

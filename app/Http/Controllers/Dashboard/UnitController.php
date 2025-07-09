@@ -11,6 +11,13 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class UnitController extends Controller
 {
+     public function __construct()
+    {
+        $this->middleware('permission:units.view')->only(['index', 'show']);
+        $this->middleware('permission:units.create')->only(['create', 'store']);
+        $this->middleware('permission:units.edit')->only(['edit', 'update']);
+        $this->middleware('permission:units.delete')->only('destroy');
+    }
     /**
      * عرض قائمة الوحدات
      */
@@ -27,7 +34,7 @@ class UnitController extends Controller
         }])
         ->paginate(1000);
 
-    return view('units.index', compact('units'));
+    return view('dashboard.units.index', compact('units'));
     }
 
     /**
@@ -41,7 +48,7 @@ class UnitController extends Controller
 
         Excel::import(new UnitsImport, $request->file('file'));
 
-        return redirect()->route('units.index')->with('success', 'تم استيراد بيانات الوحدات بنجاح!');
+        return redirect()->route('dashboard.units.index')->with('success', 'تم استيراد بيانات الوحدات بنجاح!');
     }
 
     /**
@@ -50,7 +57,7 @@ class UnitController extends Controller
     public function create()
     {
         $governorates = Governorate::all();
-        return view('units.create', compact('governorates'));
+        return view('dashboard.units.create', compact('governorates'));
     }
 
     /**
@@ -66,7 +73,7 @@ class UnitController extends Controller
 
         Unit::create($request->all());
 
-        return redirect()->route('units.index')->with('success', 'تمت إضافة الوحدة بنجاح.');
+        return redirect()->route('dashboard.units.index')->with('success', 'تمت إضافة الوحدة بنجاح.');
     }
 
     /**
@@ -74,7 +81,7 @@ class UnitController extends Controller
      */
     public function show(Unit $unit)
     {
-        return view('units.show', compact('unit'));
+        return view('dashboard.units.show', compact('unit'));
     }
 
     /**
@@ -84,7 +91,7 @@ class UnitController extends Controller
     {
         $unit = Unit::findOrFail($id);
         $governorates = Governorate::all();
-        return view('units.edit', compact('unit', 'governorates'));
+        return view('dashboard.units.edit', compact('unit', 'governorates'));
     }
 
 
@@ -101,7 +108,7 @@ class UnitController extends Controller
 
         $unit->update($request->all());
 
-        return redirect()->route('units.index')->with('success', 'تم تحديث بيانات الوحدة بنجاح.');
+        return redirect()->route('dashboard.units.index')->with('success', 'تم تحديث بيانات الوحدة بنجاح.');
     }
 
     /**
@@ -110,6 +117,6 @@ class UnitController extends Controller
     public function destroy(Unit $unit)
     {
         $unit->delete();
-        return redirect()->route('units.index')->with('success', 'تم حذف الوحدة بنجاح.');
+        return redirect()->route('dashboard.units.index')->with('success', 'تم حذف الوحدة بنجاح.');
     }
 }

@@ -17,17 +17,16 @@ use Carbon\Carbon;
 
 class StationReportController extends Controller
 {
-    public function index()
+     public function index()
     {
-        // الحصول على وحدة المستخدم الحالي
         $userUnitId = auth()->user()->unit_id;
+        $userUnitName = $userUnitId ? DB::table('units')->where('id', $userUnitId)->value('unit_name') : null;
 
-        // جلب اسم الوحدة إذا كان الجدول يستخدم اسم الوحدة بدلاً من ID
-        $userUnitName = DB::table('units')->where('id', $userUnitId)->value('unit_name');
-
-        // استعلام إحصائيات الوحدات
+        // =========================================================================
+        // الاستعلام الأول: إحصائيات مجمعة حسب الوحدة
+        // =========================================================================
         $unitStatsQuery = StationReport::select(
-            'station_reports.وحدة المياه',
+            DB::raw('`وحدة المياه`'),
             DB::raw("SUM(total_well_hours) AS total_well_hours"),
             DB::raw("SUM(horizontal_pump_hours) AS total_horizontal_pump_hours"),
             DB::raw("SUM(solar_electricity_hours) AS total_solar_electricity_hours"),
@@ -42,15 +41,16 @@ class StationReportController extends Controller
         );
 
         if (!empty($userUnitName)) {
-            $unitStatsQuery->where('station_reports.وحدة المياه', $userUnitName);
+            $unitStatsQuery->where(DB::raw('`وحدة المياه`'), $userUnitName);
         }
+        $unitStats = $unitStatsQuery->groupBy(DB::raw('`وحدة المياه`'))->get();
 
-        $unitStats = $unitStatsQuery->groupBy('station_reports.وحدة المياه')->get();
-
-        // استعلام إحصائيات المحطات
+        // =========================================================================
+        // الاستعلام الثاني: إحصائيات مجمعة حسب المحطة
+        // =========================================================================
         $stationStatsQuery = StationReport::select(
-            'station_reports.وحدة المياه',
-            'station_reports.المحطات',
+            DB::raw('`وحدة المياه`'),
+            DB::raw('`المحطات`'),
             DB::raw("SUM(total_well_hours) AS total_well_hours"),
             DB::raw("SUM(horizontal_pump_hours) AS total_horizontal_pump_hours"),
             DB::raw("SUM(solar_electricity_hours) AS total_solar_electricity_hours"),
@@ -64,48 +64,72 @@ class StationReportController extends Controller
             DB::raw("SUM(charged_electricity_kwh) AS total_charged_electricity")
         );
 
-        if (!empty($userUnitName)) {
-            $stationStatsQuery->where('station_reports.وحدة المياه', $userUnitName);
+       if (!empty($userUnitName)) {
+            $stationStatsQuery->where(DB::raw('`وحدة المياه`'), $userUnitName);
         }
+        $stationStats = $stationStatsQuery->groupBy(DB::raw('`وحدة المياه`'), DB::raw('`المحطات`'))->get();
 
-        $stationStats = $stationStatsQuery->groupBy('station_reports.وحدة المياه', 'station_reports.المحطات')->get();
-
-        $avgStats = StationReport::when(!empty($userUnitName), function($query) use($userUnitName) {
-            return $query->where('station_reports.وحدة المياه', $userUnitName);
-        })
-        ->select(
-            'station_reports.المحطات',
+        // =========================================================================
+        // الاستعلام الثالث: إحصائيات المتوسطات حسب المحطة (الطريقة الصحيحة)
+        // =========================================================================
+        $avgStatsQuery = StationReport::select(
+            DB::raw('`المحطات`'),
             DB::raw("ROUND(AVG(total_well_hours), 4) as avg_total_well_hours"),
             DB::raw("ROUND(AVG(horizontal_pump_hours), 4) as avg_total_horizontal_pump_hours"),
-            DB::raw("ROUND(AVG(solar_electricity_hours), 4) as avg_total_solar_electricity_hours"),
-            DB::raw("ROUND(AVG(solar_generator_hours), 4) as avg_total_solar_generator_hours"),
-            DB::raw("ROUND(AVG(solar_only_hours), 4) as avg_total_solar_only_hours"),
-            DB::raw("ROUND(AVG(electricity_hours), 4) as avg_total_electricity_hours"),
-            DB::raw("ROUND(AVG(electricity_consumption_kwh), 4) as avg_total_electricity_consumption"),
-            DB::raw("ROUND(AVG(water_pumped_m3), 4) as avg_total_water_pumped"),
-            DB::raw("ROUND(AVG(diesel_consumption), 4) as avg_total_diesel_used"),
-            DB::raw("ROUND(AVG(oil_quantity), 4) as avg_total_oil_added"),
-            DB::raw("ROUND(AVG(charged_electricity_kwh), 4) as avg_total_charged_electricity")
-        )
-        ->groupBy('station_reports.المحطات')
-        ->get();
+            DB::raw("SUM(solar_electricity_hours) AS total_solar_electricity_hours"),
+            DB::raw("SUM(solar_generator_hours) AS total_solar_generator_hours"),
+            DB::raw("SUM(solar_only_hours) AS total_solar_only_hours"),
+            DB::raw("SUM(electricity_hours) AS total_electricity_hours"),
+            DB::raw("SUM(electricity_consumption_kwh) AS total_electricity_consumption"),
+            DB::raw("SUM(water_pumped_m3) AS total_water_pumped"),
+            DB::raw("SUM(diesel_consumption) AS total_diesel_used"),
+            DB::raw("SUM(oil_quantity) AS total_oil_added"),
+            DB::raw("SUM(charged_electricity_kwh) AS total_charged_electricity")
+        );
+
+     // تطبيق الفلتر الخاص بالوحدة (إذا كان موجودًا) على الاستعلام قبل تنفيذه
+        if (!empty($userUnitName)) {
+            $avgStatsQuery->where(DB::raw('`وحدة المياه`'), $userUnitName);
+        }
+
+        // الآن، قم بتجميع النتائج وتنفيذ الاستعلام
+        $avgStats = $avgStatsQuery->groupBy(DB::raw('`المحطات`'))->get();
 
 
-        // تحويل البيانات إلى JSON لاستخدامها في الرسوم البيانية (إن وجدت)
+        // =========================================================================
+        // تحويل البيانات للرسوم البيانية
+        // =========================================================================
         $unitStatsForChart = $unitStats->map(function ($item) {
             return [
                 'unit' => $item->{"وحدة المياه"},
-                'well_hours' => $item->total_well_hours,
-                'pump_hours' => $item->total_horizontal_pump_hours,
-                'total_solar_electricity_hours' => $item->total_solar_electricity_hours,
-                'total_solar_generator_hours' => $item->total_solar_generator_hours,
-                'total_solar_only_hours' => $item->total_solar_only_hours,
-                'total_electricity_hours' => $item->total_electricity_hours,
-                'electricity_consumption' => $item->total_electricity_consumption,
-                'water_pumped' => $item->total_water_pumped,
-                'diesel_used' => $item->total_diesel_used,
-                'oil_added' => $item->total_oil_added,
-                'charged_electricity' => $item->total_charged_electricity
+                'well_hours' => (float) $item->total_well_hours,
+                'pump_hours' => (float) $item->total_horizontal_pump_hours,
+                'total_solar_electricity_hours' => (float) $item->total_solar_electricity_hours,
+                'total_solar_generator_hours' => (float) $item->total_solar_generator_hours,
+                'total_solar_only_hours' => (float) $item->total_solar_only_hours,
+                'total_electricity_hours' => (float) $item->total_electricity_hours,
+                'electricity_consumption' => (float) $item->total_electricity_consumption,
+                'water_pumped' => (float) $item->total_water_pumped,
+                'diesel_used' => (float) $item->total_diesel_used,
+                'oil_added' => (float) $item->total_oil_added,
+                'charged_electricity' => (float) $item->total_charged_electricity
+            ];
+        });
+
+        $stationStatsForChart = $stationStats->map(function ($item) {
+            return [
+                'station' => $item->{"المحطات"},
+                'well_hours' => (float) $item->total_well_hours,
+                'pump_hours' =>  (float)$item->total_horizontal_pump_hours,
+                'total_solar_electricity_hours' => (float) $item->total_solar_electricity_hours,
+                'total_solar_generator_hours' =>  (float)$item->total_solar_generator_hours,
+                'total_solar_only_hours' => (float) $item->total_solar_only_hours,
+                'total_electricity_hours' =>  (float)$item->total_electricity_hours,
+                'electricity_consumption' => (float) $item->total_electricity_consumption,
+                'water_pumped' => (float) $item->total_water_pumped,
+                'diesel_used' =>  (float)$item->total_diesel_used,
+                'oil_added' =>  (float)$item->total_oil_added,
+                'charged_electricity' =>  (float)$item->total_charged_electricity
             ];
         });
 
@@ -126,8 +150,7 @@ class StationReportController extends Controller
             ];
         });
 
-        return view('station_reports.index', compact('unitStats', 'stationStats', 'unitStatsForChart', 'stationStatsForChart', 'avgStats'));
-    }
+  return view('dashboard.station-reports.index', compact('unitStats', 'stationStats', 'unitStatsForChart', 'stationStatsForChart', 'avgStats'));    }
 
 
 
@@ -203,7 +226,7 @@ class StationReportController extends Controller
 
     public function create()
     {
-        return view('station_reports.create');
+        return view('dashboard.station-reports.create');
     }
 
     public function import(Request $request)
@@ -214,7 +237,7 @@ class StationReportController extends Controller
 
         Excel::import(new StationReportsImport, $request->file('file'));
 
-        return redirect()->route('station_reports.index')->with('success', 'تم استيراد التقارير بنجاح.');
+        return redirect()->route('dashboard.station-reports.index')->with('success', 'تم استيراد التقارير بنجاح.');
     }
 
 
@@ -297,7 +320,7 @@ class StationReportController extends Controller
 
         StationReport::create($request->all());
 
-        return redirect()->route('station_reports.index')->with('success', 'تم إنشاء التقرير بنجاح.');
+        return redirect()->route('dashboard.station-reports.index')->with('success', 'تم إنشاء التقرير بنجاح.');
     }
 
     /**
@@ -305,12 +328,12 @@ class StationReportController extends Controller
      */
     public function show(StationReport $report)
     {
-        return view('station_reports.show', compact('report'));
+        return view('dashboard.station-reports.show', compact('report'));
     }
 
     public function edit(StationReport $report)
     {
-        return view('station_reports.edit', compact('report'));
+        return view('dashboard.station-reports.edit', compact('report'));
     }
 
     /**
@@ -391,7 +414,7 @@ class StationReportController extends Controller
 
         $stationReport->update($request->all());
 
-        return redirect()->route('station_reports.index')->with('success', 'تم تحديث التقرير بنجاح.');
+        return redirect()->route('dashboard.station-reports.index')->with('success', 'تم تحديث التقرير بنجاح.');
     }
 
     /**
@@ -400,6 +423,6 @@ class StationReportController extends Controller
     public function destroy(StationReport $stationReport)
     {
         $stationReport->delete();
-        return redirect()->route('station_reports.index')->with('success', 'تم حذف التقرير بنجاح.');
+        return redirect()->route('dashboard.station-reports.index')->with('success', 'تم حذف التقرير بنجاح.');
     }
 }

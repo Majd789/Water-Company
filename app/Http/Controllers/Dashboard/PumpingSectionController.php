@@ -14,6 +14,13 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class PumpingSectionController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:pumping_sectors.view')->only(['index', 'show']);
+        $this->middleware('permission:pumping_sectors.create')->only(['create', 'store']);
+        $this->middleware('permission:pumping_sectors.edit')->only(['edit', 'update']);
+        $this->middleware('permission:pumping_sectors.delete')->only('destroy');
+    }
     /**
      * عرض قائمة الأقسام
      */
@@ -53,7 +60,7 @@ class PumpingSectionController extends Controller
         $PumpingSectors = $query->with(['station', 'station.town'])->paginate(10000); // استخدام الترقيم
 
         // تمرير البيانات إلى العرض مع الوحدات لاستخدامها في الفلترة
-        return view('pumping-sectors.index', compact('PumpingSectors', 'units', 'selectedUnitId'));
+        return view('dashboard.pumping-sectors.index', compact('PumpingSectors', 'units', 'selectedUnitId'));
     }
 
     public function export()
@@ -71,7 +78,7 @@ class PumpingSectionController extends Controller
         // استيراد البيانات
         Excel::import(new PumpingSectorsImport, $request->file('file'));
 
-        return redirect()->route('pumping-sectors.index')->with('success', 'تم استيراد قطاعات الضخ بنجاح.');
+        return redirect()->route('dashboard.pumping-sectors.index')->with('success', 'تم استيراد قطاعات الضخ بنجاح.');
     }
     /**
      * عرض نموذج إنشاء قسم جديد
@@ -95,7 +102,7 @@ class PumpingSectionController extends Controller
         }
 
         // إرسال المحطات والبلدات إلى العرض
-        return view('pumping-sectors.create', compact('stations', 'towns'));
+        return view('dashboard.pumping-sectors.create', compact('stations', 'towns'));
     }
 
     /**
@@ -112,7 +119,7 @@ class PumpingSectionController extends Controller
 
         PumpingSector::create($request->all());
 
-        return redirect()->route('pumping-sectors.index')->with('success', 'تمت إضافة القسم بنجاح.');
+        return redirect()->route('dashboard.pumping-sectors.index')->with('success', 'تمت إضافة القسم بنجاح.');
     }
 
     /**
@@ -120,7 +127,7 @@ class PumpingSectionController extends Controller
      */
     public function show(PumpingSector $PumpingSector)
     {
-        return view('pumping-sectors.show', compact('PumpingSector'));
+        return view('dashboard.pumping-sectors.show', compact('PumpingSector'));
     }
 
     /**
@@ -130,7 +137,7 @@ class PumpingSectionController extends Controller
     {
         $stations = Station::all();
         $towns = Town::all();
-        return view('pumping-sectors.edit', compact('PumpingSector', 'stations', 'towns'));
+        return view('dashboard.pumping-sectors.edit', compact('PumpingSector', 'stations', 'towns'));
     }
 
     /**
@@ -147,7 +154,7 @@ class PumpingSectionController extends Controller
 
         $PumpingSector->update($request->all());
 
-        return redirect()->route('pumping-sectors.index')->with('success', 'تم تحديث القسم بنجاح.');
+        return redirect()->route('dashboard.pumping-sectors.index')->with('success', 'تم تحديث القسم بنجاح.');
     }
 
     /**
@@ -157,6 +164,6 @@ class PumpingSectionController extends Controller
     {
         $PumpingSector->delete();
 
-        return redirect()->route('pumping-sectors.index')->with('success', 'تم حذف القسم بنجاح.');
+        return redirect()->route('dashboard.pumping-sectors.index')->with('success', 'تم حذف القسم بنجاح.');
     }
 }

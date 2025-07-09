@@ -13,6 +13,13 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class PrivateWellController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:private-wells.view')->only(['index', 'show']);
+        $this->middleware('permission:private-wells.create')->only(['create', 'store']);
+        $this->middleware('permission:private-wells.edit')->only(['edit', 'update']);
+        $this->middleware('permission:private-wells.delete')->only('destroy');
+    }
     /**
      * عرض قائمة الآبار.
      */
@@ -55,7 +62,7 @@ class PrivateWellController extends Controller
         $wells = $query->paginate(10000); // استخدام الترقيم لعرض البيانات
 
         // تمرير البيانات إلى العرض مع الوحدات لاستخدامها في الفلترة
-        return view('private-wells.index', compact('wells', 'units', 'selectedUnitId'));
+        return view('dashboard.private-wells.index', compact('wells', 'units', 'selectedUnitId'));
     }
 
 
@@ -74,7 +81,7 @@ class PrivateWellController extends Controller
         // استيراد البيانات
         Excel::import(new PrivateWellsImport, $request->file('file'));
 
-        return redirect()->route('private-wells.index')->with('success', 'تم استيراد الآبار الخاصة بنجاح.');
+        return redirect()->route('dashboard.private-wells.index')->with('success', 'تم استيراد الآبار الخاصة بنجاح.');
     }
 
     /**
@@ -98,7 +105,7 @@ class PrivateWellController extends Controller
         }
 
         // إرسال المحطات إلى العرض
-        return view('private-wells.create', compact('stations'));
+        return view('dashboard.private-wells.create', compact('stations'));
     }
 
     /**
@@ -116,7 +123,7 @@ class PrivateWellController extends Controller
 
         PrivateWell::create($validated);
 
-        return redirect()->route('private-wells.index')->with('success', 'تمت إضافة البئر بنجاح.');
+        return redirect()->route('dashboard.private-wells.index')->with('success', 'تمت إضافة البئر بنجاح.');
     }
 
     /**
@@ -124,7 +131,7 @@ class PrivateWellController extends Controller
      */
     public function show(PrivateWell $privateWell)
     {
-        return view('private-wells.show', compact('privateWell'));
+        return view('dashboard.private-wells.show', compact('privateWell'));
     }
 
     /**
@@ -133,7 +140,7 @@ class PrivateWellController extends Controller
     public function edit(PrivateWell $privateWell)
     {
         $stations = Station::all();
-        return view('private-wells.edit', compact('privateWell', 'stations'));
+        return view('dashboard.private-wells.edit', compact('privateWell', 'stations'));
     }
 
     /**
@@ -151,7 +158,7 @@ class PrivateWellController extends Controller
 
         $privateWell->update($validated);
 
-        return redirect()->route('private-wells.index')->with('success', 'تم تحديث بيانات البئر بنجاح.');
+        return redirect()->route('dashboard.private-wells.index')->with('success', 'تم تحديث بيانات البئر بنجاح.');
     }
 
     /**
@@ -160,6 +167,6 @@ class PrivateWellController extends Controller
     public function destroy(PrivateWell $privateWell)
     {
         $privateWell->delete();
-        return redirect()->route('private-wells.index')->with('success', 'تم حذف البئر بنجاح.');
+        return redirect()->route('dashboard.private-wells.index')->with('success', 'تم حذف البئر بنجاح.');
     }
 }

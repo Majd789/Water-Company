@@ -15,6 +15,15 @@ use Illuminate\Validation\Rule;
 
 class StationController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:stations.view')->only(['index', 'show']);
+        $this->middleware('permission:stations.create')->only(['create', 'store']);
+        $this->middleware('permission:stations.edit')->only(['edit', 'update']);
+        $this->middleware('permission:stations.delete')->only('destroy');
+        $this->middleware('permission:stations.export')->only('export');
+        $this->middleware('permission:stations.import')->only('import');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -64,7 +73,7 @@ class StationController extends Controller
         // استرجاع المحطات مع البلدات
         $stations = $stations->with('town')->paginate(50000);
 
-        return view('stations.index', compact('stations', 'towns', 'units'));
+        return view('dashboard.stations.index', compact('stations', 'towns', 'units'));
     }
 
         public function export()
@@ -84,7 +93,7 @@ class StationController extends Controller
             Excel::import(new StationsImport, $request->file('file'));
 
             // إعادة التوجيه مع رسالة النجاح
-            return redirect()->route('stations.index')->with('success', 'تم استيراد المحطات بنجاح.');
+            return redirect()->route('dashboard.stations.index')->with('success', 'تم استيراد المحطات بنجاح.');
         }
     /**
      * Show the form for creating a new resource.
@@ -92,7 +101,7 @@ class StationController extends Controller
     public function create()
     {
         $towns = Town::all();
-        return view('stations.create', compact('towns'));
+        return view('dashboard.stations.create', compact('towns'));
     }
 
     /**
@@ -142,7 +151,7 @@ class StationController extends Controller
 
         Station::create($request->all());
 
-        return redirect()->route('stations.index')->with('success', 'تم إضافة المحطة بنجاح');
+        return redirect()->route('dashboard.stations.index')->with('success', 'تم إضافة المحطة بنجاح');
     }
     /**
      * Display the specified resource.
@@ -160,96 +169,96 @@ class StationController extends Controller
                 'count' => optional($station->wells)->count() ?? 0,
                 'icon' => 'fas fa-water',
                 'color' => 'info',
-                'route' => route('wells.index', ['station_id' => $station->id])
+                'route' => route('dashboard.wells.index', ['station_id' => $station->id])
             ],
             'الآبار الخاصة' => [
                 'count' => optional($station->privateWells)->count() ?? 0,
                 'icon' => 'fas fa-user-lock',
                 'color' => 'dark',
-                'route' => route('private-wells.index', ['station_id' => $station->id])
+                'route' => route('dashboard.private-wells.index', ['station_id' => $station->id])
             ],
             'الانفلترات (العاكسات)' => [
                 'count' => optional($station->infiltrators)->count() ?? 0,
                 'icon' => 'fas fa-wave-square',
                 'color' => 'maroon',
-                'route' => route('infiltrators.index', ['station_id' => $station->id])
+                'route' => route('dashboard.infiltrators.index', ['station_id' => $station->id])
             ],
             'خزانات الديزل' => [
                 'count' => optional($station->dieselTanks)->count() ?? 0,
                 'icon' => 'fas fa-oil-can',
                 'color' => 'secondary',
-                'route' => route('diesel_tanks.index', ['station_id' => $station->id])
+                'route' => route('dashboard.diesel_tanks.index', ['station_id' => $station->id])
             ],
             'الخزانات الأرضية' => [
                 'count' => optional($station->groundTanks)->count() ?? 0,
                 'icon' => 'fas fa-database',
                 'color' => 'secondary',
-                'route' => route('ground-tanks.index', ['station_id' => $station->id])
+                'route' => route('dashboard.ground-tanks.index', ['station_id' => $station->id])
             ],
             'الخزانات المرتفعة' => [
                 'count' => optional($station->elevatedTanks)->count() ?? 0,
                 'icon' => 'fas fa-archway',
                 'color' => 'secondary',
-                'route' => route('elevated-tanks.index', ['station_id' => $station->id])
+                'route' => route('dashboard.elevated-tanks.index', ['station_id' => $station->id])
             ],
             'الطاقة الشمسية' => [
                 'count' => optional($station->solarEnergies)->count() ?? 0,
                 'icon' => 'fas fa-solar-panel',
                 'color' => 'orange',
-                'route' => route('solar_energy.index', ['station_id' => $station->id])
+                'route' => route('dashboard.solar_energy.index', ['station_id' => $station->id])
             ],
             'عدادات الكهرباء' => [
                 'count' => optional($station->electricityHours)->count() ?? 0,
                 'icon' => 'fas fa-tachometer-alt',
                 'color' => 'primary',
-                'route' => route('electricity-hours.index', ['station_id' => $station->id])
+                'route' => route('dashboard.electricity-hours.index', ['station_id' => $station->id])
             ],
             'الفلاتر (المرشحات)' => [
                 'count' => optional($station->filters)->count() ?? 0,
                 'icon' => 'fas fa-filter',
                 'color' => 'purple',
-                'route' => route('filters.index', ['station_id' => $station->id])
+                'route' => route('dashboard.filters.index', ['station_id' => $station->id])
             ],
             'قطاعات الضخ' => [
                 'count' => optional($station->pumpingSectors)->count() ?? 0,
                 'icon' => 'fas fa-sitemap',
                 'color' => 'success',
-                'route' => route('pumping-sectors.index', ['station_id' => $station->id])
+                'route' => route('dashboard.pumping-sectors.index', ['station_id' => $station->id])
             ],
             'مجموعات التوليد' => [
                 'count' => optional($station->generationGroups)->count() ?? 0,
                 'icon' => 'fas fa-industry',
                 'color' => 'warning',
-                'route' => route('generation-groups.index', ['station_id' => $station->id])
+                'route' => route('dashboard.generation-groups.index', ['station_id' => $station->id])
             ],
             'المحولات الكهربائية' => [
                 'count' => optional($station->electricityTransformers)->count() ?? 0,
                 'icon' => 'fas fa-bolt',
                 'color' => 'primary',
-                'route' => route('electricity-transformers.index', ['station_id' => $station->id])
+                'route' => route('dashboard.electricity-transformers.index', ['station_id' => $station->id])
             ],
             'المضخات الأفقية' => [
                 'count' => optional($station->horizontalPumps)->count() ?? 0,
                 'icon' => 'fas fa-arrows-alt-h',
                 'color' => 'success',
-                'route' => route('horizontal-pumps.index', ['station_id' => $station->id])
+                'route' => route('dashboard.horizontal-pumps.index', ['station_id' => $station->id])
             ],
             'مضخات التعقيم' => [
                 'count' => optional($station->disinfectionPumps)->count() ?? 0,
                 'icon' => 'fas fa-shield-virus',
                 'color' => 'danger',
-                'route' => route('disinfection_pumps.index', ['station_id' => $station->id])
+                'route' => route('dashboard.disinfection_pumps.index', ['station_id' => $station->id])
             ],
             'المناهل' => [
                 'count' => optional($station->manholes)->count() ?? 0,
                 'icon' => 'fas fa-dungeon',
                 'color' => 'dark',
-                'route' => route('manholes.index', ['station_id' => $station->id])
+                'route' => route('dashboard.manholes.index', ['station_id' => $station->id])
             ],
         ];
 
         // تمرير المحطة والإحصائيات إلى الـ view
-        return view('stations.show', compact('station', 'statistics'));
+        return view('dashboard.stations.show', compact('station', 'statistics'));
     }
 
     /**
@@ -259,7 +268,7 @@ class StationController extends Controller
     {
         $station = Station::findOrFail($id);
         $towns = Town::all();
-        return view('stations.edit', compact('station', 'towns'));
+        return view('dashboard.stations.edit', compact('station', 'towns'));
     }
 
     /**
@@ -311,7 +320,7 @@ class StationController extends Controller
 
         $station->update($request->all());
 
-        return redirect()->route('stations.index')->with('success', 'تم تحديث المحطة بنجاح');
+        return redirect()->route('dashboard.stations.index')->with('success', 'تم تحديث المحطة بنجاح');
     }
     /**
      * Remove the specified resource from storage.
@@ -321,6 +330,6 @@ class StationController extends Controller
         $station = Station::findOrFail($id);
         $station->delete();
 
-        return redirect()->route('stations.index')->with('success', 'تم حذف المحطة بنجاح');
+        return redirect()->route('dashboard.stations.index')->with('success', 'تم حذف المحطة بنجاح');
     }
 }

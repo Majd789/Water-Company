@@ -13,6 +13,13 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class GroundTankController extends Controller
 {
+         public function __construct()
+    {
+        $this->middleware('permission:ground_tanks.view')->only(['index', 'show']);
+        $this->middleware('permission:ground_tanks.create')->only(['create', 'store']);
+        $this->middleware('permission:ground_tanks.edit')->only(['edit', 'update']);
+        $this->middleware('permission:ground_tanks.delete')->only('destroy');
+    }
     public function index(Request $request)
     {
     // استرجاع جميع الوحدات لاستخدامها في الفلترة
@@ -58,7 +65,7 @@ class GroundTankController extends Controller
     $groundTanks = $query->paginate(100);
 
     // عرض البيانات في الصفحة وتمرير الوحدات للفلترة
-    return view('ground-tanks.index', compact('groundTanks', 'units'));
+    return view('dashboard.ground-tanks.index', compact('groundTanks', 'units'));
     }
 
 
@@ -78,7 +85,7 @@ class GroundTankController extends Controller
         // استيراد البيانات
         Excel::import(new GroundTanksImport, $request->file('file'));
 
-        return redirect()->route('ground-tanks.index')->with('success', 'تم استيراد الخزانات الأرضية بنجاح.');
+        return redirect()->route('dashboard.ground-tanks.index')->with('success', 'تم استيراد الخزانات الأرضية بنجاح.');
     }
     public function create()
     {
@@ -93,7 +100,7 @@ class GroundTankController extends Controller
             $stations = \App\Models\Station::all();
         }
 
-        return view('ground-tanks.create', compact('stations'));
+        return view('dashboard.ground-tanks.create', compact('stations'));
     }
 
 
@@ -120,7 +127,7 @@ class GroundTankController extends Controller
 
 
          GroundTank::create($request->all()); // إنشاء الخزان الجديد
-         return redirect()->route('ground-tanks.index')->with('success', 'تم إضافة الخزان بنجاح');
+         return redirect()->route('dashboard.ground-tanks.index')->with('success', 'تم إضافة الخزان بنجاح');
      }
 
      // عرض نموذج تعديل خزان
@@ -128,7 +135,7 @@ class GroundTankController extends Controller
      {
          $groundTank = GroundTank::findOrFail($id);
          $stations = Station::all();
-         return view('ground-tanks.edit', compact('groundTank', 'stations'));
+         return view('dashboard.ground-tanks.edit', compact('groundTank', 'stations'));
      }
 
      // تحديث بيانات الخزان
@@ -155,14 +162,14 @@ class GroundTankController extends Controller
 
          $groundTank = GroundTank::findOrFail($id);
          $groundTank->update($request->all()); // تحديث البيانات
-         return redirect()->route('ground-tanks.index')->with('success', 'تم تحديث الخزان بنجاح');
+         return redirect()->route('dashboard.ground-tanks.index')->with('success', 'تم تحديث الخزان بنجاح');
      }
 
      // عرض تفاصيل الخزان
      public function show($id)
      {
          $groundTank = GroundTank::with('station')->findOrFail($id);
-         return view('ground-tanks.show', compact('groundTank'));
+         return view('dashboard.ground-tanks.show', compact('groundTank'));
      }
 
      // حذف الخزان
@@ -170,6 +177,6 @@ class GroundTankController extends Controller
      {
          $groundTank = GroundTank::findOrFail($id);
          $groundTank->delete(); // حذف الخزان
-         return redirect()->route('ground-tanks.index')->with('success', 'تم حذف الخزان بنجاح');
+         return redirect()->route('dashboard.ground-tanks.index')->with('success', 'تم حذف الخزان بنجاح');
      }
  }

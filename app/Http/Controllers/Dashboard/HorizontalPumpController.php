@@ -14,6 +14,14 @@ use Illuminate\Validation\Rule;
 
 class HorizontalPumpController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:horizontal_pumps.view')->only(['index', 'show']);
+        $this->middleware('permission:horizontal_pumps.create')->only(['create', 'store']);
+        $this->middleware('permission:horizontal_pumps.edit')->only(['edit', 'update']);
+        $this->middleware('permission:horizontal_pumps.delete')->only('destroy');
+       
+    }
    /**
      * عرض قائمة المضخات.
      */
@@ -63,7 +71,7 @@ class HorizontalPumpController extends Controller
     $horizontalPumps = $query->paginate(10000);
 
     // عرض البيانات في الصفحة
-    return view('horizontal-pumps.index', compact('horizontalPumps', 'units'));
+    return view('dashboard.horizontal-pumps.index', compact('horizontalPumps', 'units'));
 }
 
 
@@ -83,7 +91,7 @@ class HorizontalPumpController extends Controller
         // استيراد البيانات
         Excel::import(new HorizontalPumpsImport, $request->file('file'));
 
-        return redirect()->route('horizontal-pumps.index')->with('success', 'تم استيراد المضخات الأفقية بنجاح.');
+        return redirect()->route('dashboard.horizontal-pumps.index')->with('success', 'تم استيراد المضخات الأفقية بنجاح.');
     }
 
     public function create()
@@ -99,7 +107,7 @@ class HorizontalPumpController extends Controller
             $stations = \App\Models\Station::all();
         }
 
-        return view('horizontal-pumps.create', compact('stations'));
+        return view('dashboard.horizontal-pumps.create', compact('stations'));
     }
 
 
@@ -143,7 +151,7 @@ class HorizontalPumpController extends Controller
 
         HorizontalPump::create($request->all());
 
-        return redirect()->route('horizontal-pumps.index')->with('success', 'تم إضافة المضخة بنجاح.');
+        return redirect()->route('dashboard.horizontal-pumps.index')->with('success', 'تم إضافة المضخة بنجاح.');
     }
 
     /**
@@ -151,7 +159,7 @@ class HorizontalPumpController extends Controller
      */
     public function show(HorizontalPump $horizontalPump)
     {
-        return view('horizontal-pumps.show', compact('horizontalPump'));
+        return view('dashboard.horizontal-pumps.show', compact('horizontalPump'));
     }
 
     /**
@@ -160,7 +168,7 @@ class HorizontalPumpController extends Controller
     public function edit(HorizontalPump $horizontalPump)
     {
         $stations = Station::all(); // جلب قائمة المحطات
-        return view('horizontal-pumps.edit', compact('horizontalPump', 'stations'));
+        return view('dashboard.horizontal-pumps.edit', compact('horizontalPump', 'stations'));
     }
 
     /**
@@ -183,7 +191,7 @@ class HorizontalPumpController extends Controller
 
         $horizontalPump->update($request->all());
 
-        return redirect()->route('horizontal-pumps.index')->with('success', 'تم تحديث بيانات المضخة بنجاح.');
+        return redirect()->route('dashboard.horizontal-pumps.index')->with('success', 'تم تحديث بيانات المضخة بنجاح.');
     }
 
     /**
@@ -193,6 +201,6 @@ class HorizontalPumpController extends Controller
     {
         $horizontalPump->delete();
 
-        return redirect()->route('horizontal-pumps.index')->with('success', 'تم حذف المضخة بنجاح.');
+        return redirect()->route('dashboard.horizontal-pumps.index')->with('success', 'تم حذف المضخة بنجاح.');
     }
 }

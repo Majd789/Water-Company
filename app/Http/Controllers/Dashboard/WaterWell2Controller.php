@@ -14,6 +14,15 @@ use App\Exports\AggregatedWaterWellsExport;
 
 class WaterWell2Controller extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:water-wells2.view')->only(['index', 'show']);
+        $this->middleware('permission:water-wells2.create')->only(['create', 'store']);
+        $this->middleware('permission:water-wells2.edit')->only(['edit', 'update']);
+        $this->middleware('permission:water-wells2.delete')->only('destroy');
+        $this->middleware('permission:water-wells2.export-aggregated')->only('exportAggregated');
+        $this->middleware('permission:water-wells2.import')->only(['importForm', 'import']);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -84,7 +93,7 @@ class WaterWell2Controller extends Controller
             });
         }
 
-        return view('waterwells2.index', compact('filteredWells', 'request'));
+        return view('dashboard.waterwells2.index', compact('filteredWells', 'request'));
     }
 
     /**
@@ -169,7 +178,7 @@ class WaterWell2Controller extends Controller
         })->values();
 
         // عرض النتائج المجمعة في صفحة منفصلة (أو نفس الصفحة بحسب تصميمك)
-        return view('waterwells2.aggregated', compact('aggregatedResults', 'request'));
+        return view('dashboard.waterwells2.aggregated', compact('aggregatedResults', 'request'));
     }
 
 
@@ -179,12 +188,12 @@ class WaterWell2Controller extends Controller
     public function show($id)
     {
         $waterWell = WaterWell2::findOrFail($id);
-        return view('waterwells2.show', compact('waterWell'));
+        return view('dashboard.waterwells2.show', compact('waterWell'));
     }
 
     public function importForm()
     {
-        return view('waterwells2.import');
+        return view('dashboard.waterwells2.import');
     }
 
     public function import(Request $request)
@@ -195,7 +204,7 @@ class WaterWell2Controller extends Controller
 
         Excel::import(new WaterWell2Import, $request->file('file'));
 
-        return redirect()->route('waterwells2.index')->with('success', 'تم استيراد البيانات بنجاح!');
+        return redirect()->route('dashboard.waterwells2.index')->with('success', 'تم استيراد البيانات بنجاح!');
     }
          public function exportAggregated(Request $request)
     {
@@ -264,7 +273,7 @@ class WaterWell2Controller extends Controller
      */
     public function create()
     {
-        return view('waterwells2.create');
+        return view('dashboard.waterwells2.create');
     }
 
     public function store(Request $request)
@@ -289,13 +298,13 @@ class WaterWell2Controller extends Controller
 
         WaterWell2::create($validated);
 
-        return redirect()->route('waterwells2.index')->with('success', 'تم إضافة المنهل بنجاح');
+        return redirect()->route('dashboard.waterwells2.index')->with('success', 'تم إضافة المنهل بنجاح');
     }
 
     public function edit($id)
     {
         $waterWell = WaterWell2::findOrFail($id);
-        return view('waterwells2.edit', compact('waterWell'));
+        return view('dashboard.waterwells2.edit', compact('waterWell'));
     }
 
     public function update(Request $request, $id)
@@ -322,7 +331,7 @@ class WaterWell2Controller extends Controller
 
         $waterWell->update($validated);
 
-        return redirect()->route('waterwells2.show', $waterWell->id)->with('success', 'تم التعديل بنجاح');
+        return redirect()->route('dashboard.waterwells2.show', $waterWell->id)->with('success', 'تم التعديل بنجاح');
     }
 
 
@@ -338,7 +347,7 @@ class WaterWell2Controller extends Controller
             WaterWell2::query()->delete();
             DB::statement('ALTER TABLE water_wells2 AUTO_INCREMENT = 1'); // إعادة الترقيم
 
-            return redirect()->route('waterwells2.index')->with('success', 'تم حذف جميع التقارير وإعادة ترقيم الـ ID.');
+            return redirect()->route('dashboard.waterwells2.index')->with('success', 'تم حذف جميع التقارير وإعادة ترقيم الـ ID.');
         }
 
         // في حالة أن المستخدم لديه "unit_id"، يتم الحذف بناءً على وحدة المستخدم
@@ -354,10 +363,10 @@ class WaterWell2Controller extends Controller
                 DB::statement('ALTER TABLE water_wells2 AUTO_INCREMENT = 1');
             }
 
-            return redirect()->route('waterwells2.index')->with('success', 'تم حذف جميع التقارير الخاصة بوحدتك وإعادة ترقيم الـ ID.');
+            return redirect()->route('dashboard.waterwells2.index')->with('success', 'تم حذف جميع التقارير الخاصة بوحدتك وإعادة ترقيم الـ ID.');
         }
 
-        return redirect()->route('waterwells2.index')->with('error', 'لا يمكن حذف البيانات لأن المستخدم ليس لديه صلاحية.');
+        return redirect()->route('dashboard.waterwells2.index')->with('error', 'لا يمكن حذف البيانات لأن المستخدم ليس لديه صلاحية.');
     }
 
 

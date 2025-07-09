@@ -17,6 +17,13 @@ use Illuminate\Validation\Rule; // لاستخدام Rule::requiredIf
 
 class DailyStationReportController extends Controller
 {
+      public function __construct()
+    {
+        $this->middleware('permission:daily_station_reports.view')->only(['index', 'show']);
+        $this->middleware('permission:daily_station_reports.create')->only(['create', 'store']);
+        $this->middleware('permission:daily_station_reports.edit')->only(['edit', 'update']);
+        $this->middleware('permission:daily_station_reports.delete')->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -26,7 +33,7 @@ class DailyStationReportController extends Controller
                                      ->latest()
                                      ->paginate(15);
 
-        return view('daily_station_reports.index', compact('reports'));
+        return view('dashboard.daily_station_reports.index', compact('reports'));
     }
 
     /**
@@ -63,7 +70,7 @@ class DailyStationReportController extends Controller
             }
         }
 
-        return view('daily_station_reports.create', [
+        return view('dashboard.daily_station_reports.create', [
             'operatorName' => $operatorName,
             'operators' => $operators,
             'stations' => $stations,
@@ -404,14 +411,14 @@ class DailyStationReportController extends Controller
 
         DailyStationReport::create($validatedData);
 
-        return redirect()->route('daily-station-reports.index')
+        return redirect()->route('dashboard.daily-station-reports.index')
                          ->with('success', 'تم إنشاء التقرير اليومي بنجاح.');
     }
 
     public function show(DailyStationReport $dailyStationReport): View
     {
         $dailyStationReport->load(['station.town.unit', 'operator', 'pumpingSector']);
-        return view('daily_station_reports.show', compact('dailyStationReport'));
+        return view('dashboard.daily_station_reports.show', compact('dailyStationReport'));
     }
 
     public function edit(DailyStationReport $dailyStationReport): View
@@ -446,7 +453,7 @@ class DailyStationReportController extends Controller
             $pumpingSectorsForEdit = $preselectedStation->pumpingSectors()->orderBy('sector_name')->get();
         }
 
-        return view('daily_station_reports.edit', [
+        return view('dashboard.daily_station_reports.edit', [
             'dailyStationReport' => $dailyStationReport,
             'operatorName' => $operatorName,
             'stations' => $stations,
@@ -565,14 +572,14 @@ class DailyStationReportController extends Controller
 
         $dailyStationReport->update($validatedData);
 
-        return redirect()->route('daily-station-reports.index')
+        return redirect()->route('dashboard.daily-station-reports.index')
                          ->with('success', 'تم تحديث التقرير اليومي بنجاح.');
     }
 
     public function destroy(DailyStationReport $dailyStationReport): RedirectResponse
     {
         $dailyStationReport->delete();
-        return redirect()->route('daily-station-reports.index')
+        return redirect()->route('dashboard.daily-station-reports.index')
                          ->with('success', 'تم حذف التقرير اليومي بنجاح.');
     }
 }

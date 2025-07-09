@@ -12,6 +12,15 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class TownController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:towns.view')->only(['index', 'show']);
+        $this->middleware('permission:towns.create')->only(['create', 'store']);
+        $this->middleware('permission:towns.edit')->only(['edit', 'update']);
+        $this->middleware('permission:towns.delete')->only('destroy');
+        $this->middleware('permission:towns.export')->only('export');
+        $this->middleware('permission:towns.import')->only('import');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -47,7 +56,7 @@ class TownController extends Controller
         // استرجاع البلدات مع الوحدات، مع تحديد الصفحات
         $towns = $towns->with('unit')->get();
 
-        return view('towns.index', compact('towns', 'units'));
+        return view('dashboard.towns.index', compact('towns', 'units'));
     }
 
 
@@ -77,7 +86,7 @@ class TownController extends Controller
 
         // إرسال الوحدة الحالية مع الوحدات الأخرى إلى العرض
         $units = Unit::all();
-        return view('towns.create', compact('units', 'userUnitId'));
+        return view('dashboard.towns.create', compact('units', 'userUnitId'));
     }
     /**
      * Store a newly created resource in storage.
@@ -92,7 +101,7 @@ class TownController extends Controller
 
         Town::create($request->all());
 
-        return redirect()->route('towns.index')->with('success', 'تمت إضافة البلدة بنجاح.');
+        return redirect()->route('dashboard.towns.index')->with('success', 'تمت إضافة البلدة بنجاح.');
     }
 
     /**
@@ -101,7 +110,7 @@ class TownController extends Controller
     public function show(string $id)
     {
         $town = Town::with('unit')->findOrFail($id);
-        return view('towns.show', compact('town'));
+        return view('dashboard.towns.show', compact('town'));
     }
 
     /**
@@ -111,7 +120,7 @@ class TownController extends Controller
     {
         $town = Town::findOrFail($id);
         $units = Unit::all();
-        return view('towns.edit', compact('town', 'units'));
+        return view('dashboard.towns.edit', compact('town', 'units'));
     }
 
     /**
@@ -129,7 +138,7 @@ class TownController extends Controller
 
         $town->update($request->all());
 
-        return redirect()->route('towns.index')->with('success', 'تم تحديث البلدة بنجاح.');
+        return redirect()->route('dashboard.towns.index')->with('success', 'تم تحديث البلدة بنجاح.');
     }
 
     /**
@@ -140,6 +149,6 @@ class TownController extends Controller
         $town = Town::findOrFail($id);
         $town->delete();
 
-        return redirect()->route('towns.index')->with('success', 'تم حذف البلدة بنجاح.');
+        return redirect()->route('dashboard.towns.index')->with('success', 'تم حذف البلدة بنجاح.');
     }
 }
