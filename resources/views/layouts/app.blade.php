@@ -34,12 +34,13 @@
     <link rel="stylesheet" href="https://cdn.rtlcss.com/bootstrap/v4.2.1/css/bootstrap.min.css">
     <!-- Custom style for RTL -->
     <link rel="stylesheet" href="{{ asset('dist/css/custom.css') }}">
-
+    @livewireStyles
     {{-- This stack allows child pages to push their own CSS files --}}
     @stack('styles')
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
+
     <div class="wrapper">
 
         <!-- Preloader -->
@@ -56,10 +57,13 @@
             <section class="content-header">
                 @yield('content_header')
             </section>
-
-            <!-- Main content -->
-            <section class="content">
-                @yield('content')
+            @if (isset($slot))
+                {{ $slot }}
+            @else
+                <!-- Main content -->
+                <section class="content">
+                    @yield('content')
+            @endif
             </section>
         </div>
 
@@ -103,7 +107,7 @@
     <script src="{{ asset('plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
     <!-- AdminLTE App -->
     <script src="{{ asset('dist/js/adminlte.js') }}"></script>
-
+    @livewireScripts
     {{-- This stack allows child pages to push their own JS files --}}
     @stack('scripts')
 </body>
