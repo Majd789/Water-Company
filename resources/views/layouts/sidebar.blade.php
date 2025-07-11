@@ -213,13 +213,7 @@
                                             <p>خزانات الديزل</p>
                                         </a></li>
                                 @endcan
-                                @can('maintenances.view')
-                                    <li class="nav-item"><a href="{{ route('dashboard.maintenances.index') }}"
-                                            class="nav-link {{ Request::routeIs('dashboard.maintenances.*') ? 'active' : '' }}"><i
-                                                class="fas fa-tools nav-icon"></i>
-                                            <p>الصيانة</p>
-                                        </a></li>
-                                @endcan
+
                             </ul>
                         </li>
                     @endcanany
