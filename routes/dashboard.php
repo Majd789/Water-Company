@@ -91,6 +91,8 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::get('/export/diesel-tanks', [DieselTankController::class, 'export'])->name('diesel-tanks.export');
     Route::get('/weekly-reports/export', [WeeklyReportController::class, 'export'])->name('weekly_reports.export');
     Route::get('/export/all-data', [DataExportController::class, 'exportAll'])->name('export.all');
+    // داخل مجموعة الروابط الخاصة بـ dashboard
+    Route::get('maintenance_tasks.export', [MaintenanceTaskController::class, 'export'])->name('maintenance_tasks.export');
     Route::get('/station-reports/export', [StationReportController::class, 'export'])->name('station_reports.export');
     // === مسارات الاستيراد (Import) ===
     Route::post('/units/import', [UnitController::class, 'import'])->name('units.import');
@@ -114,6 +116,7 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::get('waterwells2/import', [WaterWell2Controller::class, 'importForm'])->name('waterwells2.importForm');
     Route::post('waterwells2/import', [WaterWell2Controller::class, 'import'])->name('waterwells2.import'); 
     Route::post('/station-reports/import', [StationReportController::class, 'import'])->name('station_reports.import');
+    Route::post('/maintenance_tasks/import', [MaintenanceTaskController::class, 'import'])->name('maintenance_tasks.import');
 });
 
 // --- 3. مسارات النظام (ملف التعريف، المصادقة) ---

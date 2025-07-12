@@ -48,6 +48,7 @@
 @endsection
 
 @section('content')
+
     <div class="container-fluid pt-3">
         <div class="row justify-content-center">
             <div class="col-lg-11 col-xl-10">
@@ -63,7 +64,45 @@
                         </ul>
                     </div>
                 @endif
-
+                     <div class="card card-success collapsed-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title mb-0">
+                                <i class="fas fa-file-excel ml-1"></i>
+                                استيراد من ملف Excel
+                            </h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-plus "></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            @if(session('import_errors'))
+                                <div class="alert alert-danger alert-dismissible">
+                                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                    <h5><i class="icon fas fa-ban"></i> حدثت أخطاء أثناء الاستيراد:</h5>
+                                    <ul class="mb-0">
+                                        @foreach(session('import_errors') as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+                            <form action="{{ route('dashboard.maintenance_tasks.import') }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <p class="text-muted">يمكنك استيراد قائمة بالانفلترات دفعة واحدة من ملف إكسل.</p>
+                                <div class="form-group">
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="importFile" name="file"
+                                            required>
+                                        <label class="custom-file-label" for="importFile">اختر ملف Excel</label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-success"><i class="fas fa-upload ml-1"></i> بدء
+                                    الاستيراد</button>
+                            </form>
+                        </div>
+                    </div>
                 <!-- الفورم الرئيسي لإضافة البيانات -->
                 <div class="card card-primary">
                     <div class="card-header">

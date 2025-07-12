@@ -126,7 +126,7 @@
                     {{-- تحديد خلفية وأيقونة بناءً على حالة الإصلاح --}}
                     @php
                         $isFixed = $maintenanceTask->is_fixed;
-                        $headerBg = $isFixed ? asset('dist/img/photo3.jpg') : asset('dist/img/photo3.png');
+                        $headerBg = $isFixed ? asset('dist/img/photo3.png') : asset('dist/img/photo3.png');
                         $iconClass = $isFixed ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
                         $iconBgColor = $isFixed ? 'bg-success' : 'bg-danger';
                     @endphp

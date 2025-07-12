@@ -1,11 +1,16 @@
 <?php
 
 namespace App\Http\Controllers\Dashboard;
-use App\Http\Controllers\Controller;
 
+use App\Exports\MaintenanceTasksExport;
+use App\Http\Controllers\Controller;
+use App\Imports\MaintenanceTasksImport;
 use App\Models\MaintenanceTask;
 use App\Models\Unit;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Validators\ValidationException;
+
 // use App\Http\Requests\UpdateMaintenanceTaskRequest; // Uncomment if you have a custom request
 
 class MaintenanceTaskController extends Controller
@@ -34,7 +39,7 @@ class MaintenanceTaskController extends Controller
         }
         
         // نفذ الاستعلام مع الترقيم
-        $maintenanceTasks = $query->paginate(15);
+        $maintenanceTasks = $query->get();
         
         // جلب جميع الوحدات لقائمة الفلترة
         $units = Unit::select('id', 'unit_name')->get(); 
@@ -51,7 +56,34 @@ class MaintenanceTaskController extends Controller
         $units = Unit::all();
         return view('dashboard.maintenance_tasks.create', compact('units'));
     }
+    public function import(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,xls,csv'
+    ]);
 
+    try {
+        Excel::import(new MaintenanceTasksImport, $request->file('file'));
+    } catch (ValidationException $e) {
+         $failures = $e->failures();
+         $errorMessages = [];
+         foreach ($failures as $failure) {
+             $errorMessages[] = "خطأ في الصف رقم " . $failure->row() . ": " . implode(', ', $failure->errors());
+         }
+         return redirect()->back()->with('import_errors', $errorMessages);
+    }
+
+    return redirect()->route('dashboard.maintenance_tasks.index')
+                     ->with('success', 'تم استيراد البيانات بنجاح.');
+    }
+   public function export(Request $request)
+    {
+        $unitId = $request->query('unit_id'); // جلب فلتر الوحدة من الـ URL
+
+        $fileName = 'maintenance_tasks_' . date('Y-m-d') . '.xlsx';
+        
+        return Excel::download(new MaintenanceTasksExport($unitId), $fileName);
+    }
     /**
      * تخزين مهمة الصيانة الجديدة في قاعدة البيانات.
      */

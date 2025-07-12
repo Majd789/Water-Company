@@ -86,12 +86,14 @@
                     {{-- قسم جدول البيانات --}}
                     <div class="card card-primary card-outline">
                         <div class="card-header">
-                            <h3 class="card-title">
+                          <h3 class="card-title">
                                 <i class="fas fa-tools mr-1"></i>
-                                عرض مهام الصيانة <span
-                                    class="badge badge-primary ml-2">{{ $maintenanceTasks->total() }}</span>
+                                عرض مهام الصيانة <span class="badge badge-primary ml-2">{{ $maintenanceTasks->count() }}</span>
                             </h3>
                             <div class="card-tools d-flex align-items-center">
+                                <a href="{{ route('dashboard.maintenance_tasks.export', request()->query()) }}" class="btn btn-success ml-2">
+                                 <i class="fas fa-file-excel"></i> تصدير (البيانات المعروضة)
+                                  </a>
                                 {{-- يمكن إضافة زر تصدير هنا بنفس الطريقة --}}
                                 @can('maintenance_tasks.create')
                                     <a href="{{ route('dashboard.maintenance_tasks.create') }}" class="btn btn-primary">
@@ -175,10 +177,7 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="mt-3">
-                                {{-- عرض روابط الـ Pagination --}}
-                                {{ $maintenanceTasks->links() }}
-                            </div>
+                          
                         </div>
                     </div>
                 </div>
@@ -188,6 +187,7 @@
 @endsection
 
 @push('scripts')
+    
     {{-- JS Libraries --}}
     <script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>
@@ -206,47 +206,59 @@
 
     <script>
         $(function() {
+            // =================================================
+            // 1. تهيئة المكتبات والإضافات
+            // =================================================
+
             // تهيئة Select2
             $('.select2').select2({
-                theme: 'bootstrap4'
-            });
-
-            // إرسال فورم الفلترة تلقائياً عند تغيير الوحدة
-            $('#unitFilterSelect').on('change', function() {
-                $('#unitFilterForm').submit();
+                theme: 'bootstrap4',
+                dir: 'rtl'
             });
 
             // تهيئة DataTable
-            $("#maintenanceTasksTable").DataTable({
+            var maintenanceTable = $("#maintenanceTasksTable").DataTable({
                 "responsive": true,
-                "lengthChange": false, // تعطيل تغيير عدد الصفوف
+                "lengthChange": true,
                 "autoWidth": false,
-                "paging": false, // تعطيل الترقيم من DataTable لأننا نستخدم ترقيم Laravel
+                "paging": true,
                 "searching": true,
                 "ordering": true,
-                "info": false, // تعطيل معلومات الجدول
+                "info": true,
                 "language": {
                     "url": "{{ asset('datatable-lang/ar.json') }}",
                 },
                 "buttons": [{
-                        extend: 'copy',
-                        text: '<i class="fas fa-copy"></i> نسخ'
-                    },
-                    {
-                        extend: 'excel',
-                        text: '<i class="fas fa-file-excel"></i> إكسيل'
-                    },
-                    {
-                        extend: 'print',
-                        text: '<i class="fas fa-print"></i> طباعة'
-                    },
-                    {
-                        extend: 'colvis',
-                        text: 'إظهار/إخفاء الأعمدة'
+                        extend: 'copy', text: '<i class="fas fa-copy"></i> نسخ',
+                        exportOptions: { columns: ':visible:not(.no-export)' }
+                    }, {
+                        extend: 'excel', text: '<i class="fas fa-file-excel"></i> إكسيل',
+                        exportOptions: { columns: ':visible:not(.no-export)' }
+                    }, {
+                        extend: 'print', text: '<i class="fas fa-print"></i> طباعة',
+                        exportOptions: { columns: ':visible:not(.no-export)' }
+                    }, {
+                        extend: 'colvis', text: 'إظهار/إخفاء الأعمدة',
+                        columns: ':not(.no-export)'
                     }
                 ]
             }).buttons().container().appendTo('#maintenanceTasksTable_wrapper .col-md-6:eq(0)');
 
+
+            // =================================================
+            // 2. ربط الأحداث (Event Listeners)
+            // =================================================
+
+            // إرسال فورم الفلترة عند تغيير الوحدة
+            $('#unitFilterSelect').on('change', function() {
+                $('#unitFilterForm').submit();
+            });
+
+            // تحديث عداد النتائج عند البحث أو الترتيب في DataTable
+            maintenanceTable.on('draw.dt', function() {
+                var filteredRowCount = maintenanceTable.rows({ search: 'applied' }).count();
+                $('.card-header .badge').text(filteredRowCount);
+            });
 
             // تفعيل SweetAlert2 لتأكيد الحذف
             $('.delete-form').on('submit', function(e) {
@@ -265,7 +277,7 @@
                     if (result.isConfirmed) {
                         form.submit();
                     }
-                })
+                });
             });
         });
     </script>
