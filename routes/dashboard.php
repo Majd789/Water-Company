@@ -7,12 +7,13 @@ use App\Http\Controllers\Dashboard\{
     DashboardController, UserController, RoleController, UnitController, TownController, StationController,
     WellController, GenerationGroupController, HorizontalPumpController, GroundTankController,
     ElevatedTankController, FilterController, InfiltratorController, InstitutionPropertyController,
-    MaintenanceController, ManholeController, NoteController, PrivateWellController, PumpingSectionController,
+     ManholeController, NoteController, PrivateWellController, PumpingSectionController,
     SolarEnergyController, StationMapController, StationReportController, WaterWell2Controller,
     WeeklyReportController, ActivityLogController, DataExportController, DailyStationReportController,
     DieselTankController, DisinfectionPumpController, ElectricityHourController,
-    ElectricityTransformerController, VannaChatController
+    ElectricityTransformerController, MaintenanceTaskController
 };
+
 
 /*
 |--------------------------------------------------------------------------
@@ -51,13 +52,13 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::resource('manholes', ManholeController::class);
     Route::resource('solar_energy', SolarEnergyController::class); // تم الإبقاء على الاسم كما هو
     Route::resource('diesel_tanks', DieselTankController::class);
-    Route::resource('institution_properties', InstitutionPropertyController::class); // تم الإبقاء على الاسم
     Route::resource('disinfection_pumps', DisinfectionPumpController::class);
     Route::resource('station_reports', StationReportController::class);
     Route::resource('weekly_reports', WeeklyReportController::class);
     Route::resource('daily-station-reports', DailyStationReportController::class);
     Route::resource('waterwells2', WaterWell2Controller::class);
     Route::resource('notes', NoteController::class);
+    Route::resource('maintenance_tasks', MaintenanceTaskController::class);
     Route::get('waterwells2/calculate/{wellName}/{stationCode}', [WaterWell2Controller::class, 'calculateWellData'])->name('waterwells2.calculate');
     Route::delete('waterwells2/destroy', [WaterWell2Controller::class, 'destroy'])->name('waterwells2.destroy');
     Route::get('/station-reports', [StationReportController::class, 'index'])->name('station_reports.index');

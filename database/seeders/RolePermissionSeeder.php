@@ -47,8 +47,6 @@ class RolePermissionSeeder extends Seeder
             'privet_wells' => 'الآبار الخاصة',
             'notes' => 'الملاحظات',
             'manholes' => 'الريغارات',
-            'maintenances' => 'الصيانات',
-            'maintenance_types' => 'أنواع الصيانة',
             'institution_properties' => 'ممتلكات المؤسسة',
             'infiltrators' => 'المتسربين',
             'horizontal_pumps' => 'المضخات الأفقية',
@@ -62,7 +60,7 @@ class RolePermissionSeeder extends Seeder
             'disinfection_pumps' => 'مضخات التعقيم',
             'diesel_tanks' => 'خزانات المازوت',
             'daily_station_reports' => 'تقارير المحطات اليومية',
-            'activities_logs' => 'سجلات النشاطات',
+            'maintenance_tasks' => 'مهام الصيانة',
         ];
 
         $permissions = [];
