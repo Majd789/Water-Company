@@ -1,4 +1,25 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    @php
+        // 1. تحديد الصورة الافتراضية
+        $profileImage = asset('assets/img/favicon.png');
+
+        // 2. التحقق من دور المستخدم وتغيير الصورة بناءً عليه
+        if (!auth()->user()->roles->isEmpty()) {
+            $roleName = auth()->user()->roles->first()->display_name;
+
+            switch ($roleName) {
+                case 'مشرف وحدة':
+                    $profileImage = asset('assets/img/AdminUnit.png');
+                    break;
+                case 'القسم التقني':
+                    $profileImage = asset('assets/img/it.png');
+                    break;
+                case 'قسم الصيانة':
+                    $profileImage = asset('assets/img/maintenance_tasks.jpg');
+                    break;
+            }
+        }
+    @endphp
     <a href="{{ route('dashboard.home') }}" class="brand-link">
         <img src="{{ asset('assets/img/favicon.png') }}" alt="Water Db Logo" class="brand-image img-circle elevation-3"
             style="opacity: .8">
@@ -9,7 +30,7 @@
         @auth
             <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                 <div class="image">
-                    <img src="{{ asset('assets/img/favicon.png') }}" class="img-circle elevation-2" alt="User Image">
+                    <img src="{{ $profileImage }}" class="img-circle elevation-2" alt="User Image">
                 </div>
                 <div class="info">
                     <a href="#" class="d-block">{{ auth()->user()->name }}</a>
