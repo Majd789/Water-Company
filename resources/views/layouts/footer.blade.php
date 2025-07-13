@@ -1,7 +1,7 @@
- <footer class="main-footer">
-     <strong>Copyright &copy; 2014-2019 <a href="http://adminlte.io">AdminLTE.io</a>.</strong>
-     All rights reserved.
-     <div class="float-right d-none d-sm-inline-block">
-         <b>Version</b> 3.0.0-rc.1
-     </div>
- </footer>
+<footer class="main-footer">
+    <strong>حقوق النشر © <?php echo date('Y'); ?> <a href="#">الفريق التقني لمؤسسة مياه
+            إدلب</a>.
+        <div class="float-right d-none d-sm-inline-block">
+            <b>الإصدار</b> 1.0.0
+        </div>
+</footer>

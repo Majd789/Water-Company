@@ -7,12 +7,13 @@ use App\Http\Controllers\Dashboard\{
     DashboardController, UserController, RoleController, UnitController, TownController, StationController,
     WellController, GenerationGroupController, HorizontalPumpController, GroundTankController,
     ElevatedTankController, FilterController, InfiltratorController, InstitutionPropertyController,
-    MaintenanceController, ManholeController, NoteController, PrivateWellController, PumpingSectionController,
+     ManholeController, NoteController, PrivateWellController, PumpingSectionController,
     SolarEnergyController, StationMapController, StationReportController, WaterWell2Controller,
     WeeklyReportController, ActivityLogController, DataExportController, DailyStationReportController,
     DieselTankController, DisinfectionPumpController, ElectricityHourController,
-    ElectricityTransformerController, VannaChatController
+    ElectricityTransformerController, MaintenanceTaskController
 };
+
 
 /*
 |--------------------------------------------------------------------------
@@ -23,8 +24,6 @@ use App\Http\Controllers\Dashboard\{
 
 // --- 1. المسارات العامة (لا تتطلب تسجيل الدخول) ---
 Route::get('/', fn() => redirect()->route('login'));
-Route::get('/vanna-chat', [VannaChatController::class, 'index'])->name('vanna.chat.index');
-Route::post('/vanna-chat/stream', [VannaChatController::class, 'stream'])->name('vanna.chat.stream');
 Route::get('/latest-news', [WeeklyReportController::class, 'news'])->name('weekly_reports.news');
 
 // --- 2. مسارات لوحة التحكم الرئيسية (محمية وتستخدم البادئة /dashboard) ---
@@ -53,14 +52,13 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::resource('manholes', ManholeController::class);
     Route::resource('solar_energy', SolarEnergyController::class); // تم الإبقاء على الاسم كما هو
     Route::resource('diesel_tanks', DieselTankController::class);
-    Route::resource('institution_properties', InstitutionPropertyController::class); // تم الإبقاء على الاسم
     Route::resource('disinfection_pumps', DisinfectionPumpController::class);
-    Route::resource('maintenances', MaintenanceController::class);
     Route::resource('station_reports', StationReportController::class);
     Route::resource('weekly_reports', WeeklyReportController::class);
     Route::resource('daily-station-reports', DailyStationReportController::class);
     Route::resource('waterwells2', WaterWell2Controller::class);
     Route::resource('notes', NoteController::class);
+    Route::resource('maintenance_tasks', MaintenanceTaskController::class);
     Route::get('waterwells2/calculate/{wellName}/{stationCode}', [WaterWell2Controller::class, 'calculateWellData'])->name('waterwells2.calculate');
     Route::delete('waterwells2/destroy', [WaterWell2Controller::class, 'destroy'])->name('waterwells2.destroy');
     Route::get('/station-reports', [StationReportController::class, 'index'])->name('station_reports.index');
@@ -92,8 +90,9 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::get('/export/solar-energies', [SolarEnergyController::class, 'export'])->name('solar-energies.export');
     Route::get('/export/diesel-tanks', [DieselTankController::class, 'export'])->name('diesel-tanks.export');
     Route::get('/weekly-reports/export', [WeeklyReportController::class, 'export'])->name('weekly_reports.export');
-      Route::get('/export/maintenances', [MaintenanceController::class, 'export'])->name('maintenances.export');
     Route::get('/export/all-data', [DataExportController::class, 'exportAll'])->name('export.all');
+    // داخل مجموعة الروابط الخاصة بـ dashboard
+    Route::get('maintenance_tasks.export', [MaintenanceTaskController::class, 'export'])->name('maintenance_tasks.export');
     Route::get('/station-reports/export', [StationReportController::class, 'export'])->name('station_reports.export');
     // === مسارات الاستيراد (Import) ===
     Route::post('/units/import', [UnitController::class, 'import'])->name('units.import');
@@ -114,10 +113,10 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::post('manholes/import', [ManholeController::class, 'import'])->name('manholes.import');
     Route::post('solar_energy/import', [SolarEnergyController::class, 'import'])->name('import.solar_energies');
     Route::post('diesel_tanks/import', [DieselTankController::class, 'import'])->name('import.diesel_tanks');
-    Route::post('maintenances/import', [MaintenanceController::class, 'import'])->name('import.maintenances');
     Route::get('waterwells2/import', [WaterWell2Controller::class, 'importForm'])->name('waterwells2.importForm');
     Route::post('waterwells2/import', [WaterWell2Controller::class, 'import'])->name('waterwells2.import'); 
     Route::post('/station-reports/import', [StationReportController::class, 'import'])->name('station_reports.import');
+    Route::post('/maintenance_tasks/import', [MaintenanceTaskController::class, 'import'])->name('maintenance_tasks.import');
 });
 
 // --- 3. مسارات النظام (ملف التعريف، المصادقة) ---
