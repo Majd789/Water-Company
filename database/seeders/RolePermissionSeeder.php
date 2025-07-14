@@ -41,6 +41,7 @@ class RolePermissionSeeder extends Seeder
             'units' => 'الوحدات',
             'towns' => 'البلدات',
             'stations' => 'المحطات',
+            'wells' => 'الآبار',
             'station_reports' => 'تقارير المحطات',
             'solar_energies' => 'الطاقة الشمسية',
             'pumping_sectors' => 'قطاعات الضخ',

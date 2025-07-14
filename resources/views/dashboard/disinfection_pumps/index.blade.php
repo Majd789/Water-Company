@@ -147,7 +147,7 @@
                                                 <td>{{ $pump->operating_pressure }}</td>
                                                 <td class="text-center">
                                                     <div class="btn-group">
-                                                        <a href="{{ route('dashboard.dashboard.dashboard.dashboard.dashboard.disinfection_pumps.show', $pump->id) }}"
+                                                        <a href="{{ route('dashboard.disinfection_pumps.show', $pump->id) }}"
                                                             class="btn btn-sm btn-outline-info" title="عرض">
                                                             <i class="fas fa-eye"></i>
 

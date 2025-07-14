@@ -70,36 +70,36 @@
                 @endif
 
                 <!-- قسم استيراد الانفلترات (بنفس التصميم الأخضر) -->
-              
-                    <div class="card card-success collapsed-card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3 class="card-title mb-0">
-                                <i class="fas fa-file-excel ml-1"></i>
-                                استيراد من ملف Excel
-                            </h3>
-                            <div class="card-tools">
-                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                    <i class="fas fa-plus "></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <form action="{{ route('infiltrators.import') }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                <p class="text-muted">يمكنك استيراد قائمة بالانفلترات دفعة واحدة من ملف إكسل.</p>
-                                <div class="form-group">
-                                    <div class="custom-file">
-                                        <input type="file" class="custom-file-input" id="importFile" name="file"
-                                            required>
-                                        <label class="custom-file-label" for="importFile">اختر ملف Excel</label>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-success"><i class="fas fa-upload ml-1"></i> بدء
-                                    الاستيراد</button>
-                            </form>
+
+                <div class="card card-success collapsed-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-file-excel ml-1"></i>
+                            استيراد من ملف Excel
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-plus "></i>
+                            </button>
                         </div>
                     </div>
-              
+                    <div class="card-body">
+                        <form action="{{ route('dashboard.infiltrators.import') }}" method="POST"
+                            enctype="multipart/form-data">
+                            @csrf
+                            <p class="text-muted">يمكنك استيراد قائمة بالانفلترات دفعة واحدة من ملف إكسل.</p>
+                            <div class="form-group">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="importFile" name="file" required>
+                                    <label class="custom-file-label" for="importFile">اختر ملف Excel</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success"><i class="fas fa-upload ml-1"></i> بدء
+                                الاستيراد</button>
+                        </form>
+                    </div>
+                </div>
+
 
                 <!-- الفورم الرئيسي لإضافة انفلتر جديد -->
                 <div class="card card-primary">
@@ -112,7 +112,7 @@
                     <!-- /.card-header -->
 
                     <!-- بدء الفورم -->
-                    <form action="{{ route('infiltrators.store') }}" method="POST" novalidate>
+                    <form action="{{ route('dashboard.infiltrators.store') }}" method="POST" novalidate>
                         @csrf
                         <div class="card-body">
 
@@ -254,7 +254,7 @@
                                 <i class="fas fa-save ml-1"></i>
                                 حفظ الانفلتر
                             </button>
-                            <a href="{{ route('infiltrators.index') }}" class="btn btn-secondary btn-lg">
+                            <a href="{{ route('dashboard.infiltrators.index') }}" class="btn btn-secondary btn-lg">
                                 <i class="fas fa-times ml-1"></i>
                                 إلغاء
                             </a>
