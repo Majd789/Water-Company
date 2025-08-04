@@ -30,4 +30,6 @@ public function governorate()
         return $this->hasManyThrough(Station::class, Town::class);
     }
 
+    public function projectActivities() { return $this->hasMany(ProjectActivity::class); }
+
 }

@@ -62,6 +62,8 @@ class RolePermissionSeeder extends Seeder
             'diesel_tanks' => 'خزانات المازوت',
             'daily_station_reports' => 'تقارير المحطات اليومية',
             'maintenance_tasks' => 'مهام الصيانة',
+            'projects' => 'المشاريع',
+            'project_activities' => 'أنشطة المشاريع',
         ];
 
         $permissions = [];
