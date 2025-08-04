@@ -73,4 +73,6 @@ class Station extends Model
     {
     return $this->hasMany(SolarEnergy::class);
     }
+    public function projectActivities() { return $this->hasMany(ProjectActivity::class); }
+
 }

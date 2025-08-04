@@ -11,7 +11,7 @@ use App\Http\Controllers\Dashboard\{
     SolarEnergyController, StationMapController, StationReportController, WaterWell2Controller,
     WeeklyReportController, ActivityLogController, DataExportController, DailyStationReportController,
     DieselTankController, DisinfectionPumpController, ElectricityHourController,
-    ElectricityTransformerController, MaintenanceTaskController
+    ElectricityTransformerController, MaintenanceTaskController,ProjectController
 };
 
 
@@ -54,6 +54,7 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::resource('diesel_tanks', DieselTankController::class);
     Route::resource('disinfection_pumps', DisinfectionPumpController::class);
     Route::resource('station_reports', StationReportController::class);
+     Route::resource('projects', ProjectController::class);
     Route::resource('weekly_reports', WeeklyReportController::class);
     Route::resource('daily-station-reports', DailyStationReportController::class);
     Route::resource('waterwells2', WaterWell2Controller::class);
