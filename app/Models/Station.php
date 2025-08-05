@@ -73,4 +73,46 @@ class Station extends Model
     {
     return $this->hasMany(SolarEnergy::class);
     }
+    public function filters() //المرشحات
+    {
+        return $this->hasMany(Filter::class);
+    }
+    public function manholes() //المحطات المرشحة
+    {
+        return $this->hasMany(Manhole::class);
+    }
+    public function stationReports() //التقارير
+    {
+        return $this->hasMany(StationReport::class);
+    }
+    public function units() //الوحدات
+    {
+        return $this->hasMany(Unit::class);
+    }
+    public function Infiltrator() //المحولات رافع الجهد
+    {
+        return $this->hasMany(Infiltrator::class);
+    }
+    public function DieselTank() //الخزانات الوقود
+    {
+        return $this->hasMany(DieselTank::class);
+    }
+
+    public function DisinfectionPump() // مضخات التعقيم
+    {
+        return $this->hasMany(DisinfectionPump::class);
+    }
+    public function ElectricityTransformer() //محولات الكهرباء
+    {
+        return $this->hasMany(ElectricityTransformer::class);
+    }
+    public function ElevatedTank() // العاليةى الخزانات المياه
+    {
+        return $this->hasMany(ElectricityHour::class);
+    }
+
+    public function ElectricityHour() // ساعات الكهرباء
+    {
+        return $this->hasMany(ElectricityHour::class);
+    }
 }
