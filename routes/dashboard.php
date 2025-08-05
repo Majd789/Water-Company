@@ -38,6 +38,7 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::resource('units', UnitController::class);
     Route::resource('towns', TownController::class);
     Route::resource('stations', StationController::class);
+    Route::get('stations/global-information/{id}', [StationController::class, 'getStationGlobalInformation'])->name('stations.global-information');
     Route::resource('wells', WellController::class);
     Route::resource('generation-groups', GenerationGroupController::class);
     Route::resource('horizontal-pumps', HorizontalPumpController::class);
@@ -114,17 +115,17 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::post('solar_energy/import', [SolarEnergyController::class, 'import'])->name('import.solar_energies');
     Route::post('diesel_tanks/import', [DieselTankController::class, 'import'])->name('import.diesel_tanks');
     Route::get('waterwells2/import', [WaterWell2Controller::class, 'importForm'])->name('waterwells2.importForm');
-    Route::post('waterwells2/import', [WaterWell2Controller::class, 'import'])->name('waterwells2.import'); 
+    Route::post('waterwells2/import', [WaterWell2Controller::class, 'import'])->name('waterwells2.import');
     Route::post('/station-reports/import', [StationReportController::class, 'import'])->name('station_reports.import');
     Route::post('/maintenance_tasks/import', [MaintenanceTaskController::class, 'import'])->name('maintenance_tasks.import');
 });
 
-// --- 3. مسارات النظام (ملف التعريف، المصادقة) ---
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
-});
+// // --- 3. مسارات النظام (ملف التعريف، المصادقة) ---
+// Route::middleware('auth')->group(function () {
+//     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+//     Route::patch('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+//     Route::delete('/profile', [App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
+// });
 
 // مسار عرض الملفات من storage بشكل آمن
 Route::get('/storage/{folder}/{filename}', function ($folder, $filename) {
