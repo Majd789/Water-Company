@@ -98,6 +98,7 @@
                                                 <td>{{ $station->town->town_name ?? 'N/A' }}</td>
                                                 <td class="text-center">
                                                     <div class="btn-group">
+
                                                         <a href="{{ route('dashboard.stations.show', $station->id) }}"
                                                             class="btn btn-sm btn-outline-info" title="عرض">
                                                             <i class="fas fa-eye"></i>
@@ -107,10 +108,7 @@
                                                             class="btn btn-sm btn-outline-warning" title="تعديل">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
-                                                        <a href="{{ route('dashboard.stations.exportCard', ['id' => $station->id]) }}"
-                                                            class="btn btn-success">
-                                                            <i class="fas fa-file-excel"></i> تصدير بطاقة المحطة (Excel)
-                                                        </a>
+
 
                                                         <form
                                                             action="{{ route('dashboard.stations.destroy', $station->id) }}"
@@ -124,6 +122,10 @@
                                                         </form>
 
                                                     </div>
+                                                    <a href="{{ route('dashboard.stations.exportCard', ['id' => $station->id]) }}"
+                                                        class="btn btn-success">
+                                                        <i class="fas fa-file-excel"></i>
+                                                    </a>
                                                 </td>
                                             </tr>
                                         @empty
