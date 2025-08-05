@@ -21,4 +21,7 @@ class Town extends Model
     {
         return $this->hasMany(Station::class);
     }
+
+    public function projectActivities() { return $this->hasMany(ProjectActivity::class); }
+
 }
