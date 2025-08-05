@@ -39,7 +39,7 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::resource('towns', TownController::class);
     Route::resource('stations', StationController::class);
     Route::get('stations/global-information/{id}', [StationController::class, 'getStationGlobalInformation'])->name('stations.global-information');
-    Route::resource('wells', WellController::class);
+    Route::get('/stations/{id}/export-card', [StationController::class, 'exportStationCard'])->name('stations.exportCard');    Route::resource('wells', WellController::class);
     Route::resource('generation-groups', GenerationGroupController::class);
     Route::resource('horizontal-pumps', HorizontalPumpController::class);
     Route::resource('ground-tanks', GroundTankController::class);
