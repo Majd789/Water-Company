@@ -9,7 +9,7 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup; // 👈 قم باستيراد هذه الفئة
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 
 class StationCardExport implements FromView, WithTitle, ShouldAutoSize, WithEvents
 {
@@ -33,7 +33,7 @@ class StationCardExport implements FromView, WithTitle, ShouldAutoSize, WithEven
     }
 
     /**
-     * التحكم في إعدادات الصفحة بعد إنشائها
+     * التحكم في إعدادات الصفحة والتنسيقات بعد إنشائها
      */
     public function registerEvents(): array
     {
@@ -42,25 +42,34 @@ class StationCardExport implements FromView, WithTitle, ShouldAutoSize, WithEven
                 /** @var \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet */
                 $sheet = $event->sheet->getDelegate();
 
-                // 1. ضبط اتجاه الصفحة وحجم الورق (أفقي هو الأفضل للجداول العريضة)
+                // === الجزء الأصلي لإعدادات الطباعة ===
+
+                // 1. ضبط اتجاه الصفحة وحجم الورق
                 $pageSetup = $sheet->getPageSetup();
                 $pageSetup->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
                 $pageSetup->setPaperSize(PageSetup::PAPERSIZE_A4);
+                $pageSetup->setFitToWidth(1);
+                $pageSetup->setFitToHeight(0);
 
-                // 2. تطبيق خيار "ملاءمة لصفحة واحدة عرضاً" (Fit to 1 page wide)
-                //    و "ارتفاع تلقائي" (Height auto)
-                $pageSetup->setFitToWidth(1); // هذا هو السطر الأهم: يجعل العرض صفحة واحدة
-                $pageSetup->setFitToHeight(0); // تعيين الارتفاع إلى 0 يعني "تلقائي" أو غير محدود
-
-                // 3. ضبط هوامش الصفحة لتبدو أفضل عند الطباعة
+                // 2. ضبط هوامش الصفحة
                 $pageMargins = $sheet->getPageMargins();
                 $pageMargins->setTop(0.75);
                 $pageMargins->setRight(0.4);
                 $pageMargins->setLeft(0.4);
                 $pageMargins->setBottom(0.75);
 
-                // 4. جعل اتجاه ورقة العمل من اليمين إلى اليسار
+                // 3. جعل اتجاه ورقة العمل من اليمين إلى اليسار
                 $sheet->setRightToLeft(true);
+
+                // === الجزء الجديد المطلوب ===
+
+                // 4. ✅ ضبط ارتفاع الصف الافتراضي إلى 30
+                $sheet->getDefaultRowDimension()->setRowHeight(35);
+
+                // 5. ✅ ضبط حجم الخط لجميع الخلايا إلى 16
+                // نحدد نطاق الخلايا من A1 وحتى آخر خلية تحتوي على بيانات
+                $cellRange = 'A1:' . $sheet->getHighestColumn() . $sheet->getHighestRow();
+                $sheet->getStyle($cellRange)->getFont()->setSize(16);
             },
         ];
     }
