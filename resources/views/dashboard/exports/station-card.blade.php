@@ -75,6 +75,7 @@
                     ['label' => 'ماركة ونموذج المضخة', 'key' => 'pump_brand_model'],
                     ['label' => 'مصدر الطاقة', 'key' => 'energy_source'],
                     ['label' => 'عنوان البئر', 'key' => 'well_address'],
+                    ['label' => 'موقع البئر', 'key' => 'well_location'],
                 ],
             ])
             @include('dashboard.exports._section_template', [

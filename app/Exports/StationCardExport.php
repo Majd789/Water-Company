@@ -6,12 +6,13 @@ use App\Models\Station;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+// ❗ قمنا بإزالة ShouldAutoSize
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class StationCardExport implements FromView, WithTitle, ShouldAutoSize, WithEvents
+class StationCardExport implements FromView, WithTitle, WithEvents // ❗ لاحظ إزالة ShouldAutoSize
 {
     protected $station;
 
@@ -22,6 +23,7 @@ class StationCardExport implements FromView, WithTitle, ShouldAutoSize, WithEven
 
     public function view(): View
     {
+        // تأكد من أن المسار صحيح. بناءً على الكود، يجب أن يكون هكذا:
         return view('dashboard.exports.station-card', [
             'station' => $this->station
         ]);
@@ -32,44 +34,52 @@ class StationCardExport implements FromView, WithTitle, ShouldAutoSize, WithEven
         return 'بطاقة محطة - ' . $this->station->station_code;
     }
 
-    /**
-     * التحكم في إعدادات الصفحة والتنسيقات بعد إنشائها
-     */
     public function registerEvents(): array
     {
         return [
             AfterSheet::class => function(AfterSheet $event) {
-                /** @var \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet */
                 $sheet = $event->sheet->getDelegate();
 
-                // === الجزء الأصلي لإعدادات الطباعة ===
-
-                // 1. ضبط اتجاه الصفحة وحجم الورق
+                // ... إعدادات الطباعة والهوامش واتجاه الصفحة (تبقى كما هي)
                 $pageSetup = $sheet->getPageSetup();
                 $pageSetup->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
                 $pageSetup->setPaperSize(PageSetup::PAPERSIZE_A4);
                 $pageSetup->setFitToWidth(1);
                 $pageSetup->setFitToHeight(0);
 
-                // 2. ضبط هوامش الصفحة
                 $pageMargins = $sheet->getPageMargins();
                 $pageMargins->setTop(0.75);
                 $pageMargins->setRight(0.4);
                 $pageMargins->setLeft(0.4);
                 $pageMargins->setBottom(0.75);
 
-                // 3. جعل اتجاه ورقة العمل من اليمين إلى اليسار
                 $sheet->setRightToLeft(true);
-
-                // === الجزء الجديد المطلوب ===
-
-                // 4. ✅ ضبط ارتفاع الصف الافتراضي إلى 30
+                
                 $sheet->getDefaultRowDimension()->setRowHeight(35);
 
-                // 5. ✅ ضبط حجم الخط لجميع الخلايا إلى 16
-                // نحدد نطاق الخلايا من A1 وحتى آخر خلية تحتوي على بيانات
+                // ✅ الجزء الجديد: التحكم اليدوي بعرض الأعمدة
+                // العمود الأول (للمواصفات) نجعله عريضًا
+                $sheet->getColumnDimension('A')->setWidth(45);
+                // باقي الأعمدة (للبيانات) نجعلها بعرض معقول
+                // نفترض أن لديك حتى 7 آبار/عناصر كحد أقصى (حتى العمود H)
+                for ($col = 'B'; $col <= 'I'; $col++) {
+                    $sheet->getColumnDimension($col)->setWidth(25);
+                }
+
+                // تطبيق التنسيقات على جميع الخلايا (التوسيط وحجم الخط والتفاف النص)
                 $cellRange = 'A1:' . $sheet->getHighestColumn() . $sheet->getHighestRow();
-                $sheet->getStyle($cellRange)->getFont()->setSize(16);
+                $styleArray = [
+                    'font' => [
+                        'size' => 14, // يمكنك تعديل الحجم حسب الرغبة
+                    ],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                        'wrapText' => true, // هذا السطر ضروري ليعمل فاصل الأسطر \n
+                    ],
+                ];
+
+                $sheet->getStyle($cellRange)->applyFromArray($styleArray);
             },
         ];
     }

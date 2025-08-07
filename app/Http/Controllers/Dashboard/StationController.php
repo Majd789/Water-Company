@@ -386,7 +386,7 @@ class StationController extends Controller
         ])->findOrFail($id);
         
         // اسم ملف التحميل الديناميكي
-        $fileName = 'station-card-' . $station->station_code . '.xlsx';
+        $fileName = 'station-card-' . $station->station_name . '.xlsx';
         
         // الخطوة 2: تمرير الكائن '$station' إلى فئة التصدير
         return Excel::download(new StationCardExport($station), $fileName);
