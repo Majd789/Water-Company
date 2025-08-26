@@ -206,7 +206,7 @@
                         'key' => 'is_station_transformer',
                         'type' => 'boolean',
                     ],
-                    ['label' => 'وصف المحولة', 'key' => 'talk_about_station_transformer'],
+                    ['label' => 'جاهزية المحولة', 'key' => 'talk_about_station_transformer'],
                     ['label' => 'هل الاستطاعة كافية', 'key' => 'is_capacity_sufficient', 'type' => 'boolean'],
                     ['label' => 'كم الاستطاعة المحتاجة', 'key' => 'how_mush_capacity_need'],
                 ],

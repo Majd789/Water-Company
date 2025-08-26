@@ -6,13 +6,12 @@ use App\Models\Station;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithTitle;
-// ❗ قمنا بإزالة ShouldAutoSize
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class StationCardExport implements FromView, WithTitle, WithEvents // ❗ لاحظ إزالة ShouldAutoSize
+class StationCardExport implements FromView, WithTitle, WithEvents
 {
     protected $station;
 
@@ -23,7 +22,6 @@ class StationCardExport implements FromView, WithTitle, WithEvents // ❗ لاح
 
     public function view(): View
     {
-        // تأكد من أن المسار صحيح. بناءً على الكود، يجب أن يكون هكذا:
         return view('dashboard.exports.station-card', [
             'station' => $this->station
         ]);
@@ -40,7 +38,7 @@ class StationCardExport implements FromView, WithTitle, WithEvents // ❗ لاح
             AfterSheet::class => function(AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                // ... إعدادات الطباعة والهوامش واتجاه الصفحة (تبقى كما هي)
+                // إعدادات الطباعة والهوامش واتجاه الصفحة (تبقى كما هي)
                 $pageSetup = $sheet->getPageSetup();
                 $pageSetup->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
                 $pageSetup->setPaperSize(PageSetup::PAPERSIZE_A4);
@@ -55,27 +53,32 @@ class StationCardExport implements FromView, WithTitle, WithEvents // ❗ لاح
 
                 $sheet->setRightToLeft(true);
                 
-                $sheet->getDefaultRowDimension()->setRowHeight(35);
+                // --- الجزء الذي تم تعديله ---
+                // الحصول على أعلى صف يحتوي على بيانات
+                $highestRow = $sheet->getHighestRow();
 
-                // ✅ الجزء الجديد: التحكم اليدوي بعرض الأعمدة
-                // العمود الأول (للمواصفات) نجعله عريضًا
+                // المرور على جميع الصفوف من 1 إلى آخر صف وتعيين الارتفاع
+                for ($row = 1; $row <= $highestRow; $row++) {
+                    $sheet->getRowDimension($row)->setRowHeight(35);
+                }
+                // --- نهاية الجزء المعدل ---
+
+                // التحكم اليدوي بعرض الأعمدة
                 $sheet->getColumnDimension('A')->setWidth(45);
-                // باقي الأعمدة (للبيانات) نجعلها بعرض معقول
-                // نفترض أن لديك حتى 7 آبار/عناصر كحد أقصى (حتى العمود H)
                 for ($col = 'B'; $col <= 'I'; $col++) {
                     $sheet->getColumnDimension($col)->setWidth(25);
                 }
 
                 // تطبيق التنسيقات على جميع الخلايا (التوسيط وحجم الخط والتفاف النص)
-                $cellRange = 'A1:' . $sheet->getHighestColumn() . $sheet->getHighestRow();
+                $cellRange = 'A1:' . $sheet->getHighestColumn() . $highestRow;
                 $styleArray = [
                     'font' => [
-                        'size' => 14, // يمكنك تعديل الحجم حسب الرغبة
+                        'size' => 14,
                     ],
                     'alignment' => [
                         'horizontal' => Alignment::HORIZONTAL_CENTER,
                         'vertical' => Alignment::VERTICAL_CENTER,
-                        'wrapText' => true, // هذا السطر ضروري ليعمل فاصل الأسطر \n
+                        'wrapText' => true,
                     ],
                 ];
 

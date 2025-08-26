@@ -8,6 +8,7 @@ use App\Imports\TownsImport;
 use Illuminate\Http\Request;
 use App\Models\Town;
 use App\Models\Unit;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class TownController extends Controller
@@ -24,41 +25,26 @@ class TownController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+ public function index(Request $request)
     {
-        $units = Unit::all();  // استرجاع جميع الوحدات
-        $towns = Town::query();
+        $query = Town::with('unit');
 
-        // التصفية حسب وحدة المستخدم المتصل (تحديد الوحدة المرتبطة بالمستخدم)
-        $user = auth()->user();  // الحصول على المستخدم المتصل
+        // التصفية حسب وحدة المستخدم
+        $user = auth()->user();
         if ($user->unit_id) {
-            // إذا كان للمستخدم وحدة مرتبطة به
-            $towns->where('unit_id', $user->unit_id);
+            $query->where('unit_id', $user->unit_id);
         }
 
-        // التحقق إذا كان يوجد قيمة في الطلب للبحث
-        if ($request->has('search') && $request->search != '') {
-            $searchTerm = $request->search;
-
-            // البحث في اسم البلدة أو كود البلدة أو اسم الوحدة
-            $towns->where('town_name', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('town_code', 'like', '%' . $searchTerm . '%')
-                  ->orWhereHas('unit', function ($q) use ($searchTerm) {
-                      $q->where('unit_name', 'like', '%' . $searchTerm . '%');
-                  });
+        // التصفية حسب الوحدة المختارة (للمدراء)
+        if ($request->filled('unit_id')) {
+            $query->where('unit_id', $request->unit_id);
         }
 
-        // التصفية حسب الوحدة إذا تم اختيار وحدة معينة
-        if ($request->has('unit_id') && $request->unit_id != '') {
-            $towns->where('unit_id', $request->unit_id);
-        }
-
-        // استرجاع البلدات مع الوحدات، مع تحديد الصفحات
-        $towns = $towns->with('unit')->get();
+        $towns = $query->get();
+        $units = Unit::all();
 
         return view('dashboard.towns.index', compact('towns', 'units'));
     }
-
 
     public function export(Request $request)
     {
