@@ -261,23 +261,13 @@
                             </li>
                         @endcan
                     </x-sidebar-menu-section>
+
                     @php
-                        $projectManagementPermissions = ['projects.view'];
-                        $projectManagementRoutes = ['dashboard.projects.*'];
+                        $subscriberManagementPermissions = ['subscribers.view'];
+                        $subscriberManagementRoutes = ['dashboard.subscribers.*'];
                     @endphp
-                    <x-sidebar-menu-section title="دائرة المشاريع" icon="fas fa-project-diagram" :permissions="$projectManagementPermissions"
-                        :routes="$projectManagementRoutes">
-                        @can('projects.view')
-                            <li class="nav-item">
-                                <a href="{{ route('dashboard.projects.index') }}"
-                                    class="nav-link {{ Request::routeIs('dashboard.projects.*') ? 'active' : '' }}">
-                                    <i class="fas fa-folder-open nav-icon"></i>
-                                    <p>مشاريع منظمات</p>
-                                </a>
-                            </li>
-                        @endcan
-                        {{-- يمكنك إضافة روابط أخرى متعلقة بالمشاريع هنا مستقبلاً --}}
-                    </x-sidebar-menu-section>
+
+
                     <li class="nav-header">الإعدادات</li>
 
                     {{-- 4. إدارة النظام --}}

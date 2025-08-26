@@ -85,33 +85,30 @@ class Station extends Model
     {
         return $this->hasMany(StationReport::class);
     }
-    public function units() //الوحدات
-    {
-        return $this->hasMany(Unit::class);
-    }
-    public function Infiltrator() //المحولات رافع الجهد
+   
+    public function infiltrator() //المحولات رافع الجهد
     {
         return $this->hasMany(Infiltrator::class);
     }
-    public function DieselTank() //الخزانات الوقود
+    public function dieselTank() //الخزانات الوقود
     {
         return $this->hasMany(DieselTank::class);
     }
 
-    public function DisinfectionPump() // مضخات التعقيم
+    public function disinfectionPump() // مضخات التعقيم
     {
         return $this->hasMany(DisinfectionPump::class);
     }
-    public function ElectricityTransformer() //محولات الكهرباء
+    public function electricityTransformer() //محولات الكهرباء
     {
         return $this->hasMany(ElectricityTransformer::class);
     }
-    public function ElevatedTank() // العاليةى الخزانات المياه
+    public function elevatedTanks() // العاليةى الخزانات المياه
     {
-        return $this->hasMany(ElectricityHour::class);
+        return $this->hasMany(ElevatedTank::class);
     }
 
-    public function ElectricityHour() // ساعات الكهرباء
+    public function electricityHours() // ساعات الكهرباء
     {
         return $this->hasMany(ElectricityHour::class);
     }

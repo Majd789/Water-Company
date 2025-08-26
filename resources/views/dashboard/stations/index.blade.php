@@ -54,6 +54,7 @@
                                 عرض المحطات <span class="badge badge-primary ml-2">{{ $stations->count() }}</span>
                             </h3>
                             <div class="card-tools d-flex align-items-center">
+
                                 <a href="{{ route('dashboard.stations.export', request()->query()) }}"
                                     class="btn btn-success ml-2">
                                     <i class="fas fa-file-excel"></i> تصدير Excel
@@ -97,6 +98,7 @@
                                                 <td>{{ $station->town->town_name ?? 'N/A' }}</td>
                                                 <td class="text-center">
                                                     <div class="btn-group">
+
                                                         <a href="{{ route('dashboard.stations.show', $station->id) }}"
                                                             class="btn btn-sm btn-outline-info" title="عرض">
                                                             <i class="fas fa-eye"></i>
@@ -120,6 +122,10 @@
                                                         </form>
 
                                                     </div>
+                                                    <a href="{{ route('dashboard.stations.exportCard', ['id' => $station->id]) }}"
+                                                        class="btn btn-success">
+                                                        <i class="fas fa-file-excel"></i>
+                                                    </a>
                                                 </td>
                                             </tr>
                                         @empty

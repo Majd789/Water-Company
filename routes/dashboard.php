@@ -9,9 +9,10 @@ use App\Http\Controllers\Dashboard\{
     ElevatedTankController, FilterController, InfiltratorController, InstitutionPropertyController,
      ManholeController, NoteController, PrivateWellController, PumpingSectionController,
     SolarEnergyController, StationMapController, StationReportController, WaterWell2Controller,
-    WeeklyReportController, ActivityLogController, DataExportController, DailyStationReportController,
+    WeeklyReportController, ActivityLogController, BillingImportController, ComplaintController, DataExportController, DailyStationReportController,
     DieselTankController, DisinfectionPumpController, ElectricityHourController,
-    ElectricityTransformerController, MaintenanceTaskController,ProjectController
+    ElectricityTransformerController, MaintenanceTaskController, OperationalReportController, ProjectController,
+    SubscriberController
 };
 
 
@@ -30,16 +31,14 @@ Route::get('/latest-news', [WeeklyReportController::class, 'news'])->name('weekl
 Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('home');
-
-    // === الموارد الرئيسية (Resources) ===
-    // الحماية تتم داخل كل متحكم عبر __construct
+      Route::resource('complaints', ComplaintController::class);
     Route::resource('users', UserController::class);
     Route::resource('roles', RoleController::class);
     Route::resource('units', UnitController::class);
     Route::resource('towns', TownController::class);
     Route::resource('stations', StationController::class);
     Route::get('stations/global-information/{id}', [StationController::class, 'getStationGlobalInformation'])->name('stations.global-information');
-    Route::resource('wells', WellController::class);
+    Route::get('/stations/{id}/export-card', [StationController::class, 'exportStationCard'])->name('stations.exportCard');    Route::resource('wells', WellController::class);
     Route::resource('generation-groups', GenerationGroupController::class);
     Route::resource('horizontal-pumps', HorizontalPumpController::class);
     Route::resource('ground-tanks', GroundTankController::class);
@@ -55,7 +54,6 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::resource('diesel_tanks', DieselTankController::class);
     Route::resource('disinfection_pumps', DisinfectionPumpController::class);
     Route::resource('station_reports', StationReportController::class);
-     Route::resource('projects', ProjectController::class);
     Route::resource('weekly_reports', WeeklyReportController::class);
     Route::resource('daily-station-reports', DailyStationReportController::class);
     Route::resource('waterwells2', WaterWell2Controller::class);

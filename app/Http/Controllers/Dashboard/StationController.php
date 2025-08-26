@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers\Dashboard;
+
+use App\Exports\StationCardExport;
 use App\Http\Controllers\Controller;
 
 use App\Exports\StationsExport;
@@ -332,10 +334,61 @@ class StationController extends Controller
 
         return redirect()->route('dashboard.stations.index')->with('success', 'تم حذف المحطة بنجاح');
     }
-    public function getStationGlobalInformation($id)
+   public function getStationGlobalInformation($id)
     {
-        $station = Station::with('town', 'wells', 'generationGroups', 'horizontalPumps', 'groundTanks', 'elevatedTanks', 'solarEnergies', 'electricityHours', 'filters', 'pumpingSectors', 'manholes', 'units', 'Infiltrator', 'DieselTank', 'DisinfectionPump', 'ElectricityTransformer', 'ElectricityHour')->findOrFail($id);
+        $station = Station::with([
+            'town',
+            'wells',
+            'generationGroups',
+            'horizontalPumps',
+            'groundTanks',
+            'elevatedTanks',
+            'solarEnergies',
+            'electricityHours',
+            'filters',
+            'pumpingSectors',
+            'manholes',
+            'infiltrator',  
+            'dieselTank',    
+            'disinfectionPump', 
+            'electricityTransformer', 
+        ])->findOrFail($id);
+        
         // return view('dashboard.stations.global-information', compact('station'));
         return response()->json($station);
+    }
+   /**
+     * تصدير بطاقة محطة محددة إلى ملف Excel.
+     *
+     * @param int $id
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+
+       public function exportStationCard($id)
+    {
+        // الخطوة 1: جلب المحطة مع تحميل مسبق (Eager Loading) لجميع علاقاتها
+        $station = Station::with([
+            'town.unit.governorate',
+            'wells',
+            'generationGroups',
+            'horizontalPumps',
+            'groundTanks',
+            'elevatedTanks',
+            'solarEnergies',
+            'filters',
+            'manholes',
+            'infiltrator',
+            'dieselTank',
+            'disinfectionPump',
+            'electricityTransformer',
+            'electricityHours',
+            'pumpingSectors.town', // ✅ تم تعديلها هنا لتحميل العلاقة المتداخلة مع البلدة
+        ])->findOrFail($id);
+        
+        // اسم ملف التحميل الديناميكي
+        $fileName = 'station-card-' . $station->station_name . '.xlsx';
+        
+        // الخطوة 2: تمرير الكائن '$station' إلى فئة التصدير
+        return Excel::download(new StationCardExport($station), $fileName);
     }
 }
