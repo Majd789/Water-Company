@@ -4,75 +4,46 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Maatwebsite\Excel\Concerns\Importable;
 
 class StationReport extends Model
 {
-    use HasFactory ,Importable;
+    use HasFactory;
 
-    protected $table = 'station_reports'; // اسم الجدول في قاعدة البيانات
+    protected $table = 'stations_reports';
 
     protected $fillable = [
-        'start',
-        'end',
-        'date',
-        'إسم المُشغل المناوب في المنهل',
-        'وحدة المياه',
-        'البلدة',
-        'المحطات',
-        'station_code',
-        'الوضع التشغيلي',
-        'سبب التوقف',
-        'operator_entity',
-        'operator_company',
-        'operating_wells_count',
-        'well_1_hours',
-        'well_2_hours',
-        'well_3_hours',
-        'well_4_hours',
-        'well_5_hours',
-        'well_6_hours',
-        'well_7_hours',
-        'total_well_hours',
-        'has_horizontal_pump',
-        'horizontal_pump_hours',
-        'station_operation_method',
-        'target_sector',
-        'has_disinfection',
-        'no_disinfection_reason',
-        'energy_source',
-        'solar_electricity_hours',
-        'solar_generator_hours',
-        'solar_only_hours',
-        'electricity_hours',
-        'electricity_consumption_kwh',
-        'electric_meter_before',
-        'electric_meter_after',
-        'generator_hours',
-        'diesel_consumption',
-        'oil_replacement',
-        'oil_quantity',
+        'unit_id',
+        'station_id',
+        'operator_id',
+        'report_date',
+        'status',
+        'operating_entity',
+        'operating_entity_name',
+        'stop_reason',
+        'notes',
+        'number_well',
+        'well1_operating_hours',
+        'well2_operating_hours',
+        'well3_operating_hours',
+        'well4_operating_hours',
+        'well5_operating_hours',
+        'well6_operating_hours',
+        'well7_operating_hours',
+        'operating_hours',
+        'is_horizontal_pump',
+        'horizontal_pump_operating_hours',
+        'pumping_sector_id',
+        'is_sterile',
         'water_pumped_m3',
-        'total_diesel_stock',
-        'diesel_received',
-        'new_diesel_quantity',
-        'diesel_provider',
-        'station_modification',
-        'modification_location',
-        'modification_details',
-        'transfer_destination',
-        'electric_meter_charged',
-        'charged_electricity_kwh',
-        'operator_notes',
-    ];
-
-    // ساعات تشغيل كل بئر
-    protected $casts = [
-        'has_horizontal_pump' => 'boolean',
-        'has_disinfection' => 'boolean',
-        'oil_replacement' => 'boolean',
-        'diesel_received' => 'boolean',
-        'station_modification' => 'boolean',
-        'electric_meter_charged' => 'boolean',
+        'power_source',
+        'solar_hours',
+        'grid_hours',
+        'generator_hours',
+        'solar_grid_hours',
+        'solar_generator_hours',
+        'grid_power_kwh',
+        'diesel_consumed_liters',
     ];
 }
+
+

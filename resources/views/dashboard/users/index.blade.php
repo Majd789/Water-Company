@@ -60,6 +60,7 @@
                                             <th>#</th>
                                             <th>الاسم</th>
                                             <th>البريد الإلكتروني</th>
+                                            <th>الرتبة</th>
                                             <th>الدور</th>
                                             <th>الحالة</th>
                                             <th class="text-center no-export">الإجراءات</th>
@@ -71,6 +72,7 @@
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $user->name }}</td>
                                                 <td>{{ $user->email }}</td>
+                                                <td>{{ $user->level }}</td>
                                                 <td>
                                                     <span class="badge bg-info">
                                                         {{ $user->getRoleNames()->first() ?? 'لا يوجد دور' }}

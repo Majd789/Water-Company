@@ -44,6 +44,20 @@
                                         class="form-control">
                                 </div>
                                 <div class="col-md-6 mb-3">
+                                    <label for="level" class="form-label">الرتبة</label>
+                                    <select name="level" id="level"
+                                        class="form-select @error('level') is-invalid @enderror">
+                                        <option value="">اختر رتبة</option>
+                                        @foreach ($levels as $level)
+                                            <option value="{{ $level }}" {{ old('level') == $level ? 'selected' : '' }}>
+                                                {{ $level }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('level')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6 mb-3">
                                     <label for="role" class="form-label">الدور (الصلاحية)</label>
                                     <select name="role" id="role"
                                         class="form-select @error('role') is-invalid @enderror">

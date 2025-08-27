@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use App\Enum\UserStatusEnum;
+use App\Enum\UserLevel;
 
 class UserController extends Controller
 {
@@ -34,7 +35,8 @@ class UserController extends Controller
     {
         $statuses = UserStatusEnum::cases();
         $roles = Role::pluck('name');
-        return view('dashboard.users.create', compact('statuses', 'roles'));
+        $levels = array_map(fn($e) => $e->value, UserLevel::cases());
+        return view('dashboard.users.create', compact('statuses', 'roles', 'levels'));
     }
 
     /**
@@ -50,6 +52,7 @@ class UserController extends Controller
             'role' => 'required|string',
             'staion_id' => 'nullable|integer',
             'status' => 'nullable|in:' . implode(',', array_map(fn($e) => $e->value, UserStatusEnum::cases())),
+            'level' => 'required|in:' . implode(',', array_map(fn($e) => $e->value, UserLevel::cases())),
         ]);
         $validated['password'] = Hash::make($validated['password']);
         $validated['status'] = $validated['status'] ?? UserStatusEnum::ACTIVE->value;
@@ -77,7 +80,8 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $statuses = UserStatusEnum::cases();
         $roles = \Spatie\Permission\Models\Role::pluck('name');
-        return view('dashboard.users.edit', compact('user', 'statuses', 'roles'));
+        $levels = array_map(fn($e) => $e->value, UserLevel::cases());
+        return view('dashboard.users.edit', compact('user', 'statuses', 'roles', 'levels'));
     }
 
     /**
@@ -94,6 +98,7 @@ class UserController extends Controller
             'role' => 'required|string',
             'staion_id' => 'nullable|integer',
             'status' => 'nullable|in:' . implode(',', array_map(fn($e) => $e->value, UserStatusEnum::cases())),
+            'level' => 'required|in:' . implode(',', array_map(fn($e) => $e->value, UserLevel::cases())),
         ]);
         if (!empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);

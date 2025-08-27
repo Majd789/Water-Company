@@ -143,4 +143,29 @@ class StationController extends Controller
             'station' => $station
         ]);
     }
+
+
+    public function uploadMonthlyImage(Request $request, Station $station)
+    {
+        $request->validate([
+            'image' => 'required|image|max:5120', // 5MB max
+            'month' => 'required|integer|between:1,12',
+            'year' => 'required|integer|min:2020',
+        ]);
+
+         // ✅ الخطوة 1: احذف أي صورة قديمة لنفس الشهر والسنة
+        // $station->getMedia('monthly_images')
+        //     ->where('custom_properties.month',$request->month)
+        //     ->where('custom_properties.year', $request->year)
+        //     ->each(fn ($media) => $media->delete());
+        // 2. أضف الصورة الجديدة مع تخزين الشهر والسنة كبيانات وصفية
+        $station->addMedia($request->file('image'))
+                ->withCustomProperties([
+                    'month' => $request->month,
+                    'year' => $request->year,
+                ])
+                ->toMediaCollection('monthly_images');
+
+        return back()->with('success', 'تم رفع الصورة الشهرية بنجاح.');
+    }
 }

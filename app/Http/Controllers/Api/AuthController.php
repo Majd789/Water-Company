@@ -40,13 +40,24 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user->only('id' , 'name'),
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'roles' => method_exists($user, 'getRoleNames') ? $user->getRoleNames() : [],
+                'permissions' => method_exists($user, 'getAllPermissions') ? $user->getAllPermissions()->pluck('name') : [],
+            ],
         ]);
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $accessToken = $request->bearerToken();
+        if ($accessToken) {
+            $token = PersonalAccessToken::findToken($accessToken);
+            if ($token) {
+                $token->delete();
+            }
+        }
 
         return response()->json(['message' => 'تم تسجيل الخروج بنجاح']);
     }
@@ -54,6 +65,13 @@ class AuthController extends Controller
 
      public function me(Request $request)
     {
-        return response()->json($request->user());
+        $user = $request->user();
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email ?? null,
+            'roles' => method_exists($user, 'getRoleNames') ? $user->getRoleNames() : [],
+            'permissions' => method_exists($user, 'getAllPermissions') ? $user->getAllPermissions()->pluck('name') : [],
+        ]);
     }
 }

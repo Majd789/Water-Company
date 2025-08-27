@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-
+use App\Enum\UserLevel;
 return new class extends Migration
 {
     /**
@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-       Schema::create('complaint_types', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique()->comment('اسم نوع الشكوى');
-            $table->text('description')->nullable()->comment('وصف نوع الشكوى');
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->enum('level', UserLevel::getValues())->nullable()->default(UserLevel::USER->value)->index();
+
         });
     }
 
@@ -24,6 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('complaint_types');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('level');
+        });
     }
 };

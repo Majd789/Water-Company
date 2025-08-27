@@ -5,12 +5,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\Traits\LogsActivity;
-
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\HasMedia;
 use Spatie\Activitylog\LogOptions;
 
-class Station extends Model
+class Station extends Model implements HasMedia
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity , InteractsWithMedia;
+
 
     protected static $logAttributes = ['*']; // تتبع كل الحقول
     protected static $logName = 'station'; // الاسم الذي يظهر في سجل النشاطات
@@ -59,10 +61,7 @@ class Station extends Model
         return $this->hasMany(GroundTank::class);
     }
 
-    public function waterWells() //dont uesd
-    {
-        return $this->hasMany(WaterWell2::class, 'station_code', 'station_code');
-    }
+
     public function pumpingSectors(): HasMany //قطاعات لاضخ
     {
         // 'station_id' هو المفتاح الأجنبي في جدول 'pumping_sectors'
@@ -81,11 +80,8 @@ class Station extends Model
     {
         return $this->hasMany(Manhole::class);
     }
-    public function stationReports() //التقارير
-    {
-        return $this->hasMany(StationReport::class);
-    }
-   
+
+
     public function infiltrator() //المحولات رافع الجهد
     {
         return $this->hasMany(Infiltrator::class);

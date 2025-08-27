@@ -8,8 +8,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Enum\UserLevel;
 
-class User extends Authenticatable 
+class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
     use HasRoles;
@@ -26,6 +27,7 @@ class User extends Authenticatable
         'role',
         'staion_id',
         'status',
+        'level',
     ];
 
     /**
@@ -46,8 +48,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'status' => \App\Enum\UserStatusEnum::class, // <-- أضف هذا السطر
+        'level' => UserLevel::class,
     ];
-    
+
     public function unit()
     {
         return $this->belongsTo(Unit::class);
