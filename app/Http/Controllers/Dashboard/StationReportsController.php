@@ -121,7 +121,7 @@ class StationReportsController extends Controller
      */
     public function show(StationReport $stationReport)
     {
-        $stationReport->load(['station', 'unit', 'operator', 'pumpingSector']);
+        $stationReport->load(['station', 'unit', 'operator']);
 
         return view('dashboard.station-reports.show', compact('stationReport'));
     }

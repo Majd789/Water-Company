@@ -85,6 +85,10 @@ class StationReport extends Model
     {
         return $this->belongsTo(User::class, 'operator_id');
     }
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
+    }
 }
 
 
