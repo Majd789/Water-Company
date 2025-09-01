@@ -5,6 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Enum\StationOperationStatus;
 use App\Enum\StationOperatingEntityEum;
+use App\Enum\EnergyResource;
 
 use function Laravel\Prompts\table;
 
@@ -28,7 +29,7 @@ return new class extends Migration
             $table->enum('operating_entity', StationOperatingEntityEum::getValues())->nullable(); // الجهة المشغلة
             $table->string('operating_entity_name')->nullable(); // اسم الجهة المشغلة
 
-            $table->int('number_well')->nullable();// عدد الابار
+            $table->integer('number_well')->nullable();// عدد الابار
             $table->decimal('well1_operating_hours', 8, 2)->nullable()->default(0); // عدد ساعات التشغيل البئر الاول
             $table->decimal('well2_operating_hours', 8, 2)->nullable()->default(0); // عدد ساعات التشغيل الثاني
             $table->decimal('well3_operating_hours', 8, 2)->nullable()->default(0); // عدد ساعات التشغيل الثالث
@@ -44,24 +45,42 @@ return new class extends Migration
             $table->foreignId('pumping_sector_id')->nullable()->constrained('pumping_sectors')->cascadeOnDelete();
             $table->boolean('is_sterile')->nullable();// يوجد تعقيم
 
+            $table->string('energy_resource')->nullable(); // مصدر الطاقة الشغيلية (طاقة متجددة/طاقة مخزنة)
             $table->decimal('water_pumped_m3', 10, 2)->nullable()->default(0); // كمية المياه المضخوخة
 
             // --- بيانات مصادر الطاقة ---
-            $table->string('power_source')->nullable(); // مصدر الطاقة الرئيسي
-            // ساعات التشغيل لكل مصدر
-            $table->decimal('solar_hours', 8, 2)->nullable()->default(0);
-            $table->decimal('grid_hours', 8, 2)->nullable()->default(0);
+            $table->enum('power_source', EnergyResource::getValues())->nullable(); // مصدر الطاقة الرئيسي
+            // بيانات الكهرباء
+            $table->decimal('electricity_hours', 10, 2)->nullable()->default(0);
+            $table->decimal('electricity_power_kwh', 10, 2)->nullable()->default(0); // استهلاك الكهرباء
+            $table->decimal('electricity_Counter_number_before', 10, 2)->nullable()->default(0);
+            $table->decimal('electricity_Counter_number_after', 10, 2)->nullable()->default(0);
+            // بيانات الطاقة الشمسية
+            $table->decimal('solar_hours', 10, 2)->nullable()->default(0);
+            // بيانات المولدة
             $table->decimal('generator_hours', 8, 2)->nullable()->default(0);
-            // ساعات الدمج
-            $table->decimal('solar_grid_hours', 8, 2)->nullable()->default(0);
-            $table->decimal('solar_generator_hours', 8, 2)->nullable()->default(0);
-
-            // --- بيانات الاستهلاك ---
-            $table->decimal('grid_power_kwh', 10, 2)->nullable()->default(0); // استهلاك الكهرباء
             $table->decimal('diesel_consumed_liters', 10, 2)->nullable()->default(0); // استهلاك الديزل
-            $table->text('notes')->nullable(); // ملاحظات عامة
+
+            // ساعات الدمج
+            $table->decimal('electricity_solar_hours', 10, 2)->nullable()->default(0);
+            $table->decimal('solar_generator_hours', 10, 2)->nullable()->default(0);
+
+            $table->decimal('Water_production_m3', 10, 2)->nullable()->default(0);// ;كمية المياه المنتجة
+            $table->decimal('Total_desil_liters', 10, 2)->nullable()->default(0); //كمية الديزل الموجودة في المحطة
+            $table->boolean('is_diesel_received')->nullable();// هل تم استلام  الديزل
+            $table->decimal('quantity_of_diesel_received_liters', 10, 2)->nullable()->default(0); // كمية الديزل المخزنة
+            $table->string("diesel_source")->nullable();// مصدر الديزل
+
+            $table->boolean('has_station_been_modified')->nullable();// هل تم التعديل على المحطة
+            $table->text('station_modification_type')->nullable();// نوع التعديلات
+            $table->text('station_modification_notes')->nullable();// ملاحظات التعديلات
+
             $table->timestamps(); // تضيف created_at و updated_at
 
+            $table->boolean('is_the_electricity_meter_charged')->nullable();// هل تم شحن العداد الكهربائي
+            $table->decimal('quantity_of_electricity_meter_charged_kwh', 10, 2)->nullable()->default(0);// كمية الكهرباء المشحونة
+
+            $table->text('notes')->nullable(); // ملاحظات عامة
             // --- إضافة الفهارس (Indexes) لتحسين أداء الاستعلامات ---
             $table->index('report_date'); // لتسريع البحث والفلترة حسب نطاق زمني
             $table->index('status'); // لتسريع فلترة التقارير حسب الحالة (تعمل / متوقفة)

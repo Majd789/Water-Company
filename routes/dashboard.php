@@ -8,7 +8,7 @@ use App\Http\Controllers\Dashboard\{
     WellController, GenerationGroupController, HorizontalPumpController, GroundTankController,
     ElevatedTankController, FilterController, InfiltratorController, InstitutionPropertyController,
      ManholeController, NoteController, PrivateWellController, PumpingSectionController,
-    SolarEnergyController, StationMapController, StationReportController, WaterWell2Controller,
+    SolarEnergyController, StationMapController, StationReportsController, WaterWell2Controller,
     WeeklyReportController, ActivityLogController, BillingImportController, ComplaintController, DataExportController, DailyStationReportController,
     DieselTankController, DisinfectionPumpController, ElectricityHourController,
     ElectricityTransformerController, MaintenanceTaskController, OperationalReportController, ProjectController,
@@ -53,7 +53,7 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::resource('solar_energy', SolarEnergyController::class); // تم الإبقاء على الاسم كما هو
     Route::resource('diesel_tanks', DieselTankController::class);
     Route::resource('disinfection_pumps', DisinfectionPumpController::class);
-    Route::resource('station_reports', StationReportController::class);
+    Route::resource('station-reports', StationReportsController::class);
     Route::resource('weekly_reports', WeeklyReportController::class);
     Route::resource('daily-station-reports', DailyStationReportController::class);
     Route::resource('waterwells2', WaterWell2Controller::class);
@@ -61,7 +61,6 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::resource('maintenance_tasks', MaintenanceTaskController::class);
     Route::get('waterwells2/calculate/{wellName}/{stationCode}', [WaterWell2Controller::class, 'calculateWellData'])->name('waterwells2.calculate');
     Route::delete('waterwells2/destroy', [WaterWell2Controller::class, 'destroy'])->name('waterwells2.destroy');
-    Route::get('/station-reports', [StationReportController::class, 'index'])->name('station_reports.index');
     // === مسارات خاصة واستثنائية ===
     Route::get('stations-map', [StationMapController::class, 'index'])->name('stations.map');
     Route::get('activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
@@ -71,7 +70,6 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
 
 
     Route::get('/activity-log/export', [ActivityLogController::class, 'export'])->name('activity-log.export');
-    Route::get('/station-reports/export', [StationReportController::class, 'export'])->name('station_reports.export');
     Route::get('/towns/export', [TownController::class, 'export'])->name('towns.export');
     Route::get('/stations/export', [StationController::class, 'export'])->name('stations.export');
     Route::get('/wells/export', [WellController::class, 'export'])->name('wells.export');
@@ -93,7 +91,6 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::get('/export/all-data', [DataExportController::class, 'exportAll'])->name('export.all');
     // داخل مجموعة الروابط الخاصة بـ dashboard
     Route::get('maintenance_tasks.export', [MaintenanceTaskController::class, 'export'])->name('maintenance_tasks.export');
-    Route::get('/station-reports/export', [StationReportController::class, 'export'])->name('station_reports.export');
     // === مسارات الاستيراد (Import) ===
     Route::post('/units/import', [UnitController::class, 'import'])->name('units.import');
     Route::post('/towns/import', [TownController::class, 'import'])->name('towns.import');
@@ -115,7 +112,6 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::post('diesel_tanks/import', [DieselTankController::class, 'import'])->name('import.diesel_tanks');
     Route::get('waterwells2/import', [WaterWell2Controller::class, 'importForm'])->name('waterwells2.importForm');
     Route::post('waterwells2/import', [WaterWell2Controller::class, 'import'])->name('waterwells2.import');
-    Route::post('/station-reports/import', [StationReportController::class, 'import'])->name('station_reports.import');
     Route::post('/maintenance_tasks/import', [MaintenanceTaskController::class, 'import'])->name('maintenance_tasks.import');
 });
 

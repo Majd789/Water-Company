@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StationReportStoreRequest extends FormRequest
+class StationReportUpdateRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -61,5 +61,3 @@ class StationReportStoreRequest extends FormRequest
         ];
     }
 }
-
-

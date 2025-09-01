@@ -103,9 +103,9 @@
                         ];
                     @endphp
                     <x-sidebar-menu-section title="القسم التقني" icon="fas fa-desktop" :permissions="$technicalPermissions" :routes="$technicalRoutes">
-                        @can('station_reports.view')
-                            <li class="nav-item"><a href="{{ route('dashboard.station_reports.index') }}"
-                                    class="nav-link {{ Request::routeIs('dashboard.station_reports.*') ? 'active' : '' }}"><i
+                        @can('station-reports.view')
+                            <li class="nav-item"><a href="{{ route('dashboard.station-reports.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.station-reports.*') ? 'active' : '' }}"><i
                                         class="fas fa-chart-bar nav-icon"></i>
                                     <p>تقارير المحطات</p>
                                 </a></li>

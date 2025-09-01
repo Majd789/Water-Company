@@ -108,4 +108,9 @@ class Station extends Model implements HasMedia
     {
         return $this->hasMany(ElectricityHour::class);
     }
+
+    public function reports(): HasMany // التقارير
+    {
+        return $this->hasMany(StationReport::class, 'station_id');
+    }
 }
