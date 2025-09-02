@@ -52,7 +52,15 @@ Route::prefix('v1')->group(function () {
     });
     // Station Reports
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/stations-reports', [StationReportApiController::class, 'store']);
+        Route::apiResource('station-reports', StationReportApiController::class);
+
+// | `GET` | `/api/station-reports` | `index` | `station-reports.index` | جلب قائمة بجميع التقارير الخاصة بالمستخدم. |
+// | `POST` | `/api/station-reports` | `store` | `station-reports.store` | إنشاء تقرير جديد. |
+// | `GET` | `/api/station-reports/{report}` | `show` | `station-reports.show` | عرض بيانات تقرير واحد محدد. |
+// | `PUT` / `PATCH` | `/api/station-reports/{report}` | `update` | `station-reports.update` | تحديث بيانات تقرير موجود. |
+// | `DELETE` | `/api/station-reports/{report}` | `destroy` | `station-reports.destroy` | حذف تقرير محدد. |
+
+
     });
 
 

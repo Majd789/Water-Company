@@ -308,7 +308,7 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
+                                        {{-- <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="energy_resource">مصدر الطاقة التشغيلية</label>
                                                 <input type="text" name="energy_resource" id="energy_resource"
@@ -318,7 +318,7 @@
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
-                                        </div>
+                                        </div> --}}
                                     </div>
 
                                     {{-- Dynamic Energy Fields Based on Power Source --}}

@@ -1,14 +1,19 @@
 <?php
 
 namespace App\Http\Requests;
-
+use App\Enum\UserLevel; // [إضافة]
+use App\Enum\StationOperationStatus; // [إضافة]
+use App\Enum\StationOperatingEntityEum; // [إضافة]
+use App\Enum\EnergyResource; // [إضافة]
+use Illuminate\Validation\Rule; // [إضافة]
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StationReportStoreRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $user = Auth::user() && $user = Auth::user()->can('station_reports.create');
     }
 
     public function rules(): array
@@ -18,12 +23,12 @@ class StationReportStoreRequest extends FormRequest
             'station_id' => ['nullable', 'exists:stations,id'],
             'operator_id' => ['nullable', 'exists:users,id'],
             'report_date' => ['nullable', 'date'],
-            'status' => ['nullable', 'string'],
-            'operating_entity' => ['nullable', 'string'],
-            'operating_entity_name' => ['nullable', 'string', 'max:255'],
-            'stop_reason' => ['nullable', 'string'],
+            'status' => ['required', Rule::enum(StationOperationStatus::class)],
+            'operating_entity' => ['required', Rule::enum(StationOperatingEntityEum::class)],
+            'operating_entity_name' => ['nullable', 'string', 'max:255', 'required_if:operating_entity,shared,other'],
+            'stop_reason' => ['nullable', 'string', 'required_if:status,stopped'],
             'notes' => ['nullable', 'string'],
-            'number_well' => ['nullable', 'integer', 'min:0'],
+            'number_well' => ['required', 'integer', 'min:0', 'max:7'],
             'well1_operating_hours' => ['nullable', 'numeric', 'min:0'],
             'well2_operating_hours' => ['nullable', 'numeric', 'min:0'],
             'well3_operating_hours' => ['nullable', 'numeric', 'min:0'],
@@ -36,9 +41,9 @@ class StationReportStoreRequest extends FormRequest
             'horizontal_pump_operating_hours' => ['nullable', 'numeric', 'min:0'],
             'pumping_sector_id' => ['nullable', 'exists:pumping_sectors,id'],
             'is_sterile' => ['nullable', 'boolean'],
-            'energy_resource' => ['nullable', 'string', 'max:255'],
+            // 'energy_resource' => ['nullable', 'string', 'max:255'],
             'water_pumped_m3' => ['nullable', 'numeric', 'min:0'],
-            'power_source' => ['nullable', 'string'],
+            'power_source' => ['required', Rule::enum(EnergyResource::class)],
             'electricity_hours' => ['nullable', 'numeric', 'min:0'],
             'electricity_power_kwh' => ['nullable', 'numeric', 'min:0'],
             'electricity_Counter_number_before' => ['nullable', 'numeric', 'min:0'],
