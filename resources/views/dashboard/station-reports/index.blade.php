@@ -116,7 +116,7 @@
                                 عرض التقارير <span class="badge badge-primary ml-2">{{ $reports->total() }}</span>
                             </h3>
                             <div class="card-tools d-flex align-items-center">
-                                @can('station-reports.create')
+                                @can('station_reports.create')
                                     <a href="{{ route('dashboard.station-reports.create') }}" class="btn btn-primary">
                                         <i class="fas fa-plus mr-1"></i> إضافة تقرير
                                     </a>
@@ -167,19 +167,19 @@
                                                 <td>{{ $report->water_pumped_m3 ?? 0 }}</td>
                                                 <td class="text-center">
                                                     <div class="btn-group">
-                                                        @can('station-reports.view')
+                                                        @can('station_reports.view')
                                                             <a href="{{ route('dashboard.station-reports.show', $report) }}"
                                                                 class="btn btn-sm btn-info" title="عرض">
                                                                 <i class="fas fa-eye"></i>
                                                             </a>
                                                         @endcan
-                                                        @can('station-reports.edit')
+                                                        @can('station_reports.edit')
                                                             <a href="{{ route('dashboard.station-reports.edit', $report) }}"
                                                                 class="btn btn-sm btn-warning" title="تعديل">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
                                                         @endcan
-                                                        @can('station-reports.delete')
+                                                        @can('station_reports.delete')
                                                             <button type="button" class="btn btn-sm btn-danger"
                                                                 onclick="deleteReport({{ $report->id }})" title="حذف">
                                                                 <i class="fas fa-trash"></i>

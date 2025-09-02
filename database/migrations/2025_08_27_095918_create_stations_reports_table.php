@@ -45,7 +45,7 @@ return new class extends Migration
             $table->foreignId('pumping_sector_id')->nullable()->constrained('pumping_sectors')->cascadeOnDelete();
             $table->boolean('is_sterile')->nullable();// يوجد تعقيم
 
-            $table->string('energy_resource')->nullable(); // مصدر الطاقة الشغيلية (طاقة متجددة/طاقة مخزنة)
+            $table->string('energy_resource')->nullable(); //TODO:kEEP iT NULL FOR NOW
             $table->decimal('water_pumped_m3', 10, 2)->nullable()->default(0); // كمية المياه المضخوخة
 
             // --- بيانات مصادر الطاقة ---

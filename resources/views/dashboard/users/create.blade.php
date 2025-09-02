@@ -50,7 +50,7 @@
                                         <option value="">اختر رتبة</option>
                                         @foreach ($levels as $level)
                                             <option value="{{ $level }}" {{ old('level') == $level ? 'selected' : '' }}>
-                                                {{ $level }}</option>
+                                                {{ $level->getLabel()}}</option>
                                         @endforeach
                                     </select>
                                     @error('level')

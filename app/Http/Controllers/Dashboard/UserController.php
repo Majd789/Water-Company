@@ -35,7 +35,7 @@ class UserController extends Controller
     {
         $statuses = UserStatusEnum::cases();
         $roles = Role::pluck('name');
-        $levels = array_map(fn($e) => $e->value, UserLevel::cases());
+        $levels = UserLevel::cases();
         return view('dashboard.users.create', compact('statuses', 'roles', 'levels'));
     }
 
@@ -80,7 +80,7 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $statuses = UserStatusEnum::cases();
         $roles = \Spatie\Permission\Models\Role::pluck('name');
-        $levels = array_map(fn($e) => $e->value, UserLevel::cases());
+        $levels = UserLevel::cases();
         return view('dashboard.users.edit', compact('user', 'statuses', 'roles', 'levels'));
     }
 

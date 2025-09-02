@@ -6,8 +6,8 @@ enum StationOperationStatus: string
 {
     case WORKING = 'working';
     case STOPPED = 'stopped';
-    case PENDING = 'pending';
-    case CANCELLED = 'cancelled';
+
+
 
     public static function getValues(): array
     {
@@ -19,8 +19,7 @@ enum StationOperationStatus: string
         return match($this) {
             self::WORKING => 'يعمل',
             self::STOPPED => 'متوقف',
-            self::PENDING => 'قيد الانتظار',
-            self::CANCELLED => 'ملغى',
+
         };
     }
 
@@ -29,8 +28,6 @@ enum StationOperationStatus: string
         return match($this) {
             self::WORKING => 'success',
             self::STOPPED => 'danger',
-            self::PENDING => 'warning',
-            self::CANCELLED => 'secondary',
         };
     }
 }

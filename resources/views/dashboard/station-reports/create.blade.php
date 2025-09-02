@@ -53,10 +53,22 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="station_id">المحطة</label>
-                                            <select name="station_id" id="station_id" class="form-control select2 @error('station_id') is-invalid @enderror">
+                                            {{-- <select name="station_id" id="station_id" class="form-control select2 @error('station_id') is-invalid @enderror">
                                                 <option value="">اختر المحطة</option>
                                                 @foreach($stations as $station)
                                                     <option value="{{ $station->id }}" {{ old('station_id') == $station->id ? 'selected' : '' }}>
+                                                        {{ $station->station_name }}
+                                                    </option>
+                                                @endforeach
+                                            </select> --}}
+                                            <select name="station_id" id="station_id" class="form-control select2 @error('station_id') is-invalid @enderror"
+                                                {{-- [تعديل] إذا كان المستخدم مشغل أو مدير محطة، يتم تعطيل القائمة لمنعه من تغييرها --}}
+                                                {{ in_array(Auth::user()->level, [App\Enum\UserLevel::STATION_OPERATOR, App\Enum\UserLevel::STATION_ADMIN]) ? 'disabled' : '' }}>
+
+                                                <option value="">اختر المحطة</option>
+                                                @foreach($stations as $station)
+                                                    {{-- [تعديل] إضافة شرط لتحديد المحطة تلقائياً بناءً على المتغير القادم من المتحكم --}}
+                                                    <option value="{{ $station->id }}" {{ old('station_id', $selectedStationId ?? '') == $station->id ? 'selected' : '' }}>
                                                         {{ $station->station_name }}
                                                     </option>
                                                 @endforeach
@@ -67,6 +79,9 @@
                                         </div>
                                     </div>
                                 </div>
+                                @if(in_array(Auth::user()->level, [App\Enum\UserLevel::STATION_OPERATOR, App\Enum\UserLevel::STATION_ADMIN]))
+                                    <input type="hidden" name="station_id" value="{{ Auth::user()->station_id }}">
+                                @endif
 
                                 <div class="row">
                                     <div class="col-md-6">
@@ -102,8 +117,45 @@
                                         </div>
                                     </div>
                                 </div>
+                                 <!-- [تعديل] بداية: إضافة الحقول الديناميكية لاسم الجهة المشغلة -->
+                                <div class="row">
+                                    <!-- قائمة المنظمات (مخفية بشكل افتراضي) -->
+                                    <div class="col-md-6" id="operating_entity_name_ngo_wrapper" style="display: none;">
+                                        <div class="form-group">
+                                            <label for="operating_entity_name_ngo">اسم المنظمة <span class="text-danger">*</span></label>
+                                            <select name="operating_entity_name" id="operating_entity_name_ngo" class="form-control @error('operating_entity_name') is-invalid @enderror" disabled>
+                                                <option value="">-- اختر المنظمة --</option>
+                                                {{-- هذا الجزء لن يعمل إلا إذا تم تمرير المتغير من المتحكم --}}
+                                                @isset($organizationNames)
+                                                    @foreach($organizationNames as $org)
+                                                        <option value="{{ $org->value }}" {{ old('operating_entity_name') == $org->value ? 'selected' : '' }}>
+                                                            {{ $org->getLabel() }}
+                                                        </option>
+                                                    @endforeach
+                                                @endisset
+                                            </select>
+                                            @error('operating_entity_name')
+                                                <span class="invalid-feedback d-block">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
 
-                                                                {{-- Wells Information --}}
+                                    <!-- حقل نصي للخيار "أخرى" (مخفي بشكل افتراضي) -->
+                                    <div class="col-md-6" id="operating_entity_name_other_wrapper" style="display: none;">
+                                        <div class="form-group">
+                                            <label for="operating_entity_name_other">اسم الجهة (أخرى) <span class="text-danger">*</span></label>
+                                            <input type="text" name="operating_entity_name" id="operating_entity_name_other"
+                                                   class="form-control @error('operating_entity_name') is-invalid @enderror"
+                                                   value="{{ old('operating_entity_name') }}" disabled>
+                                            @error('operating_entity_name')
+                                                <span class="invalid-feedback d-block">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- [تعديل] نهاية: إضافة الحقول الديناميكية -->
+
+                             {{-- Wells Information --}}
                                 <div class="card card-secondary">
                                     <div class="card-header">
                                         <h3 class="card-title">معلومات الآبار</h3>
@@ -597,12 +649,58 @@
 @push('scripts')
     <script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
     <script>
+        // $(function() {
+        //     // Initialize Select2
+        //     $('.select2').select2({
+        //         theme: 'bootstrap4',
+        //         dir: 'rtl'
+        //     });
         $(function() {
-            // Initialize Select2
+            // تفعيل مكتبة البحث على كل القوائم المنسدلة الظاهرة عند تحميل الصفحة
             $('.select2').select2({
                 theme: 'bootstrap4',
                 dir: 'rtl'
             });
+
+
+            $('#operating_entity').on('change', function() {
+                const entity = $(this).val();
+                const ngoWrapper = $('#operating_entity_name_ngo_wrapper');
+                const otherWrapper = $('#operating_entity_name_other_wrapper');
+                const ngoSelect = $('#operating_entity_name_ngo');
+                const otherInput = $('#operating_entity_name_other');
+
+              // --- الخطوة 1: إعادة تعيين حالة الحقول الديناميكية ---
+
+                // [هام] قبل إخفاء قائمة المنظمات، يتم التأكد إذا كانت خاصية البحث مفعلة عليها وتدميرها
+                // هذا يمنع حدوث أخطاء عند الإظهار والإخفاء المتكرر
+                if (ngoSelect.hasClass("select2-hidden-accessible")) {
+                    ngoSelect.select2('destroy');
+                }
+                ngoWrapper.hide(); // إخفاء قائمة المنظمات
+                ngoSelect.prop('disabled', true); // تعطيلها لمنع إرسال قيمتها مع النموذج
+
+                otherWrapper.hide(); // إخفاء حقل "أخرى"
+                otherInput.prop('disabled', true); // تعطيله
+
+                // --- الخطوة 2: إظهار وتفعيل الحقل المناسب بناءً على الاختيار ---
+
+                if (entity === 'shared') {
+                    ngoWrapper.show(); // إظهار حاوية قائمة المنظمات
+                    ngoSelect.prop('disabled', false); // تفعيل القائمة لجعلها قابلة للاستخدام
+
+                    // [هام] هنا يتم تفعيل خاصية البحث (select2) على القائمة بعد أن أصبحت ظاهرة
+                    ngoSelect.select2({
+                        theme: 'bootstrap4',
+                        dir: 'rtl'
+                    });
+                } else if (entity === 'other') {
+                    otherWrapper.show(); // إظهار حاوية حقل "أخرى"
+                    otherInput.prop('disabled', false); // تفعيل الحقل
+                }
+            });
+            // --- [تعديل] نهاية: المنطق الخاص بالجهة المشغلة ---
+
 
             // Dynamic Wells Fields Logic
             $('#number_well').on('change', function() {
@@ -717,6 +815,7 @@
             $('#is_diesel_received').trigger('change');
             $('#has_station_been_modified').trigger('change');
             $('#is_the_electricity_meter_charged').trigger('change');
+            $('#operating_entity').trigger('change'); // <-- Trigger for the new logic
         }
     </script>
 @endpush

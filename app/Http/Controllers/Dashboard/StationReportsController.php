@@ -14,16 +14,18 @@ use App\Enum\StationOperationStatus;
 use App\Enum\StationOperatingEntityEum;
 use App\Enum\EnergyResource;
 use Illuminate\Http\Request;
+use App\Enum\UserLevel;
+use App\Enum\OperatingEntityName;
 use Illuminate\Support\Facades\Auth;
 
 class StationReportsController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:station-reports.view')->only(['index', 'show']);
-        $this->middleware('permission:station-reports.create')->only(['create', 'store']);
-        $this->middleware('permission:station-reports.edit')->only(['edit', 'update']);
-        $this->middleware('permission:station-reports.delete')->only('destroy');
+        $this->middleware('permission:station_reports.view')->only(['index', 'show']);
+        $this->middleware('permission:station_reports.create')->only(['create', 'store']);
+        $this->middleware('permission:station_reports.edit')->only(['edit', 'update']);
+        $this->middleware('permission:station_reports.delete')->only('destroy');
     }
 
     /**
@@ -31,13 +33,21 @@ class StationReportsController extends Controller
      */
     public function index(Request $request)
     {
+
         $user = Auth::user();
 
         $query = StationReport::with(['station', 'unit', 'operator']);
 
-        // Filter by user's unit if they have one
-        if ($user->unit_id) {
-            $query->where('unit_id', $user->unit_id);
+        switch ($user->level) {
+            case UserLevel::UNIT_ADMIN:
+                $query->where('unit_id', $user->unit_id);
+                break;
+            case UserLevel::STATION_ADMIN:
+            case UserLevel::STATION_OPERATOR:
+                $query->where('station_id', $user->station_id);
+                break;
+            // case UserLevel::ADMIN:
+            // لا يتم تطبيق أي فلترة، المدير يرى كل التقارير
         }
 
         // Apply filters
@@ -59,12 +69,17 @@ class StationReportsController extends Controller
 
         $reports = $query->orderBy('report_date', 'desc')->paginate(15);
 
-        // Get filter options
-        $stations = Station::when($user->unit_id, function ($q) use ($user) {
-            return $q->whereHas('town', function ($query) use ($user) {
-                $query->where('unit_id', $user->unit_id);
-            });
-        })->get();
+        $stationsQuery = Station::query();
+        switch ($user->level) {
+            case UserLevel::UNIT_ADMIN:
+                $stationsQuery->whereHas('town', fn($q) => $q->where('unit_id', $user->unit_id));
+                break;
+            case UserLevel::STATION_ADMIN:
+            case UserLevel::STATION_OPERATOR:
+                $stationsQuery->where('id', $user->station_id);
+                break;
+        }
+        $stations = $stationsQuery->get();
 
         $statuses = StationOperationStatus::cases();
 
@@ -77,24 +92,35 @@ class StationReportsController extends Controller
     public function create()
     {
         $user = Auth::user();
-
+        $organizationNames = OperatingEntityName::cases();
+        $stationsQuery = Station::query();
+        $operatorQuery = User::query()->where('level', 'station_operator');
+        $selectedStationId = null; // متغير لتحديد المحطة تلقائياً للمشغل
+        switch ($user->level) {
+            case UserLevel::UNIT_ADMIN:
+                // مدير الوحدة يرى فقط المحطات التابعة لوحدته
+                $stationsQuery->whereHas('town', fn($q) => $q->where('unit_id', $user->unit_id));
+                break;
+            case UserLevel::STATION_ADMIN:
+            case UserLevel::STATION_OPERATOR:
+                $operatorQuery->where('station_id' ,Auth()->user()->station_id);
+                // مدير المحطة والمشغل يرى فقط محطته
+                $stationsQuery->where('id', $user->station_id);
+                $selectedStationId = $user->station_id; // تحديد المحطة تلقائياً
+                break;
+        }
+        $stations = $stationsQuery->get();
+        $operators = $operatorQuery->get();
         $units = Unit::all();
-        $stations = Station::when($user->unit_id, function ($q) use ($user) {
-            return $q->whereHas('town', function ($query) use ($user) {
-                $query->where('unit_id', $user->unit_id);
-            });
-        })->get();
-
-        $operators = User::where('level', 'station_operator')->get();
         $pumpingSectors = PumpingSector::all();
-
         $statuses = StationOperationStatus::cases();
         $operatingEntities = StationOperatingEntityEum::cases();
         $energyResources = EnergyResource::cases();
 
         return view('dashboard.station-reports.create', compact(
             'units', 'stations', 'operators', 'pumpingSectors',
-            'statuses', 'operatingEntities', 'energyResources'
+            'statuses', 'operatingEntities', 'energyResources', 'organizationNames',
+            'selectedStationId' // [إضافة] تمرير متغير المحطة المحددة إلى الواجهة
         ));
     }
 
@@ -104,11 +130,31 @@ class StationReportsController extends Controller
     public function store(StationReportStoreRequest $request)
     {
         $data = $request->validated();
+        $user = Auth::user();
 
         // Set default values
         if (!isset($data['operator_id'])) {
             $data['operator_id'] = Auth::id();
         }
+         // [تعديل] بداية: فرض قيم IDs الصحيحة لضمان الأمان وعدم التلاعب بالبيانات
+         switch ($user->level) {
+            case UserLevel::UNIT_ADMIN:
+                // التأكد من أن المحطة المختارة تابعة لنفس وحدة المدير
+                $station = Station::with('town')->findOrFail($data['station_id']);
+                if ($station->town->unit_id != $user->unit_id) {
+                    // إذا حاول مدير وحدة إضافة تقرير لمحطة خارج وحدته، يتم منعه
+                    return back()->with('error', 'ليس لديك صلاحية لإضافة تقرير لهذه المحطة.');
+                }
+                $data['unit_id'] = $user->unit_id;
+                break;
+            case UserLevel::STATION_ADMIN:
+            case UserLevel::STATION_OPERATOR:
+                // فرض رقم المحطة ورقم الوحدة الخاص بالمستخدم لتجنب أي تلاعب
+                $data['station_id'] = $user->station_id;
+                $data['unit_id'] = $user->unit_id;
+                break;
+        }
+        // [تعديل] نهاية: فرض القيم
 
         StationReport::create($data);
 
@@ -132,15 +178,21 @@ class StationReportsController extends Controller
     public function edit(StationReport $stationReport)
     {
         $user = Auth::user();
-
+        $stationsQuery = Station::query();
+        $operatorQuery = User::query()->where('level', 'station_operator');
+        switch ($user->level) {
+            case UserLevel::UNIT_ADMIN:
+                $stationsQuery->whereHas('town', fn($q) => $q->where('unit_id', $user->unit_id));
+                break;
+            case UserLevel::STATION_ADMIN:
+            case UserLevel::STATION_OPERATOR:
+                $operatorQuery->where('station_id' ,Auth()->user()->station_id);
+                $stationsQuery->where('id', $user->station_id);
+                break;
+        }
+        $stations = $stationsQuery->get();
         $units = Unit::all();
-        $stations = Station::when($user->unit_id, function ($q) use ($user) {
-            return $q->whereHas('town', function ($query) use ($user) {
-                $query->where('unit_id', $user->unit_id);
-            });
-        })->get();
-
-        $operators = User::where('level', 'station_operator')->get();
+        $operators = $operatorQuery->get();
         $pumpingSectors = PumpingSector::all();
 
         $statuses = StationOperationStatus::cases();
