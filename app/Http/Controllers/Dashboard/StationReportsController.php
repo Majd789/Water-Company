@@ -228,4 +228,5 @@ class StationReportsController extends Controller
         return redirect()->route('dashboard.station-reports.index')
             ->with('success', 'تم حذف التقرير بنجاح');
     }
+
 }

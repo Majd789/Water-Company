@@ -50,6 +50,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/stations-export', [StationController::class, 'export']);
         Route::post('/stations-import', [StationController::class, 'import']);
     });
+
     // Station Reports
     Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('station-reports', StationReportApiController::class);
@@ -59,17 +60,13 @@ Route::prefix('v1')->group(function () {
 // | `GET` | `/api/station-reports/{report}` | `show` | `station-reports.show` | عرض بيانات تقرير واحد محدد. |
 // | `PUT` / `PATCH` | `/api/station-reports/{report}` | `update` | `station-reports.update` | تحديث بيانات تقرير موجود. |
 // | `DELETE` | `/api/station-reports/{report}` | `destroy` | `station-reports.destroy` | حذف تقرير محدد. |
-
-
     });
 
-
-
-
-    // الاحصائيات
-    Route::middleware(['auth:sanctum', 'AdminRole:admin,super,superA'])->group(function(){
+       // الاحصائيات
+    Route::middleware(['auth:sanctum'])->group(function(){
         Route::get('/statistics',[StatisticsController::class,'index']);
     });
+
 
 
 });

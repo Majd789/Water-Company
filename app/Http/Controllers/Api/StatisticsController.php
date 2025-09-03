@@ -48,7 +48,6 @@ class StatisticsController extends Controller
                 'station_name' => $station->station_name,
                 'station_code' => $station->station_code,
                 'wells_count' => Well::where('station_id', $stationId)->count(),
-                'private_wells_count' => PrivateWell::where('station_id', $stationId)->count(),
                 'pumping_sectors_count' => PumpingSector::where('station_id', $stationId)->count(),
                 'diesel_tanks_count' => DieselTank::where('station_id', $stationId)->count(),
                 'manholes_count' => Manhole::where('station_id', $stationId)->count(),
@@ -62,8 +61,7 @@ class StatisticsController extends Controller
                 'generation_groups_count' => GenerationGroup::where('station_id', $stationId)->count(),
                 'electricity_hours_count' => ElectricityHour::where('station_id', $stationId)->count(),
                 'ground_tanks_count' => GroundTank::where('station_id', $stationId)->count(),
-                // 'maintenances_count' => Maintenance::where('station_id', $stationId)->count(),
-                // 'daily_station_reports_count' => DailyStationReport::where('station_id', $stationId)->count(),
+
             ];
             $message = "احصائيات محطة '{$station->station_name}' جلبت بنجاح.";
 
@@ -72,7 +70,6 @@ class StatisticsController extends Controller
             $statistics = [
                 'stations_count' => Station::count(),
                 'wells_count' => Well::count(),
-                'private_wells_count' => PrivateWell::count(),
                 'users_count' => User::count(),
                 'units_count' => Unit::count(),
                 'towns_count' => Town::count(),
@@ -89,9 +86,7 @@ class StatisticsController extends Controller
                 'generation_groups_count' => GenerationGroup::count(),
                 'electricity_hours_count' => ElectricityHour::count(),
                 'ground_tanks_count' => GroundTank::count(),
-                // 'institution_properties_count' => InstitutionProperty::count(),
-                // 'maintenances_count' => Maintenance::count(),
-                // 'daily_station_reports_count' => DailyStationReport::count(),
+
             ];
             $message = '.تم جلب جميع الاحصائيات العامة بنجاح ';
         }
