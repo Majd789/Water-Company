@@ -16,7 +16,7 @@
         "livewire/volt": "^1.0",
         "maatwebsite/excel": "*",
         "spatie/laravel-activitylog": "^4.10",
-        "spatie/laravel-medialibrary": "11.0.0",
+        "spatie/laravel-medialibrary": "^11.14",
         "spatie/laravel-permission": "^6.20",
         "yajra/laravel-datatables-oracle": "^10.11"
     },

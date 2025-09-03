@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\HorizontalPumpApiController;
 use App\Http\Controllers\Api\InfiltratorApiController;
 use App\Http\Controllers\Api\ManholeApiController;
 use App\Http\Controllers\Api\PumpingSectionApiController;
+use App\Http\Controllers\API\PumpingSectorsApiController;
 use App\Http\Controllers\Api\SolarEnergyApiController;
 use App\Http\Controllers\Api\StationApiController;
 use App\Http\Controllers\API\StationController;
@@ -61,6 +62,15 @@ Route::prefix('v1')->group(function () {
 // | `PUT` / `PATCH` | `/api/station-reports/{report}` | `update` | `station-reports.update` | تحديث بيانات تقرير موجود. |
 // | `DELETE` | `/api/station-reports/{report}` | `destroy` | `station-reports.destroy` | حذف تقرير محدد. |
     });
+
+    //قطاعات الضخ
+    Route::middleware(['auth:sanctum'])->group(function(){
+            Route::apiResource('/pumping_sectors',PumpingSectorsApiController::class);
+        });
+
+    //جلب بيانات المنظمات
+    Route::middleware(['auth:sanctum'])->group(function(){
+        Route::get('/reports/create-data', [StationReportApiController::class, 'getCreateReportData']);});
 
        // الاحصائيات
     Route::middleware(['auth:sanctum'])->group(function(){

@@ -11,22 +11,26 @@ use App\Http\Traits\ApiResponse;
 use App\Http\Resources\StationReportResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Enum\OperatingEntityName;
+use App\Models\PumpingSector;
+use App\Models\Unit;
 
 class StationReportApiController extends Controller
 {
     use ApiResponse;
 
 
-    public function index(Request $request){
+    public function index(Request $request)
+    {
         $user = Auth::user();
         if ($user->cannot('station_reports.view')) {
             // إذا لم يكن لدى المستخدم الصلاحية، نرجع رسالة خطأ باستخدام الـ Trait
             return $this->errorResponse('ليس لديك الصلاحية لعرض هذه البيانات.', 403); // 403 Forbidden
         }
 
-        $reports = StationReport::where('operator_id',$user->id)->with(['station', 'operator'])
-                         ->latest('report_date')
-                         ->paginate(20);
+        $reports = StationReport::where('operator_id', $user->id)->with(['station', 'operator'])
+            ->latest('report_date')
+            ->paginate(20);
 
         if ($reports->isEmpty()) {
             return $this->successResponse(
@@ -47,7 +51,7 @@ class StationReportApiController extends Controller
             return $this->errorResponse('ليس لديك الصلاحية لانشاء التقارير  .', 403); // 403 Forbidden
         }
         $validated = $request->validated();
-       $validated['operator_id'] = $user->id;
+        $validated['operator_id'] = $user->id;
         // [إضافة] معالجة اسم الجهة المشغلة تلقائياً
         if ($validated['operating_entity'] === 'water_company') {
             $validated['operating_entity_name'] = 'water_company';
@@ -84,31 +88,59 @@ class StationReportApiController extends Controller
             new StationReportResource($stationReport),
             'تم جلب بيانات التقرير بنجاح'
         );
-  }
-  public function destroy(StationReport $stationReport)
-  {
-      $user = Auth::user();
+    }
+    public function destroy(StationReport $stationReport)
+    {
+        $user = Auth::user();
 
-      // 1. التحقق من الصلاحية العامة للحذف
-      if ($user->cannot('station_reports.delete')) {
-          return $this->errorResponse('ليس لديك الصلاحية لحذف التقارير.', 403);
-      }
+        // 1. التحقق من الصلاحية العامة للحذف
+        if ($user->cannot('station_reports.delete')) {
+            return $this->errorResponse('ليس لديك الصلاحية لحذف التقارير.', 403);
+        }
 
-      // 2. التحقق من أن المستخدم هو نفسه منشئ التقرير (الأمان)
-      if ($stationReport->operator_id !== $user->id) {
-          return $this->errorResponse('لا يمكنك حذف هذا التقرير لأنه لا يخصك.', 403);
-      }
+        // 2. التحقق من أن المستخدم هو نفسه منشئ التقرير (الأمان)
+        if ($stationReport->operator_id !== $user->id) {
+            return $this->errorResponse('لا يمكنك حذف هذا التقرير لأنه لا يخصك.', 403);
+        }
 
-      // تنفيذ عملية الحذف
-      $stationReport->delete();
+        // تنفيذ عملية الحذف
+        $stationReport->delete();
 
-      // إرجاع رسالة نجاح بدون بيانات
-      return $this->successResponse(
-          null, // لا توجد بيانات لإرجاعها بعد الحذف
-          'تم حذف التقرير بنجاح'
-      );
-  }
+        // إرجاع رسالة نجاح بدون بيانات
+        return $this->successResponse(
+            null, // لا توجد بيانات لإرجاعها بعد الحذف
+            'تم حذف التقرير بنجاح'
+        );
+    }
+
+      public function getCreateReportData()
+    {
+        $user = auth()->user();
+        $units = Unit::all();
+        $userUnitId = $user->unit_id;
+        $query = PumpingSector::query()->where('station_id', $user->station_id);
+        $selectedUnitId = $request->unit_id ?? $userUnitId;
+        $PumpingSectors = $query->with(['station', 'station.town'])->get();
+          
+        // جلب قائمة المنظمات
+        $organizations = collect(OperatingEntityName::cases())->map(function ($case) {
+            return [
+                'value' => $case->value, // e.g., 'islamic_relief'
+                'label' => $case->getLabel(), // e.g., 'الإغاثة الإسلامية'
+            ];
+        })->sortBy('label')->values(); // نرتبها أبجدياً حسب التسمية
+
+        // تجميع كل البيانات في مصفوفة واحدة
+        $data = [
+            'organizations' => $organizations,
+             'PumpingSectors' => $PumpingSectors,
+             'units' => $units,
+             'station_id' => $user->station_id,
+             'unit_id' => $user->unit_id,
+          
+        ];
+        
+        return $this->successResponse($data, 'تم جلب البيانات اللازمة لإنشاء التقرير بنجاح.');
+    }
 
 }
-
-

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Schema;
 use App\Enum\StationOperationStatus;
 use App\Enum\StationOperatingEntityEum;
 use App\Enum\EnergyResource;
+use App\Enum\OperatingEntityName;
 
 use function Laravel\Prompts\table;
 
@@ -27,7 +28,7 @@ return new class extends Migration
             $table->enum('status', allowed: StationOperationStatus::getValues())->nullable(); // الوضع التشغيلي
             $table->text('stop_reason')->nullable(); // سبب التوقف (في حال كانت متوقفة)
             $table->enum('operating_entity', StationOperatingEntityEum::getValues())->nullable(); // الجهة المشغلة
-            $table->string('operating_entity_name')->nullable(); // اسم الجهة المشغلة
+            $table->enum('operating_entity_name',OperatingEntityName::getValues())->nullable(); // اسم الجهة المشغلة
 
             $table->integer('number_well')->nullable();// عدد الابار
             $table->decimal('well1_operating_hours', 8, 2)->nullable()->default(0); // عدد ساعات التشغيل البئر الاول
