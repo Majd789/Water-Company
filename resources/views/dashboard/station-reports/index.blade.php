@@ -115,13 +115,13 @@
                                 <i class="fas fa-file-alt mr-1"></i>
                                 عرض التقارير <span class="badge badge-primary ml-2">{{ $reports->total() }}</span>
                             </h3>
-                            <div class="card-tools d-flex align-items-center">
+                            {{-- <div class="card-tools d-flex align-items-center">
                                 @can('station_reports.create')
                                     <a href="{{ route('dashboard.station-reports.create') }}" class="btn btn-primary">
                                         <i class="fas fa-plus mr-1"></i> إضافة تقرير
                                     </a>
                                 @endcan
-                            </div>
+                            </div> --}}
                         </div>
 
                         <div class="card-body">

@@ -99,6 +99,9 @@ class StationReportResource extends JsonResource
             'notes' => [
                 'stop_reason' => $this->stop_reason,
                 'general_notes' => $this->notes,
+                'updated_by'=>$this->updated_by,
+                'is_checked'=>$this->is_checked,
+                'checked_by'=>$this->checked_by,
             ],
 
             // --- التوقيت ---

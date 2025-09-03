@@ -11,6 +11,8 @@ use App\Http\Traits\ApiResponse;
 use App\Http\Resources\StationReportResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use App\Http\Requests\StationReportUpdateRequest;
 
 class StationReportApiController extends Controller
 {
@@ -20,45 +22,61 @@ class StationReportApiController extends Controller
     public function index(Request $request){
         $user = Auth::user();
         if ($user->cannot('station_reports.view')) {
-            // إذا لم يكن لدى المستخدم الصلاحية، نرجع رسالة خطأ باستخدام الـ Trait
             return $this->errorResponse('ليس لديك الصلاحية لعرض هذه البيانات.', 403); // 403 Forbidden
         }
 
-        $reports = StationReport::where('operator_id',$user->id)->with(['station', 'operator'])
-                         ->latest('report_date')
-                         ->paginate(20);
+        $startDate = $request->input('start_date', Carbon::now()->subMonths(3)->startOfMonth());
+        $endDate = $request->input('end_date', Carbon::now()->endOfMonth());
+
+        $reports = StationReport::where('operator_id', $user->id)
+                                ->with(['station', 'operator', 'unit'])
+                                ->whereBetween('report_date', [$startDate, $endDate])
+                                ->latest('report_date')
+                                ->get();
+
 
         if ($reports->isEmpty()) {
             return $this->successResponse(
-                [], // إرجاع مصفوفة فارغة بدلاً من null
-                'لا توجد تقارير لعرضها.'
+                new \stdClass(), // إرجاع كائن فارغ {} بدلاً من مصفوفة
+                'لا توجد تقارير لعرضها في هذا النطاق الزمني.'
             );
         }
 
+        $groupedReports = $reports->groupBy(function($report) {
+            return Carbon::parse($report->report_date)->format('Y-m'); // سيقوم بالتجميع حسب "2025-09", "2025-08" etc.
+        });
+
+        $transformedData = $groupedReports->map(function ($monthlyReports) {
+            return StationReportResource::collection($monthlyReports);
+        });
+
         return $this->successResponse(
-            StationReportResource::collection($reports),
-            'تم جلب التقارير بنجاح'
+            $transformedData,
+            'تم جلب التقارير  بنجاح'
         );
     }
     public function store(StationReportStoreRequest $request)
     {
         $user = Auth::user();
-        if ($user->cannot('station_reports.create')) {
+        if ($user->cannot('station_reports.create') && $user->level == UserLevel::STATION_OPERATOR) {
             return $this->errorResponse('ليس لديك الصلاحية لانشاء التقارير  .', 403); // 403 Forbidden
         }
         $validated = $request->validated();
-       $validated['operator_id'] = $user->id;
-        // [إضافة] معالجة اسم الجهة المشغلة تلقائياً
+        $validated['operator_id'] = $user->id;
+        $validated['unit_id']= $user->unit_id;
+        $validated['station_id']= $user->station_id;
+
+
         if ($validated['operating_entity'] === 'water_company') {
             $validated['operating_entity_name'] = 'water_company';
         }
-        // إنشاء التقرير
+
         $report = StationReport::create($validated);
-        // [تعديل] استخدام ApiResource لإرجاع استجابة JSON نظيفة ومنظمة
+
         return $this->successResponse(
             new StationReportResource($report),
             'تم إنشاء التقرير بنجاح',
-            201 // Status code for resource creation
+            201
         );
     }
 
@@ -85,6 +103,35 @@ class StationReportApiController extends Controller
             'تم جلب بيانات التقرير بنجاح'
         );
   }
+
+     public function update(StationReportUpdateRequest $request, StationReport $stationReport)
+    {
+
+        $user = Auth::user();
+        if ($user->cannot('station_reports.edit') && $user->level == UserLevel::STATION_OPERATOR) {
+
+            return $this->errorResponse('ليس لديك الصلاحية لتعديل هذه البيانات.', 403); // 403 Forbidden
+        }
+
+        // 2. التحقق من أن المستخدم هو نفسه منشئ التقرير (الأمان)
+        if ($stationReport->operator_id !== $user->id) {
+            return $this->errorResponse('لا يمكنك تعديل هذا التقرير لأنه لا يخصك.', 403);
+        }
+
+        // الحصول على البيانات التي تم التحقق من صحتها من الـ Form Request
+        $validated = $request->validated();
+        $validated['updated_by'] = $user->id;
+        // تنفيذ عملية التحديث
+        $stationReport->update($validated);
+
+        // إرجاع استجابة نجاح مع بيانات التقرير المحدثة
+        return $this->successResponse(
+            new StationReportResource($stationReport),
+            'تم تحديث التقرير بنجاح'
+        );
+    }
+
+
   public function destroy(StationReport $stationReport)
   {
       $user = Auth::user();
