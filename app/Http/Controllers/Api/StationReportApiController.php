@@ -9,7 +9,7 @@ use App\Enum\UserLevel;
 use App\Models\Station;
 use App\Http\Traits\ApiResponse;
 use App\Http\Resources\StationReportResource;
-use Gemini\Foundation\Request;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class StationReportApiController extends Controller
@@ -23,9 +23,18 @@ class StationReportApiController extends Controller
             // إذا لم يكن لدى المستخدم الصلاحية، نرجع رسالة خطأ باستخدام الـ Trait
             return $this->errorResponse('ليس لديك الصلاحية لعرض هذه البيانات.', 403); // 403 Forbidden
         }
+
         $reports = StationReport::where('operator_id',$user->id)->with(['station', 'operator'])
                          ->latest('report_date')
                          ->paginate(20);
+
+        if ($reports->isEmpty()) {
+            return $this->successResponse(
+                [], // إرجاع مصفوفة فارغة بدلاً من null
+                'لا توجد تقارير لعرضها.'
+            );
+        }
+
         return $this->successResponse(
             StationReportResource::collection($reports),
             'تم جلب التقارير بنجاح'
