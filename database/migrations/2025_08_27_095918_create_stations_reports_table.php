@@ -70,8 +70,8 @@ return new class extends Migration
             $table->decimal('quantity_of_diesel_received_liters', 10, 2)->nullable()->default(0); // كمية الديزل المخزنة
             $table->string("diesel_source")->nullable();// مصدر الديزل
 
-            $table->boolean('is_there_an_oil_change')->nullable();// هل يوجد استبدال زيت للمولدة
-            $table->decimal('quantity_of_oil_added', 10, 2)->nullable()->default(0); // كمية الزيت المضافة
+             $table->boolean('is_there_an_oil_change')->nullable();// هل يوجد استبدال زيت للمولدة
+            $table->decimal('quantity_of_oil_added', 10, 2)->nullable(); // كمية الزيت المضافة
             $table->boolean('has_station_been_modified')->nullable();// هل تم التعديل على المحطة
             $table->text('station_modification_type')->nullable();// نوع التعديلات
             $table->text('station_modification_notes')->nullable();// ملاحظات التعديلات

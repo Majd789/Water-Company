@@ -16,7 +16,7 @@ class StationReportStoreRequest extends FormRequest
         return Auth::user()->can('station_reports.create');
     }
 
-    public function rules(): array
+     public function rules(): array
     {
         return [
             'unit_id' => ['nullable', 'exists:units,id'],
@@ -41,7 +41,6 @@ class StationReportStoreRequest extends FormRequest
             'horizontal_pump_operating_hours' => ['nullable', 'numeric', 'min:0'],
             'pumping_sector_id' => ['nullable', 'exists:pumping_sectors,id'],
             'is_sterile' => ['nullable', 'boolean'],
-            // 'energy_resource' => ['nullable', 'string', 'max:255'],
             'water_pumped_m3' => ['nullable', 'numeric', 'min:0'],
             'power_source' => ['required', Rule::enum(EnergyResource::class)],
             'electricity_hours' => ['nullable', 'numeric', 'min:0'],
@@ -63,6 +62,8 @@ class StationReportStoreRequest extends FormRequest
             'station_modification_notes' => ['nullable', 'string'],
             'is_the_electricity_meter_charged' => ['nullable', 'boolean'],
             'quantity_of_electricity_meter_charged_kwh' => ['nullable', 'numeric', 'min:0'],
+            'is_there_an_oil_change' => ['nullable', 'boolean'],
+            'quantity_of_oil_added' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 }

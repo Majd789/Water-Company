@@ -6,6 +6,7 @@ use App\Enum\OperatingEntityName;
 use App\Http\Controllers\Controller;
 use App\Models\StationReport;
 use App\Http\Requests\StationReportStoreRequest;
+use App\Http\Requests\StationReportUpdateRequest; // [جديد]
 use App\Enum\UserLevel;
 use App\Models\Station;
 use App\Http\Traits\ApiResponse;
@@ -29,8 +30,8 @@ class StationReportApiController extends Controller
         }
 
         $reports = StationReport::where('operator_id',$user->id)->with(['station', 'operator'])
-                         ->latest('report_date')
-                         ->paginate(20);
+                           ->latest('report_date')
+                           ->paginate(20);
 
         if ($reports->isEmpty()) {
             return $this->successResponse(
@@ -53,27 +54,106 @@ class StationReportApiController extends Controller
         );
     }
     public function store(StationReportStoreRequest $request)
-{
-    $user = Auth::user();
-    if ($user->cannot('station_reports.create') && $user->level == UserLevel::STATION_OPERATOR) {
-        return $this->errorResponse('ليس لديك الصلاحية لانشاء التقارير .', 403);
+    {
+        $user = Auth::user();
+
+        // 1. التحقق من الصلاحيات
+        if ($user->cannot('station_reports.create')) {
+            return $this->errorResponse('ليس لديك الصلاحية لإنشاء التقارير.', 403);
+        }
+
+        $validated = $request->validated();
+        $validated['operator_id'] = $user->id;
+
+        $newReportDate = Carbon::parse($validated['report_date']);
+
+        // 2. التحقق من وجود تقرير لنفس التاريخ
+        $existingReport = StationReport::where('operator_id', $user->id)
+            ->whereDate('report_date', $newReportDate->toDateString())
+            ->exists();
+        if ($existingReport) {
+            return $this->errorResponse('يوجد بالفعل تقرير مرسل لهذا التاريخ.', 403);
+        }
+
+        // 3. التحقق من تسلسل التقارير
+        $lastReport = StationReport::where('operator_id', $user->id)
+            ->latest('report_date')
+            ->first();
+        if ($lastReport) {
+            $lastReportDate = Carbon::parse($lastReport->report_date);
+            if (!$newReportDate->equalTo($lastReportDate->addDay())) {
+                return $this->errorResponse('يجب عليك إرسال تقرير اليوم السابق أولاً.', 403);
+            }
+        }
+    
+        // إزالة الحقول التي قيمها فارغة أو صفرية
+        $validated = collect($validated)->filter(function ($value) {
+            return !is_null($value) && ($value !== '' || is_bool($value));
+        })->toArray();
+    
+        // تعيين القيمة إلى null إذا كانت فارغة أو صفرية، بدلاً من إزالتها بالكامل
+        if (isset($validated['operating_entity_name']) && empty($validated['operating_entity_name'])) {
+            $validated['operating_entity_name'] = null;
+        }
+
+        $report = StationReport::create($validated);
+
+        return $this->successResponse(
+            new StationReportResource($report),
+            'تم إنشاء التقرير بنجاح',
+            201
+        );
     }
-    $validated = $request->validated();
-    $validated['operator_id'] = $user->id;
 
-    // تعديل: لا تقم بتعيين قيمة لـ operating_entity_name إذا كانت الجهة water_company
-    if ($validated['operating_entity'] !== 'shared') {
-        unset($validated['operating_entity_name']);
+    public function update(StationReportUpdateRequest $request, StationReport $stationReport)
+    {
+        $user = Auth::user();
+
+        // 1. التحقق من الصلاحيات: هل يملك المستخدم صلاحية التعديل؟
+        if ($user->cannot('station_reports.edit')) {
+            return $this->errorResponse('ليس لديك الصلاحية لتعديل التقارير.', 403);
+        }
+
+        // 2. التحقق من أن المستخدم هو نفسه منشئ التقرير
+        if ($stationReport->operator_id !== $user->id) {
+            return $this->errorResponse('لا يمكنك تعديل هذا التقرير لأنه لا يخصك.', 403);
+        }
+
+        $validated = $request->validated();
+
+        // 3. التحقق من تسلسل التقارير عند محاولة تعديل التاريخ
+        if (isset($validated['report_date'])) {
+            $newReportDate = Carbon::parse($validated['report_date']);
+            $originalReportDate = Carbon::parse($stationReport->report_date);
+
+            // جلب التقرير الذي يسبق التقرير الحالي
+            $previousReport = StationReport::where('operator_id', $user->id)
+                                          ->where('report_date', '<', $originalReportDate)
+                                          ->latest('report_date')
+                                          ->first();
+            
+            // إذا كان هناك تقرير سابق، تأكد أن التاريخ الجديد يتبعه مباشرة
+            if ($previousReport && !$newReportDate->equalTo(Carbon::parse($previousReport->report_date)->addDay())) {
+                return $this->errorResponse('تاريخ التقرير الجديد يجب أن يتبع التقرير السابق مباشرة.', 403);
+            }
+        }
+
+        // إزالة الحقول التي قيمها فارغة أو صفرية لتجنب تحديثها
+        $validated = collect($validated)->filter(function ($value) {
+            return !is_null($value) && ($value !== '' || is_bool($value));
+        })->toArray();
+    
+        // تحديث التقرير بالبيانات الجديدة
+        $stationReport->update($validated);
+    
+        // إعادة تحميل التقرير مع العلاقات المحدثة
+        $stationReport->load(['station', 'operator']);
+
+        return $this->successResponse(
+            new StationReportResource($stationReport),
+            'تم تحديث التقرير بنجاح'
+        );
     }
-
-    $report = StationReport::create($validated);
-
-    return $this->successResponse(
-        new StationReportResource($report),
-        'تم إنشاء التقرير بنجاح',
-        201
-    );
-}
 
     public function show(StationReport $stationReport)
     {
@@ -97,10 +177,10 @@ class StationReportApiController extends Controller
             new StationReportResource($stationReport),
             'تم جلب بيانات التقرير بنجاح'
         );
-  }
-  public function destroy(StationReport $stationReport)
-  {
-      $user = Auth::user();
+    }
+    public function destroy(StationReport $stationReport)
+    {
+        $user = Auth::user();
 
         // 1. التحقق من الصلاحية العامة للحذف
         if ($user->cannot('station_reports.delete')) {
@@ -122,7 +202,7 @@ class StationReportApiController extends Controller
         );
     }
 
-      public function getCreateReportData()
+    public function getCreateReportData(Request $request)
     {
         $user = auth()->user();
         $units = Unit::all();
@@ -142,14 +222,13 @@ class StationReportApiController extends Controller
         // تجميع كل البيانات في مصفوفة واحدة
         $data = [
             'organizations' => $organizations,
-             'PumpingSectors' => $PumpingSectors,
-             'units' => $units,
-             'station_id' => $user->station_id,
-             'unit_id' => $user->unit_id,
+            'PumpingSectors' => $PumpingSectors,
+            'units' => $units,
+            'station_id' => $user->station_id,
+            'unit_id' => $user->unit_id,
           
         ];
         
         return $this->successResponse($data, 'تم جلب البيانات اللازمة لإنشاء التقرير بنجاح.');
     }
-
 }
