@@ -7,6 +7,7 @@ enum OperatingEntityName: string
     // case WATER_COMPANY = 'water_company'; // المؤسسة العامة لمياه الشرب
 
     // --- English Organizations ---
+    case WATER_COMPANY = 'water_company';
     case ACTED = 'acted';
     case ACTION_FOR_HUMANITY = 'action_for_humanity';
     case ACU = 'acu';
@@ -45,7 +46,7 @@ enum OperatingEntityName: string
     case SYRIA_RELIEF = 'syria_relief';
     case UOSSM = 'uossm';
     case WORLD_VISION = 'world_vision';
-
+    
     // --- Arabic Organizations ---
     case ISLAMIC_RELIEF = 'islamic_relief'; // الإغاثة الإسلامية
     case INTERNATIONAL_RELIEF = 'international_relief'; // الإغاثة الدولية

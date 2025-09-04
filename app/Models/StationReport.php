@@ -50,11 +50,12 @@ class StationReport extends Model
         'diesel_consumed_liters',
         'electricity_solar_hours',
         'solar_generator_hours',
-        'Water_production_m3',
         'Total_desil_liters',
         'is_diesel_received',
         'quantity_of_diesel_received_liters',
         'diesel_source',
+        'is_there_an_oil_change',
+        'quantity_of_oil_added',
         'has_station_been_modified',
         'station_modification_type',
         'station_modification_notes',
@@ -72,6 +73,7 @@ class StationReport extends Model
         'is_diesel_received' => 'boolean',
         'has_station_been_modified' => 'boolean',
         'is_the_electricity_meter_charged' => 'boolean',
+        'is_there_an_oil_change' => 'boolean',
     ];
 
 

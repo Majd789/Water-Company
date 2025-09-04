@@ -210,7 +210,9 @@ class StationReportsController extends Controller
      */
     public function update(StationReportUpdateRequest $request, StationReport $stationReport)
     {
+        $user = Auth::user();
         $data = $request->validated();
+        $data['updated_by'] = $user->id;
 
         $stationReport->update($data);
 

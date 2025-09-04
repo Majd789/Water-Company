@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enum\OperatingEntityName;
 use App\Http\Controllers\Controller;
 use App\Models\StationReport;
 use App\Http\Requests\StationReportStoreRequest;
@@ -9,11 +10,11 @@ use App\Enum\UserLevel;
 use App\Models\Station;
 use App\Http\Traits\ApiResponse;
 use App\Http\Resources\StationReportResource;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Enum\OperatingEntityName;
 use App\Models\PumpingSector;
 use App\Models\Unit;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class StationReportApiController extends Controller
 {
@@ -24,47 +25,55 @@ class StationReportApiController extends Controller
     {
         $user = Auth::user();
         if ($user->cannot('station_reports.view')) {
-            // إذا لم يكن لدى المستخدم الصلاحية، نرجع رسالة خطأ باستخدام الـ Trait
             return $this->errorResponse('ليس لديك الصلاحية لعرض هذه البيانات.', 403); // 403 Forbidden
         }
 
-        $reports = StationReport::where('operator_id', $user->id)->with(['station', 'operator'])
-            ->latest('report_date')
-            ->paginate(20);
+        $reports = StationReport::where('operator_id',$user->id)->with(['station', 'operator'])
+                         ->latest('report_date')
+                         ->paginate(20);
 
         if ($reports->isEmpty()) {
             return $this->successResponse(
-                [], // إرجاع مصفوفة فارغة بدلاً من null
-                'لا توجد تقارير لعرضها.'
+                new \stdClass(), // إرجاع كائن فارغ {} بدلاً من مصفوفة
+                'لا توجد تقارير لعرضها في هذا النطاق الزمني.'
             );
         }
 
+        $groupedReports = $reports->groupBy(function($report) {
+            return Carbon::parse($report->report_date)->format('Y-m'); // سيقوم بالتجميع حسب "2025-09", "2025-08" etc.
+        });
+
+        $transformedData = $groupedReports->map(function ($monthlyReports) {
+            return StationReportResource::collection($monthlyReports);
+        });
+
         return $this->successResponse(
-            StationReportResource::collection($reports),
-            'تم جلب التقارير بنجاح'
+            $transformedData,
+            'تم جلب التقارير  بنجاح'
         );
     }
     public function store(StationReportStoreRequest $request)
-    {
-        $user = Auth::user();
-        if ($user->cannot('station_reports.create')) {
-            return $this->errorResponse('ليس لديك الصلاحية لانشاء التقارير  .', 403); // 403 Forbidden
-        }
-        $validated = $request->validated();
-        $validated['operator_id'] = $user->id;
-        // [إضافة] معالجة اسم الجهة المشغلة تلقائياً
-        if ($validated['operating_entity'] === 'water_company') {
-            $validated['operating_entity_name'] = 'water_company';
-        }
-        // إنشاء التقرير
-        $report = StationReport::create($validated);
-        // [تعديل] استخدام ApiResource لإرجاع استجابة JSON نظيفة ومنظمة
-        return $this->successResponse(
-            new StationReportResource($report),
-            'تم إنشاء التقرير بنجاح',
-            201 // Status code for resource creation
-        );
+{
+    $user = Auth::user();
+    if ($user->cannot('station_reports.create') && $user->level == UserLevel::STATION_OPERATOR) {
+        return $this->errorResponse('ليس لديك الصلاحية لانشاء التقارير .', 403);
     }
+    $validated = $request->validated();
+    $validated['operator_id'] = $user->id;
+
+    // تعديل: لا تقم بتعيين قيمة لـ operating_entity_name إذا كانت الجهة water_company
+    if ($validated['operating_entity'] !== 'shared') {
+        unset($validated['operating_entity_name']);
+    }
+
+    $report = StationReport::create($validated);
+
+    return $this->successResponse(
+        new StationReportResource($report),
+        'تم إنشاء التقرير بنجاح',
+        201
+    );
+}
 
     public function show(StationReport $stationReport)
     {
@@ -88,10 +97,10 @@ class StationReportApiController extends Controller
             new StationReportResource($stationReport),
             'تم جلب بيانات التقرير بنجاح'
         );
-    }
-    public function destroy(StationReport $stationReport)
-    {
-        $user = Auth::user();
+  }
+  public function destroy(StationReport $stationReport)
+  {
+      $user = Auth::user();
 
         // 1. التحقق من الصلاحية العامة للحذف
         if ($user->cannot('station_reports.delete')) {

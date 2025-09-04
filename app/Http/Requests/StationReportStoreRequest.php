@@ -13,7 +13,7 @@ class StationReportStoreRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $user = Auth::user() && $user = Auth::user()->can('station_reports.create');
+        return Auth::user()->can('station_reports.create');
     }
 
     public function rules(): array
