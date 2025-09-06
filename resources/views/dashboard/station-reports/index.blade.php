@@ -43,6 +43,15 @@
                                 تصفية البيانات
                             </h3>
                             <div class="card-tools">
+                                <a href="{{ route('dashboard.reports.submission-status') }}"
+                                    class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-tv"></i> لوحة مراقبة التقارير
+                                </a>
+                                @can('station_reports.create')
+                                    <a href="{{ route('dashboard.station-reports.create') }}" class="btn btn-success btn-sm">
+                                        <i class="fas fa-plus"></i> إضافة تقرير جديد
+                                    </a>
+                                @endcan
                                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                     <i class="fas fa-plus"></i>
                                 </button>
@@ -56,7 +65,7 @@
                                             <label for="station_id">المحطة</label>
                                             <select name="station_id" id="station_id" class="form-control select2">
                                                 <option value="">جميع المحطات</option>
-                                                @foreach($stations as $station)
+                                                @foreach ($stations as $station)
                                                     <option value="{{ $station->id }}"
                                                         {{ request('station_id') == $station->id ? 'selected' : '' }}>
                                                         {{ $station->station_name }}
@@ -70,7 +79,7 @@
                                             <label for="status">الحالة التشغيلية</label>
                                             <select name="status" id="status" class="form-control">
                                                 <option value="">جميع الحالات</option>
-                                                @foreach($statuses as $status)
+                                                @foreach ($statuses as $status)
                                                     <option value="{{ $status->value }}"
                                                         {{ request('status') == $status->value ? 'selected' : '' }}>
                                                         {{ $status->getLabel() }}
@@ -150,12 +159,14 @@
                                     <tbody>
                                         @forelse ($reports as $report)
                                             <tr>
-                                                <td>{{ ($reports->currentPage() - 1) * $reports->perPage() + $loop->iteration }}</td>
-                                                <td>{{ $report->report_date ? $report->report_date->format('Y-m-d') : '-' }}</td>
+                                                <td>{{ ($reports->currentPage() - 1) * $reports->perPage() + $loop->iteration }}
+                                                </td>
+                                                <td>{{ $report->report_date ? $report->report_date->format('Y-m-d') : '-' }}
+                                                </td>
                                                 <td>{{ $report->station->station_name ?? 'غير محدد' }}</td>
                                                 <td>{{ $report->operator->name ?? 'غير محدد' }}</td>
                                                 <td>
-                                                    @if($report->status)
+                                                    @if ($report->status)
                                                         <span class="badge badge-{{ $report->status->getColor() }}">
                                                             {{ $report->status->getLabel() }}
                                                         </span>

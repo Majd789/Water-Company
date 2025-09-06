@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use App\Enum\StationOperationStatus;
 use App\Enum\StationOperatingEntityEum;
 use App\Enum\EnergyResource;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
+use App\Models\PumpingSector;
 class StationReport extends Model
 {
     use HasFactory;
@@ -75,8 +76,28 @@ class StationReport extends Model
         'is_the_electricity_meter_charged' => 'boolean',
         'is_there_an_oil_change' => 'boolean',
     ];
-
-
+        //لعرض ساعات تشغيل الآبار كمصفوفة في الواجهة
+          /**
+     * Accessor to get all well operating hours as a single array.
+     * This allows us to use $report->well_operating_hours in the view.
+     *
+     * @return Attribute
+     */
+    protected function wellOperatingHours(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => [
+                $this->well1_operating_hours ?? 0,
+                $this->well2_operating_hours ?? 0,
+                $this->well3_operating_hours ?? 0,
+                $this->well4_operating_hours ?? 0,
+                $this->well5_operating_hours ?? 0,
+                $this->well6_operating_hours ?? 0,
+                $this->well7_operating_hours ?? 0,
+            ],
+        );
+    }
+    
     public function station(): BelongsTo
     {
         return $this->belongsTo(Station::class, 'station_id');
@@ -95,7 +116,10 @@ class StationReport extends Model
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
-
+    public function pumpingSector(): BelongsTo
+    {
+        return $this->belongsTo(PumpingSector::class, 'pumping_sector_id');
+    }
     public function checkedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'checked_by');

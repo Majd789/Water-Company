@@ -2,27 +2,29 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Enum\EnergyResource;
+use App\Enum\OperatingEntityName;
+use App\Enum\StationOperatingEntityEum;
+use App\Enum\StationOperationStatus;
+use App\Enum\UserLevel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StationReportStoreRequest;
 use App\Http\Requests\StationReportUpdateRequest;
-use App\Models\StationReport;
+use App\Models\PumpingSector;
 use App\Models\Station;
+use App\Models\StationReport;
 use App\Models\Unit;
 use App\Models\User;
-use App\Models\PumpingSector;
-use App\Enum\StationOperationStatus;
-use App\Enum\StationOperatingEntityEum;
-use App\Enum\EnergyResource;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Enum\UserLevel;
-use App\Enum\OperatingEntityName;
 use Illuminate\Support\Facades\Auth;
 
 class StationReportsController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:station_reports.view')->only(['index', 'show']);
+        // Permissions Middleware
+        $this->middleware('permission:station_reports.view')->only(['index', 'show', 'monitoringDashboard', 'submissionStatusDashboard']);
         $this->middleware('permission:station_reports.create')->only(['create', 'store']);
         $this->middleware('permission:station_reports.edit')->only(['edit', 'update']);
         $this->middleware('permission:station_reports.delete')->only('destroy');
@@ -33,11 +35,10 @@ class StationReportsController extends Controller
      */
     public function index(Request $request)
     {
-
         $user = Auth::user();
-
         $query = StationReport::with(['station', 'unit', 'operator']);
 
+        // Filter reports based on user level
         switch ($user->level) {
             case UserLevel::UNIT_ADMIN:
                 $query->where('unit_id', $user->unit_id);
@@ -46,33 +47,29 @@ class StationReportsController extends Controller
             case UserLevel::STATION_OPERATOR:
                 $query->where('station_id', $user->station_id);
                 break;
-            // case UserLevel::ADMIN:
-            // لا يتم تطبيق أي فلترة، المدير يرى كل التقارير
         }
 
-        // Apply filters
+        // Apply search filters
         if ($request->filled('station_id')) {
             $query->where('station_id', $request->station_id);
         }
-
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-
         if ($request->filled('date_from')) {
             $query->whereDate('report_date', '>=', $request->date_from);
         }
-
         if ($request->filled('date_to')) {
             $query->whereDate('report_date', '<=', $request->date_to);
         }
 
-        $reports = $query->orderBy('report_date', 'desc')->paginate(15);
+        $reports = $query->latest('report_date')->paginate(15);
 
+        // Prepare data for filter dropdowns
         $stationsQuery = Station::query();
         switch ($user->level) {
             case UserLevel::UNIT_ADMIN:
-                $stationsQuery->whereHas('town', fn($q) => $q->where('unit_id', $user->unit_id));
+                $stationsQuery->whereHas('town', fn ($q) => $q->where('unit_id', $user->unit_id));
                 break;
             case UserLevel::STATION_ADMIN:
             case UserLevel::STATION_OPERATOR:
@@ -80,7 +77,6 @@ class StationReportsController extends Controller
                 break;
         }
         $stations = $stationsQuery->get();
-
         $statuses = StationOperationStatus::cases();
 
         return view('dashboard.station-reports.index', compact('reports', 'stations', 'statuses'));
@@ -92,36 +88,34 @@ class StationReportsController extends Controller
     public function create()
     {
         $user = Auth::user();
-        $organizationNames = OperatingEntityName::cases();
         $stationsQuery = Station::query();
-        $operatorQuery = User::query()->where('level', 'station_operator');
-        $selectedStationId = null; // متغير لتحديد المحطة تلقائياً للمشغل
+        $operatorQuery = User::query()->where('level', UserLevel::STATION_OPERATOR);
+        $selectedStationId = null;
+
+        // Filter stations and operators based on user level
         switch ($user->level) {
             case UserLevel::UNIT_ADMIN:
-                // مدير الوحدة يرى فقط المحطات التابعة لوحدته
-                $stationsQuery->whereHas('town', fn($q) => $q->where('unit_id', $user->unit_id));
+                $stationsQuery->whereHas('town', fn ($q) => $q->where('unit_id', $user->unit_id));
                 break;
             case UserLevel::STATION_ADMIN:
             case UserLevel::STATION_OPERATOR:
-                $operatorQuery->where('station_id' ,Auth()->user()->station_id);
-                // مدير المحطة والمشغل يرى فقط محطته
                 $stationsQuery->where('id', $user->station_id);
-                $selectedStationId = $user->station_id; // تحديد المحطة تلقائياً
+                $operatorQuery->where('station_id', $user->station_id);
+                $selectedStationId = $user->station_id;
                 break;
         }
-        $stations = $stationsQuery->get();
-        $operators = $operatorQuery->get();
-        $units = Unit::all();
-        $pumpingSectors = PumpingSector::all();
-        $statuses = StationOperationStatus::cases();
-        $operatingEntities = StationOperatingEntityEum::cases();
-        $energyResources = EnergyResource::cases();
 
-        return view('dashboard.station-reports.create', compact(
-            'units', 'stations', 'operators', 'pumpingSectors',
-            'statuses', 'operatingEntities', 'energyResources', 'organizationNames',
-            'selectedStationId' // [إضافة] تمرير متغير المحطة المحددة إلى الواجهة
-        ));
+        return view('dashboard.station-reports.create', [
+            'stations' => $stationsQuery->get(),
+            'operators' => $operatorQuery->get(),
+            'units' => Unit::all(),
+            'pumpingSectors' => PumpingSector::all(),
+            'statuses' => StationOperationStatus::cases(),
+            'operatingEntities' => StationOperatingEntityEum::cases(),
+            'energyResources' => EnergyResource::cases(),
+            'organizationNames' => OperatingEntityName::cases(),
+            'selectedStationId' => $selectedStationId,
+        ]);
     }
 
     /**
@@ -132,34 +126,29 @@ class StationReportsController extends Controller
         $data = $request->validated();
         $user = Auth::user();
 
-        // Set default values
-        if (!isset($data['operator_id'])) {
-            $data['operator_id'] = Auth::id();
-        }
-         // [تعديل] بداية: فرض قيم IDs الصحيحة لضمان الأمان وعدم التلاعب بالبيانات
-         switch ($user->level) {
+        // Assign operator_id if not set (for operators creating their own reports)
+        $data['operator_id'] = $data['operator_id'] ?? $user->id;
+
+        // Securely assign unit_id and station_id based on user level
+        switch ($user->level) {
             case UserLevel::UNIT_ADMIN:
-                // التأكد من أن المحطة المختارة تابعة لنفس وحدة المدير
                 $station = Station::with('town')->findOrFail($data['station_id']);
                 if ($station->town->unit_id != $user->unit_id) {
-                    // إذا حاول مدير وحدة إضافة تقرير لمحطة خارج وحدته، يتم منعه
                     return back()->with('error', 'ليس لديك صلاحية لإضافة تقرير لهذه المحطة.');
                 }
                 $data['unit_id'] = $user->unit_id;
                 break;
             case UserLevel::STATION_ADMIN:
             case UserLevel::STATION_OPERATOR:
-                // فرض رقم المحطة ورقم الوحدة الخاص بالمستخدم لتجنب أي تلاعب
                 $data['station_id'] = $user->station_id;
                 $data['unit_id'] = $user->unit_id;
                 break;
         }
-        // [تعديل] نهاية: فرض القيم
 
         StationReport::create($data);
 
         return redirect()->route('dashboard.station-reports.index')
-            ->with('success', 'تم إنشاء التقرير بنجاح');
+            ->with('success', 'تم إنشاء التقرير بنجاح.');
     }
 
     /**
@@ -167,7 +156,7 @@ class StationReportsController extends Controller
      */
     public function show(StationReport $stationReport)
     {
-        $stationReport->load(['station', 'unit', 'operator']);
+        $stationReport->load(['station', 'unit', 'operator', 'pumpingSector']);
 
         return view('dashboard.station-reports.show', compact('stationReport'));
     }
@@ -179,30 +168,31 @@ class StationReportsController extends Controller
     {
         $user = Auth::user();
         $stationsQuery = Station::query();
-        $operatorQuery = User::query()->where('level', 'station_operator');
+        $operatorQuery = User::query()->where('level', UserLevel::STATION_OPERATOR);
+
+        // Filter stations and operators based on user level
         switch ($user->level) {
             case UserLevel::UNIT_ADMIN:
-                $stationsQuery->whereHas('town', fn($q) => $q->where('unit_id', $user->unit_id));
+                $stationsQuery->whereHas('town', fn ($q) => $q->where('unit_id', $user->unit_id));
                 break;
             case UserLevel::STATION_ADMIN:
             case UserLevel::STATION_OPERATOR:
-                $operatorQuery->where('station_id' ,Auth()->user()->station_id);
                 $stationsQuery->where('id', $user->station_id);
+                $operatorQuery->where('station_id', $user->station_id);
                 break;
         }
-        $stations = $stationsQuery->get();
-        $units = Unit::all();
-        $operators = $operatorQuery->get();
-        $pumpingSectors = PumpingSector::all();
 
-        $statuses = StationOperationStatus::cases();
-        $operatingEntities = StationOperatingEntityEum::cases();
-        $energyResources = EnergyResource::cases();
-
-        return view('dashboard.station-reports.edit', compact(
-            'stationReport', 'units', 'stations', 'operators', 'pumpingSectors',
-            'statuses', 'operatingEntities', 'energyResources'
-        ));
+        return view('dashboard.station-reports.edit', [
+            'stationReport' => $stationReport,
+            'stations' => $stationsQuery->get(),
+            'operators' => $operatorQuery->get(),
+            'units' => Unit::all(),
+            'pumpingSectors' => PumpingSector::all(),
+            'statuses' => StationOperationStatus::cases(),
+            'operatingEntities' => StationOperatingEntityEum::cases(),
+            'energyResources' => EnergyResource::cases(),
+            'organizationNames' => OperatingEntityName::cases(),
+        ]);
     }
 
     /**
@@ -210,14 +200,13 @@ class StationReportsController extends Controller
      */
     public function update(StationReportUpdateRequest $request, StationReport $stationReport)
     {
-        $user = Auth::user();
         $data = $request->validated();
-        $data['updated_by'] = $user->id;
+        $data['updated_by'] = Auth::id();
 
         $stationReport->update($data);
 
         return redirect()->route('dashboard.station-reports.index')
-            ->with('success', 'تم تحديث التقرير بنجاح');
+            ->with('success', 'تم تحديث التقرير بنجاح.');
     }
 
     /**
@@ -228,7 +217,124 @@ class StationReportsController extends Controller
         $stationReport->delete();
 
         return redirect()->route('dashboard.station-reports.index')
-            ->with('success', 'تم حذف التقرير بنجاح');
+            ->with('success', 'تم حذف التقرير بنجاح.');
     }
 
+
+
+
+   public function submissionStatusDashboard(Request $request)
+    {
+        // 1. تحديد الشهر والسنة
+        $year = $request->input('year', Carbon::now()->year);
+        $month = $request->input('month', Carbon::now()->month);
+        $date = Carbon::create($year, $month, 1);
+        $daysInMonth = $date->daysInMonth;
+
+        // 2. جلب قائمة المحطات مع احترام الصلاحيات والفلترة وحالة المحطة
+        $user = Auth::user();
+        $stationsQuery = Station::query();
+        $units = collect();
+        $selectedUnitId = $request->input('unit_id');
+
+        // === التحسين الجديد هنا ===
+        // عرض المحطات التي ترسل تقارير فقط (is_verified = true)
+        $stationsQuery->where('is_verified', true);
+        // ========================
+
+        // تحديد الوحدات المتاحة للفلترة فقط لمدير النظام
+        if ($user->level === UserLevel::ADMIN) {
+            $units = Unit::orderBy('unit_name')->get();
+        }
+
+        // تطبيق الفلترة بناءً على صلاحيات المستخدم والوحدة المختارة
+        switch ($user->level) {
+            case UserLevel::UNIT_ADMIN:
+                $stationsQuery->whereHas('town', fn($q) => $q->where('unit_id', $user->unit_id));
+                break;
+            case UserLevel::STATION_ADMIN:
+            case UserLevel::STATION_OPERATOR:
+                $stationsQuery->where('id', $user->station_id);
+                break;
+            case UserLevel::ADMIN:
+                if ($selectedUnitId) {
+                    $stationsQuery->whereHas('town', fn($q) => $q->where('unit_id', $selectedUnitId));
+                }
+                break;
+            default:
+                $stationsQuery->whereRaw('1 = 0');
+                break;
+        }
+
+        $stations = $stationsQuery->orderBy('station_name')->get();
+        $stationIds = $stations->pluck('id');
+
+        // 3. جلب التقارير (يبقى كما هو)
+        $reports = collect();
+        if ($stationIds->isNotEmpty()) {
+            $reports = StationReport::whereIn('station_id', $stationIds)
+                ->whereYear('report_date', $year)
+                ->whereMonth('report_date', $month)
+                ->select('station_id', 'report_date')
+                ->get();
+        }
+        
+        // 4. بناء مصفوفة البحث (يبقى كما هو)
+        $reportMatrix = [];
+        foreach ($reports as $report) {
+            $day = Carbon::parse($report->report_date)->day;
+            $reportMatrix[$report->station_id . '-' . $day] = true;
+        }
+        
+        // 5. تجهيز بيانات الفلاتر (يبقى كما هو)
+        $years = range(Carbon::now()->year, Carbon::now()->year - 5);
+        $months = [
+            1 => 'يناير', 2 => 'فبراير', 3 => 'مارس', 4 => 'أبريل', 5 => 'مايو', 6 => 'يونيو',
+            7 => 'يوليو', 8 => 'أغسطس', 9 => 'سبتمبر', 10 => 'أكتوبر', 11 => 'نوفمبر', 12 => 'ديسمبر'
+        ];
+
+        return view('dashboard.station-reports.submission-status', compact(
+            'stations', 'year', 'month', 'daysInMonth', 'reportMatrix', 'years', 'months',
+            'units', 'selectedUnitId'
+        ));
+    }
+    /**
+     * Display the printable paper-format monthly report.
+     */
+    public function showPaperReport(Station $station, $year, $month)
+    {
+        // Eager load relationships to prevent N+1 query issues
+        $monthlyReports = StationReport::with(['operator', 'pumpingSector'])
+            ->where('station_id', $station->id)
+            ->whereYear('report_date', $year)
+            ->whereMonth('report_date', $month)
+            ->orderBy('report_date', 'asc')
+            ->get();
+
+        $reportsByDay = $monthlyReports->keyBy(fn ($report) => Carbon::parse($report->report_date)->day);
+
+        // Get operating entity info from the first available report
+        $firstReport = $monthlyReports->first();
+        $operatingEntityName = 'غير محدد';
+        if ($firstReport?->operating_entity) {
+            $operatingEntityName = $firstReport->operating_entity->getLabel();
+            if ($firstReport->operating_entity_name) {
+                $operatingEntityName .= ' - ' . $firstReport->operating_entity_name;
+            }
+        }
+
+        $monthlyTotals = [
+            'operating_hours' => $monthlyReports->sum('operating_hours'),
+            'electricity_power_kwh' => $monthlyReports->sum('electricity_power_kwh'),
+            'solar_hours' => $monthlyReports->sum('solar_hours'),
+            'generator_hours' => $monthlyReports->sum('generator_hours'),
+            'water_pumped_m3' => $monthlyReports->sum('water_pumped_m3'),
+            'quantity_of_electricity_meter_charged_kwh' => $monthlyReports->sum('quantity_of_electricity_meter_charged_kwh'),
+            'diesel_consumed_liters' => $monthlyReports->sum('diesel_consumed_liters'),
+        ];
+
+        return view('dashboard.station-reports.paper', compact(
+            'station', 'year', 'month', 'reportsByDay', 'monthlyTotals', 'operatingEntityName'
+        ));
+    }
 }

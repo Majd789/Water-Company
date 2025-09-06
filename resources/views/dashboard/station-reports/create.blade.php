@@ -17,7 +17,8 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="{{ url('/dashboard') }}">الرئيسية</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard.station-reports.index') }}">تقارير المحطات</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard.station-reports.index') }}">تقارير
+                                المحطات</a></li>
                         <li class="breadcrumb-item active">إضافة تقرير</li>
                     </ol>
                 </div>
@@ -41,7 +42,8 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="report_date">تاريخ التقرير <span class="text-danger">*</span></label>
+                                            <label for="report_date">تاريخ التقرير <span
+                                                    class="text-danger">*</span></label>
                                             <input type="date" name="report_date" id="report_date"
                                                 class="form-control @error('report_date') is-invalid @enderror"
                                                 value="{{ old('report_date', date('Y-m-d')) }}" required>
@@ -55,20 +57,22 @@
                                             <label for="station_id">المحطة</label>
                                             {{-- <select name="station_id" id="station_id" class="form-control select2 @error('station_id') is-invalid @enderror">
                                                 <option value="">اختر المحطة</option>
-                                                @foreach($stations as $station)
+                                                @foreach ($stations as $station)
                                                     <option value="{{ $station->id }}" {{ old('station_id') == $station->id ? 'selected' : '' }}>
                                                         {{ $station->station_name }}
                                                     </option>
                                                 @endforeach
                                             </select> --}}
-                                            <select name="station_id" id="station_id" class="form-control select2 @error('station_id') is-invalid @enderror"
+                                            <select name="station_id" id="station_id"
+                                                class="form-control select2 @error('station_id') is-invalid @enderror"
                                                 {{-- [تعديل] إذا كان المستخدم مشغل أو مدير محطة، يتم تعطيل القائمة لمنعه من تغييرها --}}
                                                 {{ in_array(Auth::user()->level, [App\Enum\UserLevel::STATION_OPERATOR, App\Enum\UserLevel::STATION_ADMIN]) ? 'disabled' : '' }}>
 
                                                 <option value="">اختر المحطة</option>
-                                                @foreach($stations as $station)
+                                                @foreach ($stations as $station)
                                                     {{-- [تعديل] إضافة شرط لتحديد المحطة تلقائياً بناءً على المتغير القادم من المتحكم --}}
-                                                    <option value="{{ $station->id }}" {{ old('station_id', $selectedStationId ?? '') == $station->id ? 'selected' : '' }}>
+                                                    <option value="{{ $station->id }}"
+                                                        {{ old('station_id', $selectedStationId ?? '') == $station->id ? 'selected' : '' }}>
                                                         {{ $station->station_name }}
                                                     </option>
                                                 @endforeach
@@ -79,7 +83,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                @if(in_array(Auth::user()->level, [App\Enum\UserLevel::STATION_OPERATOR, App\Enum\UserLevel::STATION_ADMIN]))
+                                @if (in_array(Auth::user()->level, [App\Enum\UserLevel::STATION_OPERATOR, App\Enum\UserLevel::STATION_ADMIN]))
                                     <input type="hidden" name="station_id" value="{{ Auth::user()->station_id }}">
                                 @endif
 
@@ -87,10 +91,12 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="status">الحالة التشغيلية</label>
-                                            <select name="status" id="status" class="form-control @error('status') is-invalid @enderror">
+                                            <select name="status" id="status"
+                                                class="form-control @error('status') is-invalid @enderror">
                                                 <option value="">اختر الحالة</option>
-                                                @foreach($statuses as $status)
-                                                    <option value="{{ $status->value }}" {{ old('status') == $status->value ? 'selected' : '' }}>
+                                                @foreach ($statuses as $status)
+                                                    <option value="{{ $status->value }}"
+                                                        {{ old('status') == $status->value ? 'selected' : '' }}>
                                                         {{ $status->getLabel() }}
                                                     </option>
                                                 @endforeach
@@ -103,10 +109,12 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="operating_entity">الجهة المشغلة</label>
-                                            <select name="operating_entity" id="operating_entity" class="form-control @error('operating_entity') is-invalid @enderror">
+                                            <select name="operating_entity" id="operating_entity"
+                                                class="form-control @error('operating_entity') is-invalid @enderror">
                                                 <option value="">اختر الجهة المشغلة</option>
-                                                @foreach($operatingEntities as $entity)
-                                                    <option value="{{ $entity->value }}" {{ old('operating_entity') == $entity->value ? 'selected' : '' }}>
+                                                @foreach ($operatingEntities as $entity)
+                                                    <option value="{{ $entity->value }}"
+                                                        {{ old('operating_entity') == $entity->value ? 'selected' : '' }}>
                                                         {{ $entity->getLabel() }}
                                                     </option>
                                                 @endforeach
@@ -117,18 +125,22 @@
                                         </div>
                                     </div>
                                 </div>
-                                 <!-- [تعديل] بداية: إضافة الحقول الديناميكية لاسم الجهة المشغلة -->
+                                <!-- [تعديل] بداية: إضافة الحقول الديناميكية لاسم الجهة المشغلة -->
                                 <div class="row">
                                     <!-- قائمة المنظمات (مخفية بشكل افتراضي) -->
                                     <div class="col-md-6" id="operating_entity_name_ngo_wrapper" style="display: none;">
                                         <div class="form-group">
-                                            <label for="operating_entity_name_ngo">اسم المنظمة <span class="text-danger">*</span></label>
-                                            <select name="operating_entity_name" id="operating_entity_name_ngo" class="form-control @error('operating_entity_name') is-invalid @enderror" disabled>
+                                            <label for="operating_entity_name_ngo">اسم المنظمة <span
+                                                    class="text-danger">*</span></label>
+                                            <select name="operating_entity_name" id="operating_entity_name_ngo"
+                                                class="form-control @error('operating_entity_name') is-invalid @enderror"
+                                                disabled>
                                                 <option value="">-- اختر المنظمة --</option>
                                                 {{-- هذا الجزء لن يعمل إلا إذا تم تمرير المتغير من المتحكم --}}
                                                 @isset($organizationNames)
-                                                    @foreach($organizationNames as $org)
-                                                        <option value="{{ $org->value }}" {{ old('operating_entity_name') == $org->value ? 'selected' : '' }}>
+                                                    @foreach ($organizationNames as $org)
+                                                        <option value="{{ $org->value }}"
+                                                            {{ old('operating_entity_name') == $org->value ? 'selected' : '' }}>
                                                             {{ $org->getLabel() }}
                                                         </option>
                                                     @endforeach
@@ -143,10 +155,12 @@
                                     <!-- حقل نصي للخيار "أخرى" (مخفي بشكل افتراضي) -->
                                     <div class="col-md-6" id="operating_entity_name_other_wrapper" style="display: none;">
                                         <div class="form-group">
-                                            <label for="operating_entity_name_other">اسم الجهة (أخرى) <span class="text-danger">*</span></label>
-                                            <input type="text" name="operating_entity_name" id="operating_entity_name_other"
-                                                   class="form-control @error('operating_entity_name') is-invalid @enderror"
-                                                   value="{{ old('operating_entity_name') }}" disabled>
+                                            <label for="operating_entity_name_other">اسم الجهة (أخرى) <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text" name="operating_entity_name"
+                                                id="operating_entity_name_other"
+                                                class="form-control @error('operating_entity_name') is-invalid @enderror"
+                                                value="{{ old('operating_entity_name') }}" disabled>
                                             @error('operating_entity_name')
                                                 <span class="invalid-feedback d-block">{{ $message }}</span>
                                             @enderror
@@ -155,7 +169,7 @@
                                 </div>
                                 <!-- [تعديل] نهاية: إضافة الحقول الديناميكية -->
 
-                             {{-- Wells Information --}}
+                                {{-- Wells Information --}}
                                 <div class="card card-secondary">
                                     <div class="card-header">
                                         <h3 class="card-title">معلومات الآبار</h3>
@@ -178,7 +192,8 @@
                                                     <label for="operating_hours">إجمالي ساعات التشغيل</label>
                                                     <input type="number" name="operating_hours" id="operating_hours"
                                                         class="form-control @error('operating_hours') is-invalid @enderror"
-                                                        value="{{ old('operating_hours') }}" step="0.01" min="0">
+                                                        value="{{ old('operating_hours') }}" step="0.01"
+                                                        min="0">
                                                     @error('operating_hours')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -189,7 +204,8 @@
                                                     <label for="water_pumped_m3">كمية المياه المضخوخة (م³)</label>
                                                     <input type="number" name="water_pumped_m3" id="water_pumped_m3"
                                                         class="form-control @error('water_pumped_m3') is-invalid @enderror"
-                                                        value="{{ old('water_pumped_m3') }}" step="0.01" min="0">
+                                                        value="{{ old('water_pumped_m3') }}" step="0.01"
+                                                        min="0">
                                                     @error('water_pumped_m3')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -198,9 +214,11 @@
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label for="Water_production_m3">كمية المياه المنتجة (م³)</label>
-                                                    <input type="number" name="Water_production_m3" id="Water_production_m3"
+                                                    <input type="number" name="Water_production_m3"
+                                                        id="Water_production_m3"
                                                         class="form-control @error('Water_production_m3') is-invalid @enderror"
-                                                        value="{{ old('Water_production_m3') }}" step="0.01" min="0">
+                                                        value="{{ old('Water_production_m3') }}" step="0.01"
+                                                        min="0">
                                                     @error('Water_production_m3')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -229,19 +247,27 @@
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="is_horizontal_pump">هل توجد مضخة أفقية؟</label>
-                                                    <select name="is_horizontal_pump" id="is_horizontal_pump" class="form-control">
+                                                    <select name="is_horizontal_pump" id="is_horizontal_pump"
+                                                        class="form-control">
                                                         <option value="">اختر</option>
-                                                        <option value="1" {{ old('is_horizontal_pump') == '1' ? 'selected' : '' }}>نعم</option>
-                                                        <option value="0" {{ old('is_horizontal_pump') == '0' ? 'selected' : '' }}>لا</option>
+                                                        <option value="1"
+                                                            {{ old('is_horizontal_pump') == '1' ? 'selected' : '' }}>نعم
+                                                        </option>
+                                                        <option value="0"
+                                                            {{ old('is_horizontal_pump') == '0' ? 'selected' : '' }}>لا
+                                                        </option>
                                                     </select>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="form-group">
-                                                    <label for="horizontal_pump_operating_hours">ساعات تشغيل المضخة الأفقية</label>
-                                                    <input type="number" name="horizontal_pump_operating_hours" id="horizontal_pump_operating_hours"
+                                                    <label for="horizontal_pump_operating_hours">ساعات تشغيل المضخة
+                                                        الأفقية</label>
+                                                    <input type="number" name="horizontal_pump_operating_hours"
+                                                        id="horizontal_pump_operating_hours"
                                                         class="form-control @error('horizontal_pump_operating_hours') is-invalid @enderror"
-                                                        value="{{ old('horizontal_pump_operating_hours') }}" step="0.01" min="0" disabled>
+                                                        value="{{ old('horizontal_pump_operating_hours') }}"
+                                                        step="0.01" min="0" disabled>
                                                     @error('horizontal_pump_operating_hours')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -250,14 +276,19 @@
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="pumping_sector_id">قطاع الضخ</label>
-                                                    <select name="pumping_sector_id" id="pumping_sector_id" class="form-control select2">
+                                                    <select name="pumping_sector_id" id="pumping_sector_id"
+                                                        class="form-control select2 @error('pumping_sector_id') is-invalid @enderror">
                                                         <option value="">اختر قطاع الضخ</option>
-                                                        @foreach($pumpingSectors as $sector)
-                                                            <option value="{{ $sector->id }}" {{ old('pumping_sector_id') == $sector->id ? 'selected' : '' }}>
-                                                                {{ $sector->name ?? $sector->sector_name ?? 'قطاع ' . $sector->id }}
+                                                        @foreach ($pumpingSectors as $sector)
+                                                            <option value="{{ $sector->id }}"
+                                                                {{ old('pumping_sector_id') == $sector->id ? 'selected' : '' }}>
+                                                                {{ $sector->name ?? 'قطاع ' . $sector->id }}
                                                             </option>
                                                         @endforeach
                                                     </select>
+                                                    @error('pumping_sector_id')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
                                                 </div>
                                             </div>
                                         </div>
@@ -276,8 +307,10 @@
                                                     <label for="is_sterile">هل يوجد تعقيم؟</label>
                                                     <select name="is_sterile" id="is_sterile" class="form-control">
                                                         <option value="">اختر</option>
-                                                        <option value="1" {{ old('is_sterile') == '1' ? 'selected' : '' }}>نعم</option>
-                                                        <option value="0" {{ old('is_sterile') == '0' ? 'selected' : '' }}>لا</option>
+                                                        <option value="1"
+                                                            {{ old('is_sterile') == '1' ? 'selected' : '' }}>نعم</option>
+                                                        <option value="0"
+                                                            {{ old('is_sterile') == '0' ? 'selected' : '' }}>لا</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -285,30 +318,32 @@
                                     </div>
                                 </div>
 
-                                                            {{-- Energy Information --}}
-                            <div class="card card-info">
-                                <div class="card-header">
-                                    <h3 class="card-title">معلومات الطاقة</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="power_source">مصدر الطاقة الرئيسي</label>
-                                                <select name="power_source" id="power_source" class="form-control @error('power_source') is-invalid @enderror">
-                                                    <option value="">اختر مصدر الطاقة</option>
-                                                    @foreach($energyResources as $resource)
-                                                        <option value="{{ $resource->value }}" {{ old('power_source') == $resource->value ? 'selected' : '' }}>
-                                                            {{ $resource->getLabel() }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                                @error('power_source')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
+                                {{-- Energy Information --}}
+                                <div class="card card-info">
+                                    <div class="card-header">
+                                        <h3 class="card-title">معلومات الطاقة</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="power_source">مصدر الطاقة الرئيسي</label>
+                                                    <select name="power_source" id="power_source"
+                                                        class="form-control @error('power_source') is-invalid @enderror">
+                                                        <option value="">اختر مصدر الطاقة</option>
+                                                        @foreach ($energyResources as $resource)
+                                                            <option value="{{ $resource->value }}"
+                                                                {{ old('power_source') == $resource->value ? 'selected' : '' }}>
+                                                                {{ $resource->getLabel() }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error('power_source')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
                                             </div>
-                                        </div>
-                                        {{-- <div class="col-md-6">
+                                            {{-- <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="energy_resource">مصدر الطاقة التشغيلية</label>
                                                 <input type="text" name="energy_resource" id="energy_resource"
@@ -319,110 +354,215 @@
                                                 @enderror
                                             </div>
                                         </div> --}}
-                                    </div>
-
-                                    {{-- Dynamic Energy Fields Based on Power Source --}}
-                                    <div id="energy-fields-section">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <label for="electricity_hours">ساعات الكهرباء</label>
-                                                    <input type="number" name="electricity_hours" id="electricity_hours"
-                                                        class="form-control @error('electricity_hours') is-invalid @enderror"
-                                                        value="{{ old('electricity_hours') }}" step="0.01" min="0">
-                                                    @error('electricity_hours')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <label for="solar_hours">ساعات الطاقة الشمسية</label>
-                                                    <input type="number" name="solar_hours" id="solar_hours"
-                                                        class="form-control @error('solar_hours') is-invalid @enderror"
-                                                        value="{{ old('solar_hours') }}" step="0.01" min="0">
-                                                    @error('solar_hours')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <label for="generator_hours">ساعات المولدة</label>
-                                                    <input type="number" name="generator_hours" id="generator_hours"
-                                                        class="form-control @error('generator_hours') is-invalid @enderror"
-                                                        value="{{ old('generator_hours') }}" step="0.01" min="0">
-                                                    @error('generator_hours')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
                                         </div>
 
-                                        {{-- Combined Energy Fields --}}
-                                        <div id="combined-energy-fields" style="display: none;">
-                                            <hr>
-                                            <h6 class="text-primary">ساعات الدمج</h6>
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="electricity_solar_hours">ساعات الكهرباء + الطاقة الشمسية</label>
-                                                        <input type="number" name="electricity_solar_hours" id="electricity_solar_hours"
-                                                            class="form-control @error('electricity_solar_hours') is-invalid @enderror"
-                                                            value="{{ old('electricity_solar_hours') }}" step="0.01" min="0">
-                                                        @error('electricity_solar_hours')
-                                                            <div class="invalid-feedback">{{ $message }}</div>
-                                                        @enderror
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="solar_generator_hours">ساعات الطاقة الشمسية + المولدة</label>
-                                                        <input type="number" name="solar_generator_hours" id="solar_generator_hours"
-                                                            class="form-control @error('solar_generator_hours') is-invalid @enderror"
-                                                            value="{{ old('solar_generator_hours') }}" step="0.01" min="0">
-                                                        @error('solar_generator_hours')
-                                                            <div class="invalid-feedback">{{ $message }}</div>
-                                                        @enderror
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {{-- Electricity Meter Fields --}}
-                                        <div id="electricity-meter-fields" style="display: none;">
-                                            <hr>
-                                            <h6 class="text-primary">عداد الكهرباء</h6>
+                                        {{-- Dynamic Energy Fields Based on Power Source --}}
+                                        <div id="energy-fields-section">
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <label for="electricity_Counter_number_before">قراءة العداد قبل</label>
-                                                        <input type="number" name="electricity_Counter_number_before" id="electricity_Counter_number_before"
-                                                            class="form-control @error('electricity_Counter_number_before') is-invalid @enderror"
-                                                            value="{{ old('electricity_Counter_number_before') }}" step="0.01" min="0">
-                                                        @error('electricity_Counter_number_before')
+                                                        <label for="electricity_hours">ساعات الكهرباء</label>
+                                                        <input type="number" name="electricity_hours"
+                                                            id="electricity_hours"
+                                                            class="form-control @error('electricity_hours') is-invalid @enderror"
+                                                            value="{{ old('electricity_hours') }}" step="0.01"
+                                                            min="0">
+                                                        @error('electricity_hours')
                                                             <div class="invalid-feedback">{{ $message }}</div>
                                                         @enderror
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <label for="electricity_Counter_number_after">قراءة العداد بعد</label>
-                                                        <input type="number" name="electricity_Counter_number_after" id="electricity_Counter_number_after"
-                                                            class="form-control @error('electricity_Counter_number_after') is-invalid @enderror"
-                                                            value="{{ old('electricity_Counter_number_after') }}" step="0.01" min="0">
-                                                        @error('electricity_Counter_number_after')
+                                                        <label for="solar_hours">ساعات الطاقة الشمسية</label>
+                                                        <input type="number" name="solar_hours" id="solar_hours"
+                                                            class="form-control @error('solar_hours') is-invalid @enderror"
+                                                            value="{{ old('solar_hours') }}" step="0.01"
+                                                            min="0">
+                                                        @error('solar_hours')
                                                             <div class="invalid-feedback">{{ $message }}</div>
                                                         @enderror
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <label for="electricity_power_kwh">استهلاك الكهرباء (كيلو واط ساعة)</label>
-                                                        <input type="number" name="electricity_power_kwh" id="electricity_power_kwh"
-                                                            class="form-control @error('electricity_power_kwh') is-invalid @enderror"
-                                                            value="{{ old('electricity_power_kwh') }}" step="0.01" min="0">
-                                                        @error('electricity_power_kwh')
+                                                        <label for="generator_hours">ساعات المولدة</label>
+                                                        <input type="number" name="generator_hours" id="generator_hours"
+                                                            class="form-control @error('generator_hours') is-invalid @enderror"
+                                                            value="{{ old('generator_hours') }}" step="0.01"
+                                                            min="0">
+                                                        @error('generator_hours')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- Combined Energy Fields --}}
+                                            <div id="combined-energy-fields" style="display: none;">
+                                                <hr>
+                                                <h6 class="text-primary">ساعات الدمج</h6>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="electricity_solar_hours">ساعات الكهرباء + الطاقة
+                                                                الشمسية</label>
+                                                            <input type="number" name="electricity_solar_hours"
+                                                                id="electricity_solar_hours"
+                                                                class="form-control @error('electricity_solar_hours') is-invalid @enderror"
+                                                                value="{{ old('electricity_solar_hours') }}"
+                                                                step="0.01" min="0">
+                                                            @error('electricity_solar_hours')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="solar_generator_hours">ساعات الطاقة الشمسية +
+                                                                المولدة</label>
+                                                            <input type="number" name="solar_generator_hours"
+                                                                id="solar_generator_hours"
+                                                                class="form-control @error('solar_generator_hours') is-invalid @enderror"
+                                                                value="{{ old('solar_generator_hours') }}" step="0.01"
+                                                                min="0">
+                                                            @error('solar_generator_hours')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- Electricity Meter Fields --}}
+                                            <div id="electricity-meter-fields" style="display: none;">
+                                                <hr>
+                                                <h6 class="text-primary">عداد الكهرباء</h6>
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="electricity_Counter_number_before">قراءة العداد
+                                                                قبل</label>
+                                                            <input type="number" name="electricity_Counter_number_before"
+                                                                id="electricity_Counter_number_before"
+                                                                class="form-control @error('electricity_Counter_number_before') is-invalid @enderror"
+                                                                value="{{ old('electricity_Counter_number_before') }}"
+                                                                step="0.01" min="0">
+                                                            @error('electricity_Counter_number_before')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="electricity_Counter_number_after">قراءة العداد
+                                                                بعد</label>
+                                                            <input type="number" name="electricity_Counter_number_after"
+                                                                id="electricity_Counter_number_after"
+                                                                class="form-control @error('electricity_Counter_number_after') is-invalid @enderror"
+                                                                value="{{ old('electricity_Counter_number_after') }}"
+                                                                step="0.01" min="0">
+                                                            @error('electricity_Counter_number_after')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label for="electricity_power_kwh">استهلاك الكهرباء (كيلو واط
+                                                                ساعة)</label>
+                                                            <input type="number" name="electricity_power_kwh"
+                                                                id="electricity_power_kwh"
+                                                                class="form-control @error('electricity_power_kwh') is-invalid @enderror"
+                                                                value="{{ old('electricity_power_kwh') }}" step="0.01"
+                                                                min="0">
+                                                            @error('electricity_power_kwh')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Diesel Information --}}
+                                <div class="card card-danger">
+                                    <div class="card-header">
+                                        <h3 class="card-title">معلومات الديزل</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="Total_desil_liters">إجمالي الديزل المتوفر (لتر)</label>
+                                                    <input type="number" name="Total_desil_liters"
+                                                        id="Total_desil_liters"
+                                                        class="form-control @error('Total_desil_liters') is-invalid @enderror"
+                                                        value="{{ old('Total_desil_liters') }}" step="0.01"
+                                                        min="0">
+                                                    @error('Total_desil_liters')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="is_diesel_received">هل تم استلام ديزل؟</label>
+                                                    <select name="is_diesel_received" id="is_diesel_received"
+                                                        class="form-control">
+                                                        <option value="">اختر</option>
+                                                        <option value="1"
+                                                            {{ old('is_diesel_received') == '1' ? 'selected' : '' }}>نعم
+                                                        </option>
+                                                        <option value="0"
+                                                            {{ old('is_diesel_received') == '0' ? 'selected' : '' }}>لا
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="diesel_consumed_liters">استهلاك الديزل (لتر)</label>
+                                                    <input type="number" name="diesel_consumed_liters"
+                                                        id="diesel_consumed_liters"
+                                                        class="form-control @error('diesel_consumed_liters') is-invalid @enderror"
+                                                        value="{{ old('diesel_consumed_liters') }}" step="0.01"
+                                                        min="0">
+                                                    @error('diesel_consumed_liters')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {{-- Dynamic Diesel Fields --}}
+                                        <div id="diesel-fields" style="display: none;">
+                                            <hr>
+                                            <h6 class="text-primary">تفاصيل الديزل المستلم</h6>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="quantity_of_diesel_received_liters">كمية الديزل
+                                                            المستلمة (لتر)</label>
+                                                        <input type="number" name="quantity_of_diesel_received_liters"
+                                                            id="quantity_of_diesel_received_liters"
+                                                            class="form-control @error('quantity_of_diesel_received_liters') is-invalid @enderror"
+                                                            value="{{ old('quantity_of_diesel_received_liters') }}"
+                                                            step="0.01" min="0">
+                                                        @error('quantity_of_diesel_received_liters')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="diesel_source">مصدر الديزل</label>
+                                                        <input type="text" name="diesel_source" id="diesel_source"
+                                                            class="form-control @error('diesel_source') is-invalid @enderror"
+                                                            value="{{ old('diesel_source') }}">
+                                                        @error('diesel_source')
                                                             <div class="invalid-feedback">{{ $message }}</div>
                                                         @enderror
                                                     </div>
@@ -431,163 +571,136 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                                                            {{-- Diesel Information --}}
-                            <div class="card card-danger">
-                                <div class="card-header">
-                                    <h3 class="card-title">معلومات الديزل</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="Total_desil_liters">إجمالي الديزل المتوفر (لتر)</label>
-                                                <input type="number" name="Total_desil_liters" id="Total_desil_liters"
-                                                    class="form-control @error('Total_desil_liters') is-invalid @enderror"
-                                                    value="{{ old('Total_desil_liters') }}" step="0.01" min="0">
-                                                @error('Total_desil_liters')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="is_diesel_received">هل تم استلام ديزل؟</label>
-                                                <select name="is_diesel_received" id="is_diesel_received" class="form-control">
-                                                    <option value="">اختر</option>
-                                                    <option value="1" {{ old('is_diesel_received') == '1' ? 'selected' : '' }}>نعم</option>
-                                                    <option value="0" {{ old('is_diesel_received') == '0' ? 'selected' : '' }}>لا</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="diesel_consumed_liters">استهلاك الديزل (لتر)</label>
-                                                <input type="number" name="diesel_consumed_liters" id="diesel_consumed_liters"
-                                                    class="form-control @error('diesel_consumed_liters') is-invalid @enderror"
-                                                    value="{{ old('diesel_consumed_liters') }}" step="0.01" min="0">
-                                                @error('diesel_consumed_liters')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
+                                {{-- Station Modifications --}}
+                                <div class="card card-secondary">
+                                    <div class="card-header">
+                                        <h3 class="card-title">التعديلات على المحطة</h3>
                                     </div>
-
-                                    {{-- Dynamic Diesel Fields --}}
-                                    <div id="diesel-fields" style="display: none;">
-                                        <hr>
-                                        <h6 class="text-primary">تفاصيل الديزل المستلم</h6>
+                                    <div class="card-body">
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="form-group">
-                                                    <label for="quantity_of_diesel_received_liters">كمية الديزل المستلمة (لتر)</label>
-                                                    <input type="number" name="quantity_of_diesel_received_liters" id="quantity_of_diesel_received_liters"
-                                                        class="form-control @error('quantity_of_diesel_received_liters') is-invalid @enderror"
-                                                        value="{{ old('quantity_of_diesel_received_liters') }}" step="0.01" min="0">
-                                                    @error('quantity_of_diesel_received_liters')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
+                                                    <label for="has_station_been_modified">هل تم التعديل على
+                                                        المحطة؟</label>
+                                                    <select name="has_station_been_modified"
+                                                        id="has_station_been_modified" class="form-control">
+                                                        <option value="">اختر</option>
+                                                        <option value="1"
+                                                            {{ old('has_station_been_modified') == '1' ? 'selected' : '' }}>
+                                                            نعم</option>
+                                                        <option value="0"
+                                                            {{ old('has_station_been_modified') == '0' ? 'selected' : '' }}>
+                                                            لا</option>
+                                                    </select>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="diesel_source">مصدر الديزل</label>
-                                                    <input type="text" name="diesel_source" id="diesel_source"
-                                                        class="form-control @error('diesel_source') is-invalid @enderror"
-                                                        value="{{ old('diesel_source') }}">
-                                                    @error('diesel_source')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
+                                        </div>
+
+                                        {{-- Dynamic Modification Fields --}}
+                                        <div id="modification-fields" style="display: none;">
+                                            <hr>
+                                            <h6 class="text-primary">تفاصيل التعديلات</h6>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="station_modification_type">نوع التعديلات</label>
+                                                        <input type="text" name="station_modification_type"
+                                                            id="station_modification_type"
+                                                            class="form-control @error('station_modification_type') is-invalid @enderror"
+                                                            value="{{ old('station_modification_type') }}">
+                                                        @error('station_modification_type')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="station_modification_notes">ملاحظات التعديلات</label>
+                                                        <textarea name="station_modification_notes" id="station_modification_notes"
+                                                            class="form-control @error('station_modification_notes') is-invalid @enderror" rows="2">{{ old('station_modification_notes') }}</textarea>
+                                                        @error('station_modification_notes')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            {{-- Station Modifications --}}
-                            <div class="card card-secondary">
-                                <div class="card-header">
-                                    <h3 class="card-title">التعديلات على المحطة</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="has_station_been_modified">هل تم التعديل على المحطة؟</label>
-                                                <select name="has_station_been_modified" id="has_station_been_modified" class="form-control">
-                                                    <option value="">اختر</option>
-                                                    <option value="1" {{ old('has_station_been_modified') == '1' ? 'selected' : '' }}>نعم</option>
-                                                    <option value="0" {{ old('has_station_been_modified') == '0' ? 'selected' : '' }}>لا</option>
-                                                </select>
-                                            </div>
-                                        </div>
+                                {{-- Electricity Meter Charging --}}
+                                <div class="card card-warning">
+                                    <div class="card-header">
+                                        <h3 class="card-title">شحن عداد الكهرباء</h3>
                                     </div>
-
-                                    {{-- Dynamic Modification Fields --}}
-                                    <div id="modification-fields" style="display: none;">
-                                        <hr>
-                                        <h6 class="text-primary">تفاصيل التعديلات</h6>
+                                    <div class="card-body">
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="form-group">
-                                                    <label for="station_modification_type">نوع التعديلات</label>
-                                                    <input type="text" name="station_modification_type" id="station_modification_type"
-                                                        class="form-control @error('station_modification_type') is-invalid @enderror"
-                                                        value="{{ old('station_modification_type') }}">
-                                                    @error('station_modification_type')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
+                                                    <label for="is_the_electricity_meter_charged">هل تم شحن العداد
+                                                        الكهربائي؟</label>
+                                                    <select name="is_the_electricity_meter_charged"
+                                                        id="is_the_electricity_meter_charged" class="form-control">
+                                                        <option value="">اختر</option>
+                                                        <option value="1"
+                                                            {{ old('is_the_electricity_meter_charged') == '1' ? 'selected' : '' }}>
+                                                            نعم</option>
+                                                        <option value="0"
+                                                            {{ old('is_the_electricity_meter_charged') == '0' ? 'selected' : '' }}>
+                                                            لا</option>
+                                                    </select>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="station_modification_notes">ملاحظات التعديلات</label>
-                                                    <textarea name="station_modification_notes" id="station_modification_notes"
-                                                        class="form-control @error('station_modification_notes') is-invalid @enderror"
-                                                        rows="2">{{ old('station_modification_notes') }}</textarea>
-                                                    @error('station_modification_notes')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
+                                        </div>
+
+                                        {{-- Dynamic Charging Fields --}}
+                                        <div id="charging-fields" style="display: none;">
+                                            <hr>
+                                            <h6 class="text-primary">تفاصيل الشحن</h6>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="quantity_of_electricity_meter_charged_kwh">كمية
+                                                            الكهرباء المشحونة (كيلو واط ساعة)</label>
+                                                        <input type="number"
+                                                            name="quantity_of_electricity_meter_charged_kwh"
+                                                            id="quantity_of_electricity_meter_charged_kwh"
+                                                            class="form-control @error('quantity_of_electricity_meter_charged_kwh') is-invalid @enderror"
+                                                            value="{{ old('quantity_of_electricity_meter_charged_kwh') }}"
+                                                            step="0.01" min="0">
+                                                        @error('quantity_of_electricity_meter_charged_kwh')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            {{-- Electricity Meter Charging --}}
-                            <div class="card card-warning">
-                                <div class="card-header">
-                                    <h3 class="card-title">شحن عداد الكهرباء</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="is_the_electricity_meter_charged">هل تم شحن العداد الكهربائي؟</label>
-                                                <select name="is_the_electricity_meter_charged" id="is_the_electricity_meter_charged" class="form-control">
-                                                    <option value="">اختر</option>
-                                                    <option value="1" {{ old('is_the_electricity_meter_charged') == '1' ? 'selected' : '' }}>نعم</option>
-                                                    <option value="0" {{ old('is_the_electricity_meter_charged') == '0' ? 'selected' : '' }}>لا</option>
-                                                </select>
-                                            </div>
-                                        </div>
+                                {{-- Additional Information --}}
+                                <div class="card card-light">
+                                    <div class="card-header">
+                                        <h3 class="card-title">معلومات إضافية</h3>
                                     </div>
-
-                                    {{-- Dynamic Charging Fields --}}
-                                    <div id="charging-fields" style="display: none;">
-                                        <hr>
-                                        <h6 class="text-primary">تفاصيل الشحن</h6>
+                                    <div class="card-body">
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="form-group">
-                                                    <label for="quantity_of_electricity_meter_charged_kwh">كمية الكهرباء المشحونة (كيلو واط ساعة)</label>
-                                                    <input type="number" name="quantity_of_electricity_meter_charged_kwh" id="quantity_of_electricity_meter_charged_kwh"
-                                                        class="form-control @error('quantity_of_electricity_meter_charged_kwh') is-invalid @enderror"
-                                                        value="{{ old('quantity_of_electricity_meter_charged_kwh') }}" step="0.01" min="0">
-                                                    @error('quantity_of_electricity_meter_charged_kwh')
+                                                    <label for="stop_reason">سبب التوقف (إذا كانت المحطة متوقفة)</label>
+                                                    <textarea name="stop_reason" id="stop_reason" class="form-control @error('stop_reason') is-invalid @enderror"
+                                                        rows="2">{{ old('stop_reason') }}</textarea>
+                                                    @error('stop_reason')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="notes">ملاحظات عامة</label>
+                                                    <textarea name="notes" id="notes" class="form-control @error('notes') is-invalid @enderror" rows="2">{{ old('notes') }}"></textarea>
+                                                    @error('notes')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
                                                 </div>
@@ -595,39 +708,6 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            {{-- Additional Information --}}
-                            <div class="card card-light">
-                                <div class="card-header">
-                                    <h3 class="card-title">معلومات إضافية</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="stop_reason">سبب التوقف (إذا كانت المحطة متوقفة)</label>
-                                                <textarea name="stop_reason" id="stop_reason"
-                                                    class="form-control @error('stop_reason') is-invalid @enderror"
-                                                    rows="2">{{ old('stop_reason') }}</textarea>
-                                                @error('stop_reason')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="notes">ملاحظات عامة</label>
-                                                <textarea name="notes" id="notes" class="form-control @error('notes') is-invalid @enderror"
-                                                    rows="2">{{ old('notes') }}"></textarea>
-                                                @error('notes')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                             </div>
 
                             <div class="card-footer">
@@ -670,7 +750,7 @@
                 const ngoSelect = $('#operating_entity_name_ngo');
                 const otherInput = $('#operating_entity_name_other');
 
-              // --- الخطوة 1: إعادة تعيين حالة الحقول الديناميكية ---
+                // --- الخطوة 1: إعادة تعيين حالة الحقول الديناميكية ---
 
                 // [هام] قبل إخفاء قائمة المنظمات، يتم التأكد إذا كانت خاصية البحث مفعلة عليها وتدميرها
                 // هذا يمنع حدوث أخطاء عند الإظهار والإخفاء المتكرر
@@ -790,7 +870,7 @@
             electricityFields.hide();
 
             // Show fields based on selection
-            switch(powerSource) {
+            switch (powerSource) {
                 case 'electricity_solar':
                 case 'electricity_generator':
                 case 'all_sources':

@@ -6,9 +6,7 @@ enum UserLevel: string
 {
     case ADMIN = 'admin';
     case STATION_ADMIN = 'station_admin';
-
     case UNIT_ADMIN = 'unit_admin';
-
     case STATION_OPERATOR = 'station_operator';
     case USER = 'user';
 
