@@ -91,6 +91,15 @@ class StationReport extends Model
     {
         return $this->belongsTo(Unit::class);
     }
+    public function updatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function checkedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'checked_by');
+    }
 }
 
 

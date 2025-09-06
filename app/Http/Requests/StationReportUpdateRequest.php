@@ -19,14 +19,13 @@ class StationReportUpdateRequest extends FormRequest
 
     public function rules(): array
     {
- return [
+return [
             'unit_id' => ['sometimes', 'nullable', 'exists:units,id'],
             'station_id' => ['sometimes', 'nullable', 'exists:stations,id'],
             'operator_id' => ['sometimes', 'nullable', 'exists:users,id'],
-            'report_date' => ['sometimes', 'required', 'date'],
             'status' => ['sometimes', 'required', Rule::enum(StationOperationStatus::class)],
             'operating_entity' => ['sometimes', 'required', Rule::enum(StationOperatingEntityEum::class)],
-            'operating_entity_name' => ['sometimes', 'nullable', 'string', 'max:255', 'required_if:operating_entity,shared'],
+            'operating_entity_name' => ['sometimes', 'nullable', 'string', 'max:255', 'required_if:operating_entity,shared,other'],
             'stop_reason' => ['sometimes', 'nullable', 'string', 'required_if:status,stopped'],
             'notes' => ['sometimes', 'nullable', 'string'],
             'number_well' => ['sometimes', 'required', 'integer', 'min:0', 'max:7'],
@@ -45,7 +44,7 @@ class StationReportUpdateRequest extends FormRequest
             'pumping_sector_id' => ['sometimes', 'nullable', 'exists:pumping_sectors,id'],
             'is_sterile' => ['sometimes', 'nullable', 'boolean'],
             'water_pumped_m3' => ['sometimes', 'nullable', 'numeric', 'min:0'],
-            'power_source' => ['sometimes', 'required', Rule::enum(EnergyResource::class)],
+            'power_source' => ['sometimes', 'nullable', Rule::enum(EnergyResource::class)],
             'electricity_hours' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'electricity_power_kwh' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'electricity_Counter_number_before' => ['sometimes', 'nullable', 'numeric', 'min:0'],
