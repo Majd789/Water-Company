@@ -16,7 +16,7 @@ class StationReportStoreRequest extends FormRequest
         return Auth::user()->can('station_reports.create');
     }
 
-    public function rules(): array
+     public function rules(): array
     {
         return [
             'unit_id' => ['nullable', 'exists:units,id'],
@@ -28,7 +28,7 @@ class StationReportStoreRequest extends FormRequest
             'operating_entity_name' => ['nullable', 'string', 'max:255', 'required_if:operating_entity,shared,other'],
             'stop_reason' => ['nullable', 'string', 'required_if:status,stopped'],
             'notes' => ['nullable', 'string'],
-            'number_well' => ['required', 'integer', 'min:0', 'max:7'],
+            'number_well' => ['nullable', 'integer', 'min:0', 'max:7'],
             'well1_operating_hours' => ['nullable', 'numeric', 'min:0'],
             'well2_operating_hours' => ['nullable', 'numeric', 'min:0'],
             'well3_operating_hours' => ['nullable', 'numeric', 'min:0'],
@@ -41,9 +41,8 @@ class StationReportStoreRequest extends FormRequest
             'horizontal_pump_operating_hours' => ['nullable', 'numeric', 'min:0'],
             'pumping_sector_id' => ['nullable', 'exists:pumping_sectors,id'],
             'is_sterile' => ['nullable', 'boolean'],
-            // 'energy_resource' => ['nullable', 'string', 'max:255'],
             'water_pumped_m3' => ['nullable', 'numeric', 'min:0'],
-            'power_source' => ['required', Rule::enum(EnergyResource::class)],
+            'power_source' => ['nullable', Rule::enum(EnergyResource::class)],
             'electricity_hours' => ['nullable', 'numeric', 'min:0'],
             'electricity_power_kwh' => ['nullable', 'numeric', 'min:0'],
             'electricity_Counter_number_before' => ['nullable', 'numeric', 'min:0'],
@@ -63,6 +62,8 @@ class StationReportStoreRequest extends FormRequest
             'station_modification_notes' => ['nullable', 'string'],
             'is_the_electricity_meter_charged' => ['nullable', 'boolean'],
             'quantity_of_electricity_meter_charged_kwh' => ['nullable', 'numeric', 'min:0'],
+            'is_there_an_oil_change' => ['nullable', 'boolean'],
+            'quantity_of_oil_added' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 }

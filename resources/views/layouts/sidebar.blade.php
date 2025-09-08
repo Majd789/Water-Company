@@ -110,13 +110,7 @@
                                     <p>تقارير المحطات</p>
                                 </a></li>
                         @endcan
-                        @can('waterwells2.view')
-                            <li class="nav-item"><a href="{{ route('dashboard.waterwells2.index') }}"
-                                    class="nav-link {{ Request::routeIs('dashboard.waterwells2.*') ? 'active' : '' }}"><i
-                                        class="fas fa-clipboard-check nav-icon"></i>
-                                    <p>تدقيق تقارير</p>
-                                </a></li>
-                        @endcan
+
                         @can('units.view')
                             <li class="nav-item"><a href="{{ route('dashboard.units.index') }}"
                                     class="nav-link {{ Request::routeIs('dashboard.units.*') ? 'active' : '' }}"><i

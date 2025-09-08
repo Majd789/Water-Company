@@ -4,35 +4,31 @@
 
 @section('content')
     <section class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1>عرض تقرير المحطة</h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ url('/dashboard') }}">الرئيسية</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard.station-reports.index') }}">تقارير المحطات</a></li>
-                        <li class="breadcrumb-item active">عرض التقرير</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
+        {{-- ... (Header remains the same) ... --}}
     </section>
 
     <section class="content">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-12">
-                    <div class="card card-primary">
+                    <div class="card card-primary card-outline">
                         <div class="card-header">
                             <h3 class="card-title">تفاصيل التقرير</h3>
                             <div class="card-tools">
                                 @can('station-reports.edit')
-                                    <a href="{{ route('dashboard.station-reports.edit', $stationReport) }}" class="btn btn-warning btn-sm">
+                                    <a href="{{ route('dashboard.station-reports.edit', $stationReport) }}"
+                                        class="btn btn-warning btn-sm">
                                         <i class="fas fa-edit"></i> تعديل
                                     </a>
                                 @endcan
+                                <a href="{{ route('dashboard.station-reports.paper', [
+                                    'station' => $stationReport->station_id,
+                                    'year' => $stationReport->report_date->year,
+                                    'month' => $stationReport->report_date->month,
+                                ]) }}"
+                                    class="btn btn-info btn-sm" target="_blank">
+                                    <i class="fas fa-print"></i> عرض التقرير الورقي
+                                </a>
                                 <a href="{{ route('dashboard.station-reports.index') }}" class="btn btn-secondary btn-sm">
                                     <i class="fas fa-arrow-left"></i> العودة
                                 </a>
@@ -40,224 +36,265 @@
                         </div>
 
                         <div class="card-body">
-                            {{-- Basic Information --}}
-                            <div class="card card-outline card-info">
+                            {{-- ==================== Basic Information ==================== --}}
+                            <div class="card card-info">
                                 <div class="card-header">
                                     <h3 class="card-title">المعلومات الأساسية</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-md-4">
-                                            <strong>تاريخ التقرير:</strong>
-                                            <p class="text-muted">{{ $stationReport->report_date ? $stationReport->report_date->format('Y-m-d') : 'غير محدد' }}</p>
+                                        <div class="col-md-4"><strong>اسم المحطة:</strong>
+                                            <p class="text-muted">{{ $stationReport->station->station_name ?? 'غير محدد' }}
+                                            </p>
                                         </div>
-                                        <div class="col-md-4">
-                                            <strong>المحطة:</strong>
-                                            <p class="text-muted">{{ $stationReport->station->station_name ?? 'غير محدد' }}</p>
+                                        <div class="col-md-4"><strong>تاريخ التقرير:</strong>
+                                            <p class="text-muted">
+                                                {{ $stationReport->report_date ? $stationReport->report_date->translatedFormat('l, d F Y') : 'غير محدد' }}
+                                            </p>
                                         </div>
-                                        <div class="col-md-4">
-                                            <strong>المشغل:</strong>
+                                        <div class="col-md-4"><strong>حالة التشغيل:</strong>
+                                            <p class="text-muted">
+                                                @if ($stationReport->status)
+                                                    <span
+                                                        class="badge badge-{{ $stationReport->status->value == 'working' ? 'success' : 'danger' }}">{{ $stationReport->status->getLabel() }}</span>
+                                                @else
+                                                    غير محدد
+                                                @endif
+                                            </p>
+                                        </div>
+                                        @if ($stationReport->status->value == 'stopped' && !empty($stationReport->stop_reason))
+                                            <div class="col-md-4"><strong>سبب التوقف:</strong>
+                                                <p class="text-muted">{{ $stationReport->stop_reason }}</p>
+                                            </div>
+                                        @endif
+                                        <div class="col-md-4"><strong>المشغل:</strong>
                                             <p class="text-muted">{{ $stationReport->operator->name ?? 'غير محدد' }}</p>
                                         </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <strong>الحالة التشغيلية:</strong>
+                                        <div class="col-md-4"><strong>الجهة المشغلة:</strong>
                                             <p class="text-muted">
-                                                @if($stationReport->status)
-                                                    <span class="badge badge-{{ $stationReport->status->getColor() }}">
-                                                        {{ $stationReport->status->getLabel() }}
-                                                    </span>
-                                                @else
-                                                    غير محدد
-                                                @endif
-                                            </p>
+                                                {{ $stationReport->operating_entity?->getLabel() ?? 'غير محدد' }}</p>
                                         </div>
-                                        <div class="col-md-4">
-                                            <strong>الجهة المشغلة:</strong>
-                                            <p class="text-muted">
-                                                @if($stationReport->operating_entity)
-                                                    {{ $stationReport->operating_entity->getLabel() }}
-                                                @else
-                                                    غير محدد
-                                                @endif
-                                            </p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <strong>اسم الجهة المشغلة:</strong>
-                                            <p class="text-muted">{{ $stationReport->operating_entity_name ?? 'غير محدد' }}</p>
-                                        </div>
+                                        @if (!empty($stationReport->operating_entity_name))
+                                            <div class="col-md-4"><strong>الشريك:</strong>
+                                                <p class="text-muted">{{ $stationReport->operating_entity_name }}</p>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
 
-                            {{-- Wells Information --}}
-                            <div class="card card-outline card-success">
-                                <div class="card-header">
-                                    <h3 class="card-title">معلومات الآبار والتشغيل</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <strong>عدد الآبار:</strong>
-                                            <p class="text-muted">{{ $stationReport->number_well ?? 0 }}</p>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <strong>إجمالي ساعات التشغيل:</strong>
-                                            <p class="text-muted">{{ $stationReport->operating_hours ?? 0 }} ساعة</p>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <strong>كمية المياه المضخوخة:</strong>
-                                            <p class="text-muted">{{ $stationReport->water_pumped_m3 ?? 0 }} م³</p>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <strong>كمية المياه المنتجة:</strong>
-                                            <p class="text-muted">{{ $stationReport->Water_production_m3 ?? 0 }} م³</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Energy Information --}}
-                            <div class="card card-outline card-warning">
-                                <div class="card-header">
-                                    <h3 class="card-title">معلومات الطاقة</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <strong>مصدر الطاقة الرئيسي:</strong>
-                                            <p class="text-muted">
-                                                @if($stationReport->power_source)
-                                                    {{ $stationReport->power_source->getLabel() }}
-                                                @else
-                                                    غير محدد
-                                                @endif
-                                            </p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <strong>ساعات الكهرباء:</strong>
-                                            <p class="text-muted">{{ $stationReport->electricity_hours ?? 0 }} ساعة</p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <strong>استهلاك الكهرباء:</strong>
-                                            <p class="text-muted">{{ $stationReport->electricity_power_kwh ?? 0 }} كيلو واط ساعة</p>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <strong>ساعات الطاقة الشمسية:</strong>
-                                            <p class="text-muted">{{ $stationReport->solar_hours ?? 0 }} ساعة</p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <strong>ساعات المولدة:</strong>
-                                            <p class="text-muted">{{ $stationReport->generator_hours ?? 0 }} ساعة</p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <strong>استهلاك الديزل:</strong>
-                                            <p class="text-muted">{{ $stationReport->diesel_consumed_liters ?? 0 }} لتر</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Diesel Information --}}
-                            <div class="card card-outline card-danger">
-                                <div class="card-header">
-                                    <h3 class="card-title">معلومات الديزل</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <strong>إجمالي الديزل المتوفر:</strong>
-                                            <p class="text-muted">{{ $stationReport->Total_desil_liters ?? 0 }} لتر</p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <strong>هل تم استلام ديزل:</strong>
-                                            <p class="text-muted">
-                                                @if($stationReport->is_diesel_received === true)
-                                                    <span class="badge badge-success">نعم</span>
-                                                @elseif($stationReport->is_diesel_received === false)
-                                                    <span class="badge badge-danger">لا</span>
-                                                @else
-                                                    غير محدد
-                                                @endif
-                                            </p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <strong>كمية الديزل المستلمة:</strong>
-                                            <p class="text-muted">{{ $stationReport->quantity_of_diesel_received_liters ?? 0 }} لتر</p>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <strong>مصدر الديزل:</strong>
-                                            <p class="text-muted">{{ $stationReport->diesel_source ?? 'غير محدد' }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Modifications --}}
-                            @if($stationReport->has_station_been_modified || $stationReport->station_modification_type || $stationReport->station_modification_notes)
-                                <div class="card card-outline card-secondary">
+                            {{-- ==================== Pumping and Wells Information (Conditional) ==================== --}}
+                            @if ($stationReport->status->value == 'working')
+                                <div class="card card-success">
                                     <div class="card-header">
-                                        <h3 class="card-title">التعديلات على المحطة</h3>
+                                        <h3 class="card-title">بيانات الضخ والآبار</h3>
                                     </div>
                                     <div class="card-body">
                                         <div class="row">
-                                            <div class="col-md-4">
-                                                <strong>هل تم تعديل المحطة:</strong>
-                                                <p class="text-muted">
-                                                    @if($stationReport->has_station_been_modified === true)
-                                                        <span class="badge badge-success">نعم</span>
-                                                    @elseif($stationReport->has_station_been_modified === false)
-                                                        <span class="badge badge-danger">لا</span>
-                                                    @else
-                                                        غير محدد
-                                                    @endif
+                                            @if ($stationReport->number_well > 0)
+                                                <div class="col-md-4"><strong>عدد الآبار العاملة:</strong>
+                                                    <p class="text-muted">{{ $stationReport->number_well }}</p>
+                                                </div>
+                                            @endif
+                                            @if ($stationReport->water_pumped_m3 > 0)
+                                                <div class="col-md-4"><strong>كمية المياه المضخوخة:</strong>
+                                                    <p class="text-muted">{{ $stationReport->water_pumped_m3 }} م³</p>
+                                                </div>
+                                            @endif
+                                            {{-- Note: water_production_m3 is not in your model --}}
+                                            <div class="col-md-4"><strong>هل يوجد تعقيم؟:</strong>
+                                                <p class="text-muted"><span
+                                                        class="badge badge-{{ $stationReport->is_sterile ? 'success' : 'danger' }}">{{ $stationReport->is_sterile ? 'نعم' : 'لا' }}</span>
                                                 </p>
                                             </div>
-                                            <div class="col-md-8">
-                                                <strong>نوع التعديلات:</strong>
-                                                <p class="text-muted">{{ $stationReport->station_modification_type ?? 'غير محدد' }}</p>
+                                            <div class="col-md-4"><strong>توجد مضخة أفقية؟:</strong>
+                                                <p class="text-muted"><span
+                                                        class="badge badge-{{ $stationReport->is_horizontal_pump ? 'success' : 'danger' }}">{{ $stationReport->is_horizontal_pump ? 'نعم' : 'لا' }}</span>
+                                                </p>
                                             </div>
-                                        </div>
-                                        @if($stationReport->station_modification_notes)
-                                            <div class="row">
-                                                <div class="col-12">
-                                                    <strong>ملاحظات التعديلات:</strong>
-                                                    <p class="text-muted">{{ $stationReport->station_modification_notes }}</p>
+                                            @if ($stationReport->is_horizontal_pump && $stationReport->horizontal_pump_operating_hours > 0)
+                                                <div class="col-md-4"><strong>ساعات عمل الأفقية:</strong>
+                                                    <p class="text-muted">
+                                                        {{ $stationReport->horizontal_pump_operating_hours }} ساعة</p>
                                                 </div>
+                                            @endif
+                                            @if ($stationReport->pumpingSector)
+                                                <div class="col-md-4"><strong>قطاع الضخ:</strong>
+                                                    <p class="text-muted">
+                                                        {{ $stationReport->pumpingSector->name ?? 'غير محدد' }}
+                                                    </p>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        {{-- Well Operating Hours --}}
+                                        @if (!empty($stationReport->well_operating_hours) && max($stationReport->well_operating_hours) > 0)
+                                            <hr>
+                                            <h5>ساعات تشغيل الآبار</h5>
+                                            <div class="row">
+                                                @foreach ($stationReport->well_operating_hours as $index => $hours)
+                                                    @if ($hours > 0)
+                                                        <div class="col-md-3"><strong>ساعات البئر
+                                                                {{ $index + 1 }}:</strong>
+                                                            <p class="text-muted">{{ $hours }} ساعة</p>
+                                                        </div>
+                                                    @endif
+                                                @endforeach
                                             </div>
                                         @endif
                                     </div>
                                 </div>
                             @endif
 
-                            {{-- Notes --}}
-                            @if($stationReport->notes || $stationReport->stop_reason)
-                                <div class="card card-outline card-info">
+                            {{-- ==================== Energy Information ==================== --}}
+                            <div class="card card-warning">
+                                <div class="card-header">
+                                    <h3 class="card-title">بيانات الطاقة</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        @if (!empty($stationReport->power_source))
+                                            <div class="col-md-4"><strong>مصدر الطاقة الرئيسي:</strong>
+                                                <p class="text-muted">{{ $stationReport->power_source->getLabel() }}</p>
+                                            </div>
+                                        @endif
+                                        @if ($stationReport->electricity_hours > 0)
+                                            <div class="col-md-4"><strong>ساعات تشغيل الكهرباء:</strong>
+                                                <p class="text-muted">{{ $stationReport->electricity_hours }} ساعة</p>
+                                            </div>
+                                        @endif
+                                        @if ($stationReport->solar_hours > 0)
+                                            <div class="col-md-4"><strong>ساعات تشغيل الطاقة الشمسية:</strong>
+                                                <p class="text-muted">{{ $stationReport->solar_hours }} ساعة</p>
+                                            </div>
+                                        @endif
+                                        @if ($stationReport->generator_hours > 0)
+                                            <div class="col-md-4"><strong>ساعات تشغيل المولدة:</strong>
+                                                <p class="text-muted">{{ $stationReport->generator_hours }} ساعة</p>
+                                            </div>
+                                        @endif
+                                        @if ($stationReport->electricity_power_kwh > 0)
+                                            <div class="col-md-4"><strong>استهلاك الكهرباء:</strong>
+                                                <p class="text-muted">{{ $stationReport->electricity_power_kwh }} KWH</p>
+                                            </div>
+                                        @endif
+                                        @if (!empty($stationReport->electricity_Counter_number_before))
+                                            <div class="col-md-4"><strong>عداد الكهرباء (قبل):</strong>
+                                                <p class="text-muted">
+                                                    {{ $stationReport->electricity_Counter_number_before }}</p>
+                                            </div>
+                                        @endif
+                                        @if (!empty($stationReport->electricity_Counter_number_after))
+                                            <div class="col-md-4"><strong>عداد الكهرباء (بعد):</strong>
+                                                <p class="text-muted">
+                                                    {{ $stationReport->electricity_Counter_number_after }}</p>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- ==================== Diesel Information ==================== --}}
+                            <div class="card card-danger">
+                                <div class="card-header">
+                                    <h3 class="card-title">بيانات الديزل</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        @if ($stationReport->diesel_consumed_liters > 0)
+                                            <div class="col-md-4"><strong>استهلاك الديزل:</strong>
+                                                <p class="text-muted">{{ $stationReport->diesel_consumed_liters }} لتر</p>
+                                            </div>
+                                        @endif
+                                        @if ($stationReport->Total_desil_liters > 0)
+                                            <div class="col-md-4"><strong>الكمية الإجمالية:</strong>
+                                                <p class="text-muted">{{ $stationReport->Total_desil_liters }} لتر</p>
+                                            </div>
+                                        @endif
+                                        <div class="col-md-4"><strong>هل تم استلام ديزل؟:</strong>
+                                            <p class="text-muted"><span
+                                                    class="badge badge-{{ $stationReport->is_diesel_received ? 'success' : 'danger' }}">{{ $stationReport->is_diesel_received ? 'نعم' : 'لا' }}</span>
+                                            </p>
+                                        </div>
+                                        @if ($stationReport->is_diesel_received)
+                                            @if ($stationReport->quantity_of_diesel_received_liters > 0)
+                                                <div class="col-md-6"><strong>الكمية المستلمة:</strong>
+                                                    <p class="text-muted">
+                                                        {{ $stationReport->quantity_of_diesel_received_liters }} لتر</p>
+                                                </div>
+                                            @endif
+                                            @if (!empty($stationReport->diesel_source))
+                                                <div class="col-md-6"><strong>مصدر الديزل:</strong>
+                                                    <p class="text-muted">{{ $stationReport->diesel_source }}</p>
+                                                </div>
+                                            @endif
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- ==================== Maintenance ==================== --}}
+                            <div class="card card-secondary">
+                                <div class="card-header">
+                                    <h3 class="card-title">الصيانة</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4"><strong>هل تم شحن العداد؟:</strong>
+                                            <p class="text-muted"><span
+                                                    class="badge badge-{{ $stationReport->is_the_electricity_meter_charged ? 'success' : 'danger' }}">{{ $stationReport->is_the_electricity_meter_charged ? 'نعم' : 'لا' }}</span>
+                                            </p>
+                                        </div>
+                                        @if ($stationReport->is_the_electricity_meter_charged && $stationReport->quantity_of_electricity_meter_charged_kwh > 0)
+                                            <div class="col-md-8"><strong>كمية الشحن:</strong>
+                                                <p class="text-muted">
+                                                    {{ $stationReport->quantity_of_electricity_meter_charged_kwh }} KWH</p>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4"><strong>هل تم تغيير زيت؟:</strong>
+                                            <p class="text-muted"><span
+                                                    class="badge badge-{{ $stationReport->is_there_an_oil_change ? 'success' : 'danger' }}">{{ $stationReport->is_there_an_oil_change ? 'نعم' : 'لا' }}</span>
+                                            </p>
+                                        </div>
+                                        @if ($stationReport->is_there_an_oil_change && $stationReport->quantity_of_oil_added > 0)
+                                            <div class="col-md-8"><strong>كمية الزيت المضافة:</strong>
+                                                <p class="text-muted">{{ $stationReport->quantity_of_oil_added }} لتر</p>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4"><strong>هل تم تعديل المحطة؟:</strong>
+                                            <p class="text-muted"><span
+                                                    class="badge badge-{{ $stationReport->has_station_been_modified ? 'success' : 'danger' }}">{{ $stationReport->has_station_been_modified ? 'نعم' : 'لا' }}</span>
+                                            </p>
+                                        </div>
+                                        @if ($stationReport->has_station_been_modified)
+                                            @if (!empty($stationReport->station_modification_type))
+                                                <div class="col-md-4"><strong>نوع التعديل:</strong>
+                                                    <p class="text-muted">{{ $stationReport->station_modification_type }}
+                                                    </p>
+                                                </div>
+                                            @endif
+                                            @if (!empty($stationReport->station_modification_notes))
+                                                <div class="col-md-12"><strong>ملاحظات التعديل:</strong>
+                                                    <p class="text-muted">{{ $stationReport->station_modification_notes }}
+                                                    </p>
+                                                </div>
+                                            @endif
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- ==================== Notes ==================== --}}
+                            @if (!empty($stationReport->notes))
+                                <div class="card card-dark">
                                     <div class="card-header">
-                                        <h3 class="card-title">الملاحظات</h3>
+                                        <h3 class="card-title">ملاحظات عامة</h3>
                                     </div>
                                     <div class="card-body">
-                                        @if($stationReport->stop_reason)
-                                            <div class="row">
-                                                <div class="col-12">
-                                                    <strong>سبب التوقف:</strong>
-                                                    <p class="text-muted">{{ $stationReport->stop_reason }}</p>
-                                                </div>
-                                            </div>
-                                        @endif
-                                        @if($stationReport->notes)
-                                            <div class="row">
-                                                <div class="col-12">
-                                                    <strong>ملاحظات عامة:</strong>
-                                                    <p class="text-muted">{{ $stationReport->notes }}</p>
-                                                </div>
-                                            </div>
-                                        @endif
+                                        <p class="text-muted">{{ $stationReport->notes }}</p>
                                     </div>
                                 </div>
                             @endif

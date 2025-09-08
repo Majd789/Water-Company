@@ -70,6 +70,9 @@ class AuthController extends Controller
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email ?? null,
+            'station_id' => $user->station_id,
+            'unit_id' => $user->unit_id,
+            'level' => $user->level,
             'roles' => method_exists($user, 'getRoleNames') ? $user->getRoleNames() : [],
             'permissions' => method_exists($user, 'getAllPermissions') ? $user->getAllPermissions()->pluck('name') : [],
         ]);

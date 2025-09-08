@@ -85,6 +85,10 @@ class StationReportResource extends JsonResource
                 'received_quantity_liters' => (float) $this->quantity_of_diesel_received_liters,
                 'diesel_source' => $this->diesel_source,
             ],
+            'oil_change' => [
+                'was_oil_changed' => (bool) $this->is_there_an_oil_change,
+                'added_quantity' => (float) $this->quantity_of_oil_added,
+            ],
 
             // --- تفاصيل التعديلات وشحن العداد ---
             'modifications_and_charging' => [
