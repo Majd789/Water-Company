@@ -1,28 +1,10 @@
 <?php
 
-use App\Http\Controllers\Api\DieselTankApiController;
-use App\Http\Controllers\Api\DisinfectionPumpApiController;
-use App\Http\Controllers\Api\ElectricityHourApiController;
-use App\Http\Controllers\Api\ElectricityTransformerApiController;
-use App\Http\Controllers\Api\ElevatedTankApiController;
-use App\Http\Controllers\Api\FilterApiController;
-use App\Http\Controllers\Api\GenerationGroupApiController;
-use App\Http\Controllers\Api\GroundTankApiController;
-use App\Http\Controllers\Api\HorizontalPumpApiController;
-use App\Http\Controllers\Api\InfiltratorApiController;
-use App\Http\Controllers\Api\ManholeApiController;
-use App\Http\Controllers\Api\PumpingSectionApiController;
 use App\Http\Controllers\API\PumpingSectorsApiController;
-use App\Http\Controllers\Api\SolarEnergyApiController;
-use App\Http\Controllers\Api\StationApiController;
 use App\Http\Controllers\API\StationController;
-use App\Http\Controllers\Api\TownApiController;
-use App\Http\Controllers\Api\UnitApiController;
-use App\Http\Controllers\Api\WellApiController;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\StatisticsController;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Api\StationReportApiController;
+use App\Http\Controllers\Api\ManholeReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -55,6 +37,7 @@ Route::prefix('v1')->group(function () {
     // Station Reports
     Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('station-reports', StationReportApiController::class);
+        Route::apiResource('manhole-reports', ManholeReportController::class);
 
 // | `GET` | `/api/station-reports` | `index` | `station-reports.index` | جلب قائمة بجميع التقارير الخاصة بالمستخدم. |
 // | `POST` | `/api/station-reports` | `store` | `station-reports.store` | إنشاء تقرير جديد. |

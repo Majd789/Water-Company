@@ -43,6 +43,7 @@ class RolePermissionSeeder extends Seeder
             'stations' => 'المحطات',
             'wells' => 'الآبار',
             'station_reports' => 'تقارير المحطات',
+            'manhole_reports' => 'تقارير المناهل',
             'solar_energies' => 'الطاقة الشمسية',
             'pumping_sectors' => 'قطاعات الضخ',
             'privet_wells' => 'الآبار الخاصة',

@@ -85,12 +85,12 @@ class StationReportApiController extends Controller
                 return $this->errorResponse('يجب عليك إرسال تقرير اليوم السابق أولاً.', 403);
             }
         }
-    
+
         // إزالة الحقول التي قيمها فارغة أو صفرية
         $validated = collect($validated)->filter(function ($value) {
             return !is_null($value) && ($value !== '' || is_bool($value));
         })->toArray();
-    
+
         // تعيين القيمة إلى null إذا كانت فارغة أو صفرية، بدلاً من إزالتها بالكامل
         if (isset($validated['operating_entity_name']) && empty($validated['operating_entity_name'])) {
             $validated['operating_entity_name'] = null;
@@ -131,7 +131,7 @@ class StationReportApiController extends Controller
                                           ->where('report_date', '<', $originalReportDate)
                                           ->latest('report_date')
                                           ->first();
-            
+
             // إذا كان هناك تقرير سابق، تأكد أن التاريخ الجديد يتبعه مباشرة
             if ($previousReport && !$newReportDate->equalTo(Carbon::parse($previousReport->report_date)->addDay())) {
                 return $this->errorResponse('تاريخ التقرير الجديد يجب أن يتبع التقرير السابق مباشرة.', 403);
@@ -142,10 +142,10 @@ class StationReportApiController extends Controller
         $validated = collect($validated)->filter(function ($value) {
             return !is_null($value) && ($value !== '' || is_bool($value));
         })->toArray();
-    
+
         // تحديث التقرير بالبيانات الجديدة
         $stationReport->update($validated);
-    
+
         // إعادة تحميل التقرير مع العلاقات المحدثة
         $stationReport->load(['station', 'operator']);
 
@@ -210,7 +210,7 @@ class StationReportApiController extends Controller
         $query = PumpingSector::query()->where('station_id', $user->station_id);
         $selectedUnitId = $request->unit_id ?? $userUnitId;
         $PumpingSectors = $query->with(['station', 'station.town'])->get();
-          
+
         // جلب قائمة المنظمات
         $organizations = collect(OperatingEntityName::cases())->map(function ($case) {
             return [
@@ -226,9 +226,9 @@ class StationReportApiController extends Controller
             'units' => $units,
             'station_id' => $user->station_id,
             'unit_id' => $user->unit_id,
-          
+
         ];
-        
+
         return $this->successResponse($data, 'تم جلب البيانات اللازمة لإنشاء التقرير بنجاح.');
     }
 }
