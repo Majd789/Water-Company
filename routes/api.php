@@ -36,6 +36,8 @@ Route::prefix('v1')->group(function () {
 
     // Station Reports
     Route::middleware('auth:sanctum')->group(function () {
+         Route::get('/manhole-reports/create-data', [ManholeReportController::class, 'getCreateData']);
+          Route::get('/reports/create-data', [StationReportApiController::class, 'getCreateReportData']);
         Route::apiResource('station-reports', StationReportApiController::class);
         Route::apiResource('manhole-reports', ManholeReportController::class);
 
@@ -51,10 +53,7 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('/pumping_sectors',PumpingSectorsApiController::class);
         });
 
-    //جلب بيانات المنظمات
-    Route::middleware(['auth:sanctum'])->group(function(){
-        Route::get('/reports/create-data', [StationReportApiController::class, 'getCreateReportData']);});
-
+        
        // الاحصائيات
     Route::middleware(['auth:sanctum'])->group(function(){
         Route::get('/statistics',[StatisticsController::class,'index']);

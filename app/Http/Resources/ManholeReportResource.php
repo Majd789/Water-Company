@@ -19,7 +19,9 @@ class ManholeReportResource extends JsonResource
 
 
             'manhole_id' => $this->manhole_id,
-            'manhole_name' => $this->whenLoaded('manhole', fn() => $this->manhole->name),
+            'manhole_name' => $this->whenLoaded('manhole', function () {
+                return $this->manhole->manhole_name;
+            }),
             'station_id' => $this->station_id,
             'station_name' => $this->whenLoaded('station', fn() => $this->station->station_name),
             'unit_id' => $this->unit_id,

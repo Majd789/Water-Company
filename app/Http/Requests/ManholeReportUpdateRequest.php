@@ -4,7 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
-
+use App\Enum\StationOperationStatus;
+use Illuminate\Validation\Rule;
 class ManholeReportUpdateRequest extends FormRequest
 {
     /**
@@ -12,9 +13,7 @@ class ManholeReportUpdateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // سيتم التحقق من الصلاحيات التفصيلية في المتحكم
-        // هنا نتأكد فقط من أن المستخدم مسجل دخوله
-        return Auth::check();
+         return Auth::user()->can('manhole_reports.edit');
     }
 
     /**
@@ -27,23 +26,27 @@ class ManholeReportUpdateRequest extends FormRequest
         // نفس قواعد الإنشاء تقريباً، لكن بدون "report_date"
         // نستخدم 'sometimes' للسماح بإرسال الحقول المراد تحديثها فقط (مناسب لـ PATCH)
         return [
-            'unit_id' => 'sometimes|required|exists:units,id',
-            'station_id' => 'sometimes|required|exists:stations,id',
-            'manhole_id' => 'sometimes|required|exists:manholes,id',
-            'status' => 'sometimes|required|string|in:working,stopped,maintenance',
-            'stop_reason' => 'nullable|string|max:1000',
-            'has_flow_meter' => 'sometimes|required|boolean',
-            'flow_meter_counter_number_before' => 'nullable|numeric|gte:0',
-            'flow_meter_counter_number_after' => 'nullable|numeric|gt:flow_meter_counter_number_before',
-            'water_flow_m3' => 'nullable|numeric|gte:0',
-            'water_m3_price' => 'nullable|numeric|gte:0',
-            'total_water_price' => 'nullable|numeric|gte:0',
-            'has_water_refill_for_tankers' => 'sometimes|required|boolean',
-            'water_refill_for_tankers_m3' => 'nullable|numeric|gte:0',
-            'has_free_water_distribution' => 'sometimes|required|boolean',
-            'free_water_distribution_m3' => 'nullable|numeric|gte:0',
-            'book_number' => 'nullable|string|max:255',
-            'notes' => 'nullable|string|max:2000',
+          'manhole_id' => ['sometimes', 'required', 'exists:manholes,id'],
+            'status' => ['sometimes', 'required', Rule::enum(StationOperationStatus::class)],
+            
+            'stop_reason' => ['sometimes', 'nullable', 'string', 'required_if:status,stopped'],
+            'notes' => ['sometimes', 'nullable', 'string'],
+
+            // --- قسم عداد الغزارة ---
+            'has_flow_meter' => ['sometimes', 'required', 'boolean'],
+            'flow_meter_counter_number_before' => ['sometimes', 'required_if:has_flow_meter,true', 'nullable', 'numeric', 'gte:0'],
+            'flow_meter_counter_number_after' => ['sometimes', 'required_if:has_flow_meter,true', 'nullable', 'numeric', 'gte:0'],
+            'water_flow_m3' => ['sometimes', 'required_if:status,working', 'nullable', 'numeric', 'gte:0'],
+            'water_m3_price' => ['sometimes', 'required_if:status,working', 'nullable', 'numeric', 'gte:0'],
+            'total_water_price' => ['sometimes', 'required_if:status,working', 'nullable', 'numeric', 'gte:0'],
+
+            // --- قسم توزيع المياه ---
+            'has_water_refill_for_tankers' => ['sometimes', 'required', 'boolean'],
+            'water_refill_for_tankers_m3' => ['sometimes', 'required_if:has_water_refill_for_tankers,true', 'nullable', 'numeric', 'gte:0'],
+            
+            'has_free_water_distribution' => ['sometimes', 'required', 'boolean'],
+            'free_water_distribution_m3' => ['sometimes', 'required_if:has_free_water_distribution,true', 'nullable', 'numeric', 'gte:0'],
+            'book_number' => ['sometimes', 'required_if:has_free_water_distribution,true', 'nullable', 'string', 'max:255'],
         ];
     }
 }

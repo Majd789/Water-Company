@@ -49,4 +49,13 @@ class Manhole extends Model
     {
         return $this->belongsTo(Town::class);
     }
+    /**
+     * العلاقة مع تقارير المنهل
+     */
+    public function reports()
+    {
+        return $this->hasMany(ManholeReport::class);
+    }
+
+    
 }

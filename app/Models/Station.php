@@ -40,6 +40,10 @@ class Station extends Model implements HasMedia
     {
         return $this->belongsTo(Town::class);
     }
+    public function unit() //الوحدة الادارية
+    {
+        return $this->belongsTo(Unit::class);
+    }
 
     public function wells() // الابار
     {
@@ -113,4 +117,5 @@ class Station extends Model implements HasMedia
     {
         return $this->hasMany(StationReport::class, 'station_id');
     }
+    
 }

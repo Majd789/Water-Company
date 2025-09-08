@@ -19,7 +19,7 @@ class StationReportUpdateRequest extends FormRequest
 
     public function rules(): array
     {
-return [
+    return [
             'unit_id' => ['sometimes', 'nullable', 'exists:units,id'],
             'station_id' => ['sometimes', 'nullable', 'exists:stations,id'],
             'operator_id' => ['sometimes', 'nullable', 'exists:users,id'],
