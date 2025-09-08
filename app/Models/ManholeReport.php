@@ -8,7 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class ManholeReport extends Model
 {
     use HasFactory;
-
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'manholes_reports'; 
     protected $fillable = [
         'unit_id',
         'station_id',

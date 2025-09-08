@@ -19,6 +19,7 @@ use App\Http\Resources\ManholeReportResource;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\ManholeReportStoreRequest;
+use App\Http\Requests\ManholeReportUpdateRequest;
 
 class ManholeReportController extends Controller
 {
@@ -151,9 +152,34 @@ class ManholeReportController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ManholeReport $manholeReport)
+     public function update(ManholeReportUpdateRequest $request, ManholeReport $manholeReport)
     {
-        //
+        $user = Auth::user();
+
+        // 1. التحقق من الصلاحية العامة للتعديل
+        if ($user->cannot('manhole_reports.update')) {
+            return $this->errorResponse('ليس لديك الصلاحية لتعديل تقارير المناهل.', 403);
+        }
+
+        // 2. التحقق من ملكية التقرير (المشغل لا يمكنه تعديل تقارير غيره)
+        // يمكنك تعديل هذا الشرط للسماح للمدراء بالتعديل مثلاً:
+        // if ($user->id !== $manholeReport->operator_id && !$user->hasRole('admin'))
+        if ($user->id !== $manholeReport->operator_id) {
+            return $this->errorResponse('لا يمكنك تعديل تقرير لا يخصك.', 403);
+        }
+
+        // 3. التحقق من البيانات المدخلة وتحديث التقرير
+        // سيتم التحقق تلقائياً بواسطة ManholeReportUpdateRequest
+        $validated = $request->validated();
+
+        // تحديث التقرير بالبيانات التي تم التحقق منها
+        $manholeReport->update($validated);
+
+        // 4. إرجاع الاستجابة مع البيانات المحدثة
+        return $this->successResponse(
+            new ManholeReportResource($manholeReport),
+            'تم تحديث التقرير بنجاح'
+        );
     }
 
     /**
