@@ -19,6 +19,7 @@ enum StationOperationStatus: string
         return match($this) {
             self::WORKING => 'يعمل',
             self::STOPPED => 'متوقف',
+            
 
         };
     }
