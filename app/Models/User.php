@@ -55,6 +55,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Unit::class);
     }
-
-
+    public function station()
+    {
+    return $this->belongsTo(Station::class);
+    }
+    
 }

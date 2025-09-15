@@ -8,7 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class ManholeReport extends Model
 {
     use HasFactory;
-
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'manholes_reports'; 
     protected $fillable = [
         'unit_id',
         'station_id',
@@ -30,7 +35,19 @@ class ManholeReport extends Model
         'book_number',
         'notes',
     ];
-
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'has_flow_meter' => 'boolean',
+        'has_water_refill_for_tankers' => 'boolean',
+        'has_free_water_distribution' => 'boolean',
+    ];
+    /**
+     * العلاقات
+     */
     public function unit()
     {
         return $this->belongsTo(Unit::class);
