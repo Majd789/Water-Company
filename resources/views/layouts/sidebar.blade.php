@@ -20,7 +20,7 @@
             }
         }
     @endphp
-    <a href="{{ route('dashboard.home') }}" class="brand-link">
+    <a href="{{ route('dashboard.index') }}" class="brand-link">
         <img src="{{ asset('assets/img/favicon.png') }}" alt="Water Db Logo" class="brand-image img-circle elevation-3"
             style="opacity: .8">
         <span class="brand-text font-weight-light">Water Db</span>
@@ -50,8 +50,8 @@
 
                     {{-- 1. الرئيسية --}}
                     <li class="nav-item">
-                        <a href="{{ route('dashboard.home') }}"
-                            class="nav-link {{ Request::routeIs('dashboard.home') ? 'active' : '' }}">
+                        <a href="{{ route('dashboard.index') }}"
+                            class="nav-link {{ Request::routeIs('dashboard.index') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-tachometer-alt"></i>
                             <p>الرئيسية</p>
                         </a>

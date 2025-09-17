@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Response;
 use App\Http\Controllers\Dashboard\{
     DashboardController, UserController, RoleController, UnitController, TownController, StationController,
     WellController, GenerationGroupController, HorizontalPumpController, GroundTankController,
-    ElevatedTankController, FilterController, InfiltratorController,
+    ElevatedTankController, FilterController, InfiltratorController, InstitutionPropertyController,
     ManholeController, NoteController, PrivateWellController, PumpingSectionController,
     SolarEnergyController, StationMapController, StationReportsController,
     WeeklyReportController, ActivityLogController, DataExportController, DailyStationReportController,
@@ -66,13 +66,11 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::get('/export/pumping-sectors', [PumpingSectionController::class, 'export'])->name('pumping-sectors.export');
     Route::get('/export/electricity-hours', [ElectricityHourController::class, 'export'])->name('electricity-hours.export');
     Route::get('/export/electricity-transformers', [ElectricityTransformerController::class, 'export'])->name('electricity-transformers.export');
-    Route::get('/export/private-wells', [PrivateWellController::class, 'export'])->name('private-wells.export');
     Route::get('/export/infiltrators', [InfiltratorController::class, 'export'])->name('infiltrators.export');
     Route::get('/export/filters', [FilterController::class, 'export'])->name('filters.export');
     Route::get('/export/manholes', [ManholeController::class, 'export'])->name('manholes.export');
     Route::get('/export/solar-energies', [SolarEnergyController::class, 'export'])->name('solar-energies.export');
     Route::get('/export/diesel-tanks', [DieselTankController::class, 'export'])->name('diesel-tanks.export');
-    Route::get('/weekly-reports/export', [WeeklyReportController::class, 'export'])->name('weekly_reports.export');
     Route::get('/export/all-data', [DataExportController::class, 'exportAll'])->name('export.all');
     // داخل مجموعة الروابط الخاصة بـ dashboard
     Route::get('maintenance_tasks.export', [MaintenanceTaskController::class, 'export'])->name('maintenance_tasks.export');
@@ -95,7 +93,7 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::post('solar_energy/import', [SolarEnergyController::class, 'import'])->name('import.solar_energies');
     Route::post('diesel_tanks/import', [DieselTankController::class, 'import'])->name('import.diesel_tanks');
     Route::post('/maintenance_tasks/import', [MaintenanceTaskController::class, 'import'])->name('maintenance_tasks.import');
-    Route::get('/', [DashboardController::class, 'index'])->name('home');
+    Route::get('/', [DashboardController::class, 'index'])->name('index');
     Route::resource('users', UserController::class);
     Route::resource('roles', RoleController::class);
     Route::resource('units', UnitController::class);
