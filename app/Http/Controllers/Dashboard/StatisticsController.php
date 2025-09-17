@@ -73,7 +73,6 @@ class StatisticsController extends Controller
             $statistics = [
                 'stations_count' => Station::count(),
                 'wells_count' => Well::count(),
-                'private_wells_count' => PrivateWell::count(),
                 'users_count' => User::count(),
                 'units_count' => Unit::count(),
                 'towns_count' => Town::count(),

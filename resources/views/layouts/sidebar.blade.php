@@ -73,7 +73,6 @@
                             'pumping_sectors.view',
                             'electricity_hours.view',
                             'electricity_transformers.view',
-                            'privet_wells.view',
                             'infiltrators.view',
                             'filters.view',
                             'manholes.view',
@@ -95,7 +94,6 @@
                             'dashboard.pumping-sectors.*',
                             'dashboard.electricity-hours.*',
                             'dashboard.electricity-transformers.*',
-                            'dashboard.private-wells.*',
                             'dashboard.infiltrators.*',
                             'dashboard.filters.*',
                             'dashboard.manholes.*',
@@ -202,13 +200,7 @@
                                     <p>محولات الكهرباء</p>
                                 </a></li>
                         @endcan
-                        @can('privet_wells.view')
-                            <li class="nav-item"><a href="{{ route('dashboard.private-wells.index') }}"
-                                    class="nav-link {{ Request::routeIs('dashboard.private-wells.*') ? 'active' : '' }}"><i
-                                        class="fas fa-user-lock nav-icon"></i>
-                                    <p>الآبار الخاصة</p>
-                                </a></li>
-                        @endcan
+
                         @can('infiltrators.view')
                             <li class="nav-item"><a href="{{ route('dashboard.infiltrators.index') }}"
                                     class="nav-link {{ Request::routeIs('dashboard.infiltrators.*') ? 'active' : '' }}"><i
