@@ -73,7 +73,6 @@
                             'pumping_sectors.view',
                             'electricity_hours.view',
                             'electricity_transformers.view',
-                            'privet_wells.view',
                             'infiltrators.view',
                             'filters.view',
                             'manholes.view',
@@ -200,13 +199,6 @@
                                     class="nav-link {{ Request::routeIs('dashboard.electricity-transformers.*') ? 'active' : '' }}"><i
                                         class="fas fa-plug nav-icon"></i>
                                     <p>محولات الكهرباء</p>
-                                </a></li>
-                        @endcan
-                        @can('privet_wells.view')
-                            <li class="nav-item"><a href="{{ route('dashboard.private-wells.index') }}"
-                                    class="nav-link {{ Request::routeIs('dashboard.private-wells.*') ? 'active' : '' }}"><i
-                                        class="fas fa-user-lock nav-icon"></i>
-                                    <p>الآبار الخاصة</p>
                                 </a></li>
                         @endcan
                         @can('infiltrators.view')

@@ -28,10 +28,9 @@ class AllDataExport implements WithMultipleSheets
             new HorizontalPumpsExport(),
             new InfiltratorsExport(),
             new ManholesExport(),
-            new PrivateWellsExport(),
             new PumpingSectorsExport(),
             new SolarEnergiesExport(),
-          
+
         ];
     }
 }

@@ -6,13 +6,13 @@ use Illuminate\Support\Facades\Response;
 use App\Http\Controllers\Dashboard\{
     DashboardController, UserController, RoleController, UnitController, TownController, StationController,
     WellController, GenerationGroupController, HorizontalPumpController, GroundTankController,
-    ElevatedTankController, FilterController, InfiltratorController, InstitutionPropertyController,
-     ManholeController, NoteController, PrivateWellController, PumpingSectionController,
-    SolarEnergyController, StationMapController, StationReportsController, WaterWell2Controller,
-    WeeklyReportController, ActivityLogController, BillingImportController, ComplaintController, DataExportController, DailyStationReportController,
+    ElevatedTankController, FilterController, InfiltratorController,
+    ManholeController, NoteController, PrivateWellController, PumpingSectionController,
+    SolarEnergyController, StationMapController, StationReportsController,
+    WeeklyReportController, ActivityLogController, DataExportController, DailyStationReportController,
     DieselTankController, DisinfectionPumpController, ElectricityHourController,
-    ElectricityTransformerController, MaintenanceTaskController, OperationalReportController, ProjectController,
-    SubscriberController
+    ElectricityTransformerController, MaintenanceTaskController,
+
 };
 
 
@@ -25,20 +25,10 @@ use App\Http\Controllers\Dashboard\{
 
 // --- 1. المسارات العامة (لا تتطلب تسجيل الدخول) ---
 Route::get('/', fn() => redirect()->route('login'));
-Route::get('/latest-news', [WeeklyReportController::class, 'news'])->name('weekly_reports.news');
 
 // --- 2. مسارات لوحة التحكم الرئيسية (محمية وتستخدم البادئة /dashboard) ---
 Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')->group(function () {
-
-    Route::get('/', [DashboardController::class, 'index'])->name('home');
-      Route::resource('complaints', ComplaintController::class);
-    Route::resource('users', UserController::class);
-    Route::resource('roles', RoleController::class);
-    Route::resource('units', UnitController::class);
-    Route::resource('towns', TownController::class);
-    Route::resource('stations', StationController::class);
-    Route::get('stations/global-information/{id}', [StationController::class, 'getStationGlobalInformation'])->name('stations.global-information');
-    Route::get('/stations/{id}/export-card', [StationController::class, 'exportStationCard'])->name('stations.exportCard');    Route::resource('wells', WellController::class);
+ Route::get('/stations/{id}/export-card', [StationController::class, 'exportStationCard'])->name('stations.exportCard');    Route::resource('wells', WellController::class);
     Route::resource('generation-groups', GenerationGroupController::class);
     Route::resource('horizontal-pumps', HorizontalPumpController::class);
     Route::resource('ground-tanks', GroundTankController::class);
@@ -46,7 +36,6 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::resource('pumping-sectors', PumpingSectionController::class);
     Route::resource('electricity-hours', ElectricityHourController::class);
     Route::resource('electricity-transformers', ElectricityTransformerController::class);
-    Route::resource('private-wells', PrivateWellController::class);
     Route::resource('infiltrators', InfiltratorController::class);
     Route::resource('filters', FilterController::class);
     Route::resource('manholes', ManholeController::class);
@@ -54,8 +43,6 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::resource('diesel_tanks', DieselTankController::class);
     Route::resource('disinfection_pumps', DisinfectionPumpController::class);
     Route::resource('station-reports', StationReportsController::class);
-    Route::resource('weekly_reports', WeeklyReportController::class);
-    Route::resource('daily-station-reports', DailyStationReportController::class);
     Route::resource('notes', NoteController::class);
     Route::resource('maintenance_tasks', MaintenanceTaskController::class);
     // === مسارات خاصة واستثنائية ===
@@ -102,13 +89,20 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::post('pumping-sectors/import', [PumpingSectionController::class, 'import'])->name('pumping_sectors.import');
     Route::post('electricity-hours/import', [ElectricityHourController::class, 'import'])->name('electricity_hours.import');
     Route::post('electricity-transformers/import', [ElectricityTransformerController::class, 'import'])->name('electricity_transformers.import');
-    Route::post('private-wells/import', [PrivateWellController::class, 'import'])->name('private_wells.import');
     Route::post('infiltrators/import', [InfiltratorController::class, 'import'])->name('infiltrators.import');
     Route::post('filters/import', [FilterController::class, 'import'])->name('filters.import');
     Route::post('manholes/import', [ManholeController::class, 'import'])->name('manholes.import');
     Route::post('solar_energy/import', [SolarEnergyController::class, 'import'])->name('import.solar_energies');
     Route::post('diesel_tanks/import', [DieselTankController::class, 'import'])->name('import.diesel_tanks');
     Route::post('/maintenance_tasks/import', [MaintenanceTaskController::class, 'import'])->name('maintenance_tasks.import');
+    Route::get('/', [DashboardController::class, 'index'])->name('home');
+    Route::resource('users', UserController::class);
+    Route::resource('roles', RoleController::class);
+    Route::resource('units', UnitController::class);
+    Route::resource('towns', TownController::class);
+    Route::resource('stations', StationController::class);
+    Route::get('stations/global-information/{id}', [StationController::class, 'getStationGlobalInformation'])->name('stations.global-information');
+
 });
 
 // // --- 3. مسارات النظام (ملف التعريف، المصادقة) ---

@@ -20,7 +20,9 @@ class HorizontalPumpController extends Controller
         $this->middleware('permission:horizontal_pumps.create')->only(['create', 'store']);
         $this->middleware('permission:horizontal_pumps.edit')->only(['edit', 'update']);
         $this->middleware('permission:horizontal_pumps.delete')->only('destroy');
-       
+        $this->middleware('permission:horizontal_pumps.export')->only('export');
+        $this->middleware('permission:horizontal_pumps.import')->only('import');
+
     }
    /**
      * عرض قائمة المضخات.
