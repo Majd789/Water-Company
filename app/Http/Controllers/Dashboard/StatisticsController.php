@@ -13,7 +13,6 @@ use App\Models\GroundTank;
 use App\Models\HorizontalPump;
 use App\Models\Infiltrator;
 use App\Models\Manhole;
-use App\Models\PrivateWell;
 use App\Models\PumpingSector;
 use App\Models\SolarEnergy;
 use App\Models\Station;
@@ -51,9 +50,8 @@ class StatisticsController extends Controller
             // إحصائيات خاصة بمحطة
             $statistics = [
                 'wells_count' => $station->wells()->count(),
-                'private_wells_count' => $station->privateWells()->count(),
                 'pumping_sectors_count' => $station->pumpingSectors()->count(),
-                'diesel_tanks_count' => $station->dieselTanks()->count(),
+                'diesel_tanks_count' => $station->dieselTank()->count(),
                 'manholes_count' => $station->manholes()->count(),
                 'solar_energy_count' => $station->solarEnergies()->count(),
                 'filters_count' => $station->filters()->count(),

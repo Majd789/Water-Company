@@ -30,10 +30,17 @@
                                 <a href="{{ route('dashboard.units.create') }}" class="btn btn-primary ml-2">
                                     <i class="fas fa-plus"></i> إضافة وحدة جديدة
                                 </a>
+
+                                 <a href="{{ route('dashboard.export.all', request()->query()) }}"
+                                    class="btn btn-success ml-2">
+                                    <i class="fas fa-file-excel"></i> تصدير Excel
+                                </a>
+
                                 <a href="{{ route('dashboard.export.all', request()->query()) }}"
                                     class="btn btn-success ml-2">
                                     <i class="fas fa-file-excel"></i> تصدير Excel
                                 </a>
+
 
                             </div>
                         </div>
