@@ -94,7 +94,6 @@
                             'dashboard.pumping-sectors.*',
                             'dashboard.electricity-hours.*',
                             'dashboard.electricity-transformers.*',
-                            'dashboard.private-wells.*',
                             'dashboard.infiltrators.*',
                             'dashboard.filters.*',
                             'dashboard.manholes.*',
@@ -201,6 +200,7 @@
                                     <p>محولات الكهرباء</p>
                                 </a></li>
                         @endcan
+
                         @can('infiltrators.view')
                             <li class="nav-item"><a href="{{ route('dashboard.infiltrators.index') }}"
                                     class="nav-link {{ Request::routeIs('dashboard.infiltrators.*') ? 'active' : '' }}"><i
