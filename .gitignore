@@ -11,6 +11,7 @@
 /public/storage
 /storage/*.key
 /vendor
+/public
 .env
 .env.backup
 .env.production
