@@ -74,7 +74,7 @@
                 @endif
 
                 <!-- قسم استيراد الآبار -->
-              
+
                     <div class="card card-success collapsed-card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h3 class="card-title mb-0">
@@ -104,7 +104,7 @@
                             </form>
                         </div>
                     </div>
-               
+
 
                 <!-- الفورم الرئيسي لإضافة بئر جديدة -->
                 <div class="card card-primary">
@@ -150,6 +150,15 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="town_code">كود البلدة<span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend"><span class="input-group-text"><i class="fas fa-barcode"></i></span></div>
+                                        <input type="text" class="form-control" name="town_code" value="{{ old('town_code') }}" placeholder="أدخل كود البلدة" required>
+                                    </div>
+                                </div>
+                            </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="well_type">نوع البئر<span class="text-danger">*</span></label>
