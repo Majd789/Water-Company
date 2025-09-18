@@ -2,7 +2,12 @@
 /node_modules
 /public/build
 /public/hot
-/public
+/public/assets
+/public/dist
+/public/favicon.ico
+/public/docs
+/public/plugins
+/public/administrative_images
 /public/storage
 /storage/*.key
 /vendor
