@@ -11,7 +11,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard.home') }}">الرئيسية</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">الرئيسية</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('dashboard.station-reports.index') }}">تقارير
                                 المحطات</a></li>
                         <li class="breadcrumb-item active">حالة التقديم</li>
