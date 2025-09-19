@@ -173,12 +173,6 @@ class StationController extends Controller
                 'color' => 'info',
                 'route' => route('dashboard.wells.index', ['station_id' => $station->id])
             ],
-            'الآبار الخاصة' => [
-                'count' => optional($station->privateWells)->count() ?? 0,
-                'icon' => 'fas fa-user-lock',
-                'color' => 'dark',
-                'route' => route('dashboard.private-wells.index', ['station_id' => $station->id])
-            ],
             'الانفلترات (العاكسات)' => [
                 'count' => optional($station->infiltrators)->count() ?? 0,
                 'icon' => 'fas fa-wave-square',
@@ -348,12 +342,12 @@ class StationController extends Controller
             'filters',
             'pumpingSectors',
             'manholes',
-            'infiltrator',  
-            'dieselTank',    
-            'disinfectionPump', 
-            'electricityTransformer', 
+            'infiltrator',
+            'dieselTank',
+            'disinfectionPump',
+            'electricityTransformer',
         ])->findOrFail($id);
-        
+
         // return view('dashboard.stations.global-information', compact('station'));
         return response()->json($station);
     }
@@ -384,10 +378,10 @@ class StationController extends Controller
             'electricityHours',
             'pumpingSectors.town', // ✅ تم تعديلها هنا لتحميل العلاقة المتداخلة مع البلدة
         ])->findOrFail($id);
-        
+
         // اسم ملف التحميل الديناميكي
         $fileName = 'station-card-' . $station->station_name . '.xlsx';
-        
+
         // الخطوة 2: تمرير الكائن '$station' إلى فئة التصدير
         return Excel::download(new StationCardExport($station), $fileName);
     }
