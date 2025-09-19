@@ -30,34 +30,7 @@ Route::get('/', fn() => redirect()->route('login'));
 
 // --- 2. مسارات لوحة التحكم الرئيسية (محمية وتستخدم البادئة /dashboard) ---
 Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')->group(function () {
-
- Route::get('/stations/{id}/export-card', [StationController::class, 'exportStationCard'])->name('stations.exportCard');    Route::resource('wells', WellController::class);
-    Route::resource('generation-groups', GenerationGroupController::class);
-    Route::resource('horizontal-pumps', HorizontalPumpController::class);
-    Route::resource('ground-tanks', GroundTankController::class);
-    Route::resource('elevated-tanks', ElevatedTankController::class);
-    Route::resource('pumping-sectors', PumpingSectionController::class);
-    Route::resource('electricity-hours', ElectricityHourController::class);
-    Route::resource('electricity-transformers', ElectricityTransformerController::class);
-    Route::resource('infiltrators', InfiltratorController::class);
-    Route::resource('filters', FilterController::class);
-    Route::resource('manholes', ManholeController::class);
-    Route::resource('solar_energy', SolarEnergyController::class); // تم الإبقاء على الاسم كما هو
-    Route::resource('diesel_tanks', DieselTankController::class);
-    Route::resource('disinfection_pumps', DisinfectionPumpController::class);
-    Route::resource('station-reports', StationReportsController::class);
-    Route::resource('notes', NoteController::class);
-    Route::resource('maintenance_tasks', MaintenanceTaskController::class);
-    // === مسارات خاصة واستثنائية ===
-    Route::get('stations-map', [StationMapController::class, 'index'])->name('stations.map');
-    Route::get('activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
-    Route::patch('notes/{note}/status', [NoteController::class, 'updateStatus'])->name('notes.updateStatus');
-    Route::get('station-reports/paper/{station}/{year}/{month}', [StationReportsController::class, 'showPaperReport'])
-    ->name('station-reports.paper');
-    Route::get('reports/submission-status', [StationReportsController::class, 'submissionStatusDashboard'])
-        ->name('reports.submission-status');
-
-    Route::get('/activity-log/export', [ActivityLogController::class, 'export'])->name('activity-log.export');
+      Route::get('/activity-log/export', [ActivityLogController::class, 'export'])->name('activity-log.export');
 
     Route::get('/towns/export', [TownController::class, 'export'])->name('towns.export');
      Route::get('/activity-log/export', [ActivityLogController::class, 'export'])->name('activity-log.export');
@@ -99,6 +72,33 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::post('solar_energy/import', [SolarEnergyController::class, 'import'])->name('import.solar_energies');
     Route::post('diesel_tanks/import', [DieselTankController::class, 'import'])->name('import.diesel_tanks');
     Route::post('/maintenance_tasks/import', [MaintenanceTaskController::class, 'import'])->name('maintenance_tasks.import');
+    Route::get('/stations/{id}/export-card', [StationController::class, 'exportStationCard'])->name('stations.exportCard');    Route::resource('wells', WellController::class);
+    Route::resource('generation-groups', GenerationGroupController::class);
+    Route::resource('horizontal-pumps', HorizontalPumpController::class);
+    Route::resource('ground-tanks', GroundTankController::class);
+    Route::resource('elevated-tanks', ElevatedTankController::class);
+    Route::resource('pumping-sectors', PumpingSectionController::class);
+    Route::resource('electricity-hours', ElectricityHourController::class);
+    Route::resource('electricity-transformers', ElectricityTransformerController::class);
+    Route::resource('infiltrators', InfiltratorController::class);
+    Route::resource('filters', FilterController::class);
+    Route::resource('manholes', ManholeController::class);
+    Route::resource('solar_energy', SolarEnergyController::class); // تم الإبقاء على الاسم كما هو
+    Route::resource('diesel_tanks', DieselTankController::class);
+    Route::resource('disinfection_pumps', DisinfectionPumpController::class);
+    Route::resource('station-reports', StationReportsController::class);
+    Route::resource('notes', NoteController::class);
+    Route::resource('maintenance_tasks', MaintenanceTaskController::class);
+    // === مسارات خاصة واستثنائية ===
+    Route::get('stations-map', [StationMapController::class, 'index'])->name('stations.map');
+    Route::get('activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
+    Route::patch('notes/{note}/status', [NoteController::class, 'updateStatus'])->name('notes.updateStatus');
+    Route::get('station-reports/paper/{station}/{year}/{month}', [StationReportsController::class, 'showPaperReport'])
+    ->name('station-reports.paper');
+    Route::get('reports/submission-status', [StationReportsController::class, 'submissionStatusDashboard'])
+        ->name('reports.submission-status');
+
+
 
     Route::get('/', [DashboardController::class, 'index'])->name('index');
 
