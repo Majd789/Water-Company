@@ -185,12 +185,12 @@
                                 </div>
                                  <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="unit_id">البلدة<span class="text-danger">*</span></label>
+                                        <label for="unit_id">الوحدة<span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <div class="input-group-prepend"><span class="input-group-text"><i
                                                         class="fas fa-map-marker-alt"></i></span></div>
                                             <select name="unit_id" id="unit_id" class="form-control select2" required>
-                                                <option value="" disabled selected>-- اختر البلدة --</option>
+                                                <option value="" disabled selected>-- اختر الوحدة --</option>
                                                 @foreach ($units as $unit)
                                                     <option value="{{ $unit->id }}"
                                                         {{ old('unit_id') == $unit->id ? 'selected' : '' }}>
