@@ -70,7 +70,7 @@
                 @endif
 
                 <!-- قسم استيراد المناهل (بنفس التصميم الأخضر) -->
-              
+
                     <div class="card card-success collapsed-card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h3 class="card-title mb-0">
@@ -100,7 +100,7 @@
                             </form>
                         </div>
                     </div>
-              
+
 
                 <!-- الفورم الرئيسي لإضافة منهل جديد -->
                 <div class="card card-primary">
@@ -183,14 +183,21 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>الوحدة</label>
+                                        <label for="unit_id">البلدة<span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <div class="input-group-prepend"><span class="input-group-text"><i
-                                                        class="fas fa-building"></i></span></div>
-                                            <input type="text" class="form-control"
-                                                value="{{ $unit ? $unit->unit_name : 'غير محددة' }}" readonly>
+                                                        class="fas fa-map-marker-alt"></i></span></div>
+                                            <select name="unit_id" id="unit_id" class="form-control select2" required>
+                                                <option value="" disabled selected>-- اختر البلدة --</option>
+                                                @foreach ($units as $unit)
+                                                    <option value="{{ $unit->id }}"
+                                                        {{ old('unit_id') == $unit->id ? 'selected' : '' }}>
+                                                        {{ $unit->unit_name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                 </div>

@@ -91,12 +91,12 @@ class ManholeController extends Controller
     public function create()
     {
         // الحصول على الوحدة المرتبطة بالمستخدم الحالي
-        $unit = auth()->user()->unit;
+        $user_unit = auth()->user()->unit;
 
         // إذا كانت هناك وحدة، جلب المحطات عبر البلدات المرتبطة بالوحدة
-        if ($unit) {
+        if ($user_unit) {
             // جلب البلدات المرتبطة بالوحدة
-            $towns = $unit->towns;
+            $towns = $user_unit->towns;
 
             // جلب المحطات بناءً على البلدات المرتبطة بالوحدة
             $stations = \App\Models\Station::whereIn('town_id', $towns->pluck('id'))->get();
@@ -104,10 +104,11 @@ class ManholeController extends Controller
             // إذا لم تكن هناك وحدة، جلب جميع المحطات
             $stations = \App\Models\Station::all();
             $towns = Town::all(); // إذا لم يكن هناك وحدة، عرض جميع البلدات
+            $units = Unit::all(); // جلب جميع الوحدات
         }
 
         // إرسال المحطات، الوحدات، والبلدات إلى العرض
-        return view('dashboard.manholes.create', compact('stations', 'unit', 'towns'));
+        return view('dashboard.manholes.create', compact('stations', 'units','user_unit', 'towns'));
     }
 
 
