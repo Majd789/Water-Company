@@ -164,89 +164,105 @@ class StationController extends Controller
      */
     public function show(Station $station)
     {
+         $station->loadCount([
+            'wells',
+            'infiltrators',
+            'dieselTanks',
+            'groundTanks',
+            'elevatedTanks',
+            'solarEnergies',
+            'electricityHours',
+            'filters',
+            'pumpingSectors',
+            'generationGroups',
+            'electricityTransformers',
+            'horizontalPumps',
+            'disinfectionPumps',
+            'manholes',
+        ]);
         // حساب إحصائيات جميع المكونات المرتبطة بالمحطة
         // يفترض أن جميع العلاقات (مثال: wells(), generationGroups()) معرّفة في موديل Station
-        $statistics = [
+            $statistics = [
             'الآبار' => [
-                'count' => optional($station->wells)->count() ?? 0,
+                'count' => $station->wells_count ?? 0,
                 'icon' => 'fas fa-water',
                 'color' => 'info',
                 'route' => route('dashboard.wells.index', ['station_id' => $station->id])
             ],
             'الانفلترات (العاكسات)' => [
-                'count' => optional($station->infiltrators)->count() ?? 0,
+                'count' => $station->infiltrators_count ?? 0,
                 'icon' => 'fas fa-wave-square',
                 'color' => 'maroon',
                 'route' => route('dashboard.infiltrators.index', ['station_id' => $station->id])
             ],
             'خزانات الديزل' => [
-                'count' => optional($station->dieselTanks)->count() ?? 0,
+                'count' => $station->diesel_tanks_count ?? 0,
                 'icon' => 'fas fa-oil-can',
                 'color' => 'secondary',
                 'route' => route('dashboard.diesel_tanks.index', ['station_id' => $station->id])
             ],
             'الخزانات الأرضية' => [
-                'count' => optional($station->groundTanks)->count() ?? 0,
+                'count' => $station->ground_tanks_count ?? 0,
                 'icon' => 'fas fa-database',
                 'color' => 'secondary',
                 'route' => route('dashboard.ground-tanks.index', ['station_id' => $station->id])
             ],
             'الخزانات المرتفعة' => [
-                'count' => optional($station->elevatedTanks)->count() ?? 0,
+                'count' => $station->elevated_tanks_count ?? 0,
                 'icon' => 'fas fa-archway',
                 'color' => 'secondary',
                 'route' => route('dashboard.elevated-tanks.index', ['station_id' => $station->id])
             ],
             'الطاقة الشمسية' => [
-                'count' => optional($station->solarEnergies)->count() ?? 0,
+                'count' => $station->solar_energies_count ?? 0,
                 'icon' => 'fas fa-solar-panel',
                 'color' => 'orange',
                 'route' => route('dashboard.solar_energy.index', ['station_id' => $station->id])
             ],
             'عدادات الكهرباء' => [
-                'count' => optional($station->electricityHours)->count() ?? 0,
+                'count' => $station->electricity_hours_count ?? 0,
                 'icon' => 'fas fa-tachometer-alt',
                 'color' => 'primary',
                 'route' => route('dashboard.electricity-hours.index', ['station_id' => $station->id])
             ],
             'الفلاتر (المرشحات)' => [
-                'count' => optional($station->filters)->count() ?? 0,
+                'count' => $station->filters_count ?? 0,
                 'icon' => 'fas fa-filter',
                 'color' => 'purple',
                 'route' => route('dashboard.filters.index', ['station_id' => $station->id])
             ],
             'قطاعات الضخ' => [
-                'count' => optional($station->pumpingSectors)->count() ?? 0,
+                'count' => $station->pumping_sectors_count ?? 0,
                 'icon' => 'fas fa-sitemap',
                 'color' => 'success',
                 'route' => route('dashboard.pumping-sectors.index', ['station_id' => $station->id])
             ],
             'مجموعات التوليد' => [
-                'count' => optional($station->generationGroups)->count() ?? 0,
+                'count' => $station->generation_groups_count ?? 0,
                 'icon' => 'fas fa-industry',
                 'color' => 'warning',
                 'route' => route('dashboard.generation-groups.index', ['station_id' => $station->id])
             ],
             'المحولات الكهربائية' => [
-                'count' => optional($station->electricityTransformers)->count() ?? 0,
+                'count' => $station->electricity_transformers_count ?? 0,
                 'icon' => 'fas fa-bolt',
                 'color' => 'primary',
                 'route' => route('dashboard.electricity-transformers.index', ['station_id' => $station->id])
             ],
             'المضخات الأفقية' => [
-                'count' => optional($station->horizontalPumps)->count() ?? 0,
+                'count' => $station->horizontal_pumps_count ?? 0,
                 'icon' => 'fas fa-arrows-alt-h',
                 'color' => 'success',
                 'route' => route('dashboard.horizontal-pumps.index', ['station_id' => $station->id])
             ],
             'مضخات التعقيم' => [
-                'count' => optional($station->disinfectionPumps)->count() ?? 0,
+                'count' => $station->disinfection_pumps_count ?? 0,
                 'icon' => 'fas fa-shield-virus',
                 'color' => 'danger',
                 'route' => route('dashboard.disinfection_pumps.index', ['station_id' => $station->id])
             ],
             'المناهل' => [
-                'count' => optional($station->manholes)->count() ?? 0,
+                'count' => $station->manholes_count ?? 0,
                 'icon' => 'fas fa-dungeon',
                 'color' => 'dark',
                 'route' => route('dashboard.manholes.index', ['station_id' => $station->id])
