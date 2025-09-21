@@ -19,8 +19,6 @@ class SolarEnergyController extends Controller
         $this->middleware('permission:solar_energies.create')->only(['create', 'store']);
         $this->middleware('permission:solar_energies.edit')->only(['edit', 'update']);
         $this->middleware('permission:solar_energies.delete')->only('destroy');
-        $this->middleware('permission:solar_energies.export')->only('export');
-        $this->middleware('permission:solar_energies.import')->only('import');
     }
     /**
      * عرض جميع بيانات الطاقة الشمسية
