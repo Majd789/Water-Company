@@ -333,6 +333,8 @@
                                             <option value="غير معروف"
                                                 {{ old('pump_brand_model', $well->pump_brand_model) == 'غير معروف' ? 'selected' : '' }}>
                                                 غير معروف</option>
+                                            <option value="لا يوجد"
+                                                {{ old('pump_brand_model', $well->pump_brand_model) == 'لا يوجد' ? 'selected' : '' }}>لا يوجد</option>
                                         </select>
                                     </div>
                                 </div>
