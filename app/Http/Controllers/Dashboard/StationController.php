@@ -166,7 +166,7 @@ class StationController extends Controller
     {
          $station->loadCount([
             'wells',
-            'infiltrators',
+            'infiltrator',
             'dieselTanks',
             'groundTanks',
             'elevatedTanks',
@@ -190,10 +190,10 @@ class StationController extends Controller
                 'route' => route('dashboard.wells.index', ['station_id' => $station->id])
             ],
             'الانفلترات (العاكسات)' => [
-                'count' => $station->infiltrators_count ?? 0,
+                'count' => $station->infiltrator_count ?? 0,
                 'icon' => 'fas fa-wave-square',
                 'color' => 'maroon',
-                'route' => route('dashboard.infiltrators.index', ['station_id' => $station->id])
+                'route' => route('dashboard.infiltrator.index', ['station_id' => $station->id])
             ],
             'خزانات الديزل' => [
                 'count' => $station->diesel_tanks_count ?? 0,
