@@ -131,7 +131,7 @@ class WellController extends Controller
          $allowedPumpBrands = [
             'ATURIA', 'CHINESE', 'GRUNDFOS', 'RED JACKET', 'JET', 'LOWARA',
             'LOWARA/EU', 'LOWARA/FRANKLIN', 'LOWARA/VOGEL', 'PLUGER', 'RITZ',
-            'ROVATTI', 'VANSAN', 'WILLO', 'غير معروف'
+            'ROVATTI', 'VANSAN', 'WILLO', 'غير معروف','لا يوجد'
         ];
         // التحقق من صحة المدخلات
         $validated = $request->validate([
@@ -178,7 +178,7 @@ class WellController extends Controller
         $allowedPumpBrands = [
             'ATURIA', 'CHINESE', 'GRUNDFOS', 'RED JACKET', 'JET', 'LOWARA',
             'LOWARA/EU', 'LOWARA/FRANKLIN', 'LOWARA/VOGEL', 'PLUGER', 'RITZ',
-            'ROVATTI', 'VANSAN', 'WILLO', 'غير معروف'
+            'ROVATTI', 'VANSAN', 'WILLO', 'غير معروف','لا يوجد'
         ];
         // التحقق من صحة المدخلات
         $validated = $request->validate([
