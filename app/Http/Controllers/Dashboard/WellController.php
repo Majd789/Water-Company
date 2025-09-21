@@ -23,8 +23,6 @@ class WellController extends Controller
         $this->middleware('permission:wells.create')->only(['create', 'store']);
         $this->middleware('permission:wells.edit')->only(['edit', 'update']);
         $this->middleware('permission:wells.delete')->only('destroy');
-        $this->middleware('permission:wells.export')->only('export');
-        $this->middleware('permission:wells.import')->only('import');
     }
      private function getAllowedEnergySources()
     {
