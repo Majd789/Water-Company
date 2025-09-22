@@ -137,7 +137,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="panel_size">استطاعة اللوح (واط)<span
+                                        <label for="panel_size">قياس اللوح (واط)<span
                                                 class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <div class="input-group-prepend"><span class="input-group-text"><i

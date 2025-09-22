@@ -74,7 +74,7 @@
                 @endif
 
                 <!-- قسم استيراد بيانات الطاقة الشمسية -->
-             
+
                     <div class="card card-success collapsed-card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h3 class="card-title mb-0">
@@ -104,7 +104,7 @@
                             </form>
                         </div>
                     </div>
-              
+
 
                 <!-- الفورم الرئيسي لإضافة البيانات -->
                 <div class="card card-primary">

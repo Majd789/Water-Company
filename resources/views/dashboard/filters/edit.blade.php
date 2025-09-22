@@ -126,7 +126,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="filter_capacity">استطاعة المرشح (م³/ساعة)</label>
+                                        <label for="filter_capacity">استطاعة المرشح (كليو واط)</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend"><span class="input-group-text"><i
                                                         class="fas fa-tachometer-alt"></i></span></div>

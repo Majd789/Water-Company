@@ -69,7 +69,7 @@
                     </div>
                 @endif
 
-              
+
                     <div class="card card-success collapsed-card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h3 class="card-title mb-0">
@@ -99,7 +99,7 @@
                             </form>
                         </div>
                     </div>
-              
+
 
                 <!-- الفورم الرئيسي لإضافة مرشح جديد -->
                 <div class="card card-primary">
@@ -196,7 +196,7 @@
                                             <input type="number" step="0.1" name="filter_capacity"
                                                 id="filter_capacity" class="form-control"
                                                 value="{{ old('filter_capacity') }}"
-                                                placeholder="أدخل الاستطاعة بالمتر المكعب/ساعة">
+                                                placeholder="أدخل الاستطاعة بالكيلو متر مكعب في الساعة">
                                         </div>
                                     </div>
                                 </div>

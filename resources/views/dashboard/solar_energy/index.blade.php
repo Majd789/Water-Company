@@ -44,7 +44,7 @@
             <div class="row">
                 <div class="col-12">
                     {{-- قسم الفلترة للأدمن --}}
-                 
+
                         <div class="card card-default">
                             <div class="card-header">
                                 <h3 class="card-title">
@@ -81,7 +81,7 @@
                                 </form>
                             </div>
                         </div>
-                 
+
 
                     {{-- قسم جدول البيانات --}}
                     <div class="card card-primary card-outline">
@@ -96,11 +96,11 @@
                                     class="btn btn-success ml-2">
                                     <i class="fas fa-file-excel"></i> تصدير Excel
                                 </a>
-                            
+
                                     <a href="{{ route('dashboard.solar_energy.create') }}" class="btn btn-primary">
                                         <i class="fas fa-plus mr-1"></i> إضافة محطة شمسية
                                     </a>
-                           
+
                             </div>
                         </div>
 
@@ -119,7 +119,7 @@
                                         <tr>
                                             <th>#</th>
                                             <th>المحطة</th>
-                                            <th>حجم اللوح (م²)</th>
+                                            <th>قياس اللوح (واط)</th>
                                             <th>عدد الألواح</th>
                                             <th>الجهة المنشئة</th>
                                             <th>الحالة الفنية</th>
@@ -154,13 +154,13 @@
                                                             class="btn btn-sm btn-outline-info" title="عرض">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
-                                                      
+
                                                             <a href="{{ route('dashboard.solar_energy.edit', $solarEnergy->id) }}"
                                                                 class="btn btn-sm btn-outline-warning" title="تعديل">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
-                                                  
-                                                      
+
+
                                                             <form
                                                                 action="{{ route('dashboard.solar_energy.destroy', $solarEnergy->id) }}"
                                                                 method="POST" class="d-inline delete-form">
@@ -171,7 +171,7 @@
                                                                     <i class="fas fa-trash"></i>
                                                                 </button>
                                                             </form>
-                                                     
+
                                                     </div>
                                                 </td>
                                             </tr>
