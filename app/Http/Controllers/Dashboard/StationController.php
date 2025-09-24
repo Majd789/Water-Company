@@ -23,8 +23,6 @@ class StationController extends Controller
         $this->middleware('permission:stations.create')->only(['create', 'store']);
         $this->middleware('permission:stations.edit')->only(['edit', 'update']);
         $this->middleware('permission:stations.delete')->only('destroy');
-        $this->middleware('permission:stations.export')->only('export');
-        $this->middleware('permission:stations.import')->only('import');
     }
     /**
      * Display a listing of the resource.

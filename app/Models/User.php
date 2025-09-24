@@ -25,7 +25,7 @@ class User extends Authenticatable
         'password',
         'unit_id',
         'role',
-        'staion_id',
+        'station_id',
         'status',
         'level',
     ];
@@ -59,5 +59,5 @@ class User extends Authenticatable
     {
     return $this->belongsTo(Station::class);
     }
-    
+
 }
