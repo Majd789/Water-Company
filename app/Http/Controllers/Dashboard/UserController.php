@@ -9,6 +9,8 @@ use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use App\Enum\UserStatusEnum;
 use App\Enum\UserLevel;
+use App\Models\Station;
+use App\Models\Unit;
 
 class UserController extends Controller
 {
@@ -36,7 +38,10 @@ class UserController extends Controller
         $statuses = UserStatusEnum::cases();
         $roles = Role::pluck('name');
         $levels = UserLevel::cases();
-        return view('dashboard.users.create', compact('statuses', 'roles', 'levels'));
+        $units = Unit::all(); // <-- جلب كل الوحدات
+        $stations = Station::all(); // <-- جلب كل المحطات
+
+        return view('dashboard.users.create', compact('statuses', 'roles', 'levels', 'units', 'stations'));
     }
 
     /**
@@ -50,7 +55,7 @@ class UserController extends Controller
             'password' => 'required|string|min:6|confirmed',
             'unit_id' => 'nullable|integer',
             'role' => 'required|string',
-            'staion_id' => 'nullable|integer',
+            'station_id' => 'nullable|integer',
             'status' => 'nullable|in:' . implode(',', array_map(fn($e) => $e->value, UserStatusEnum::cases())),
             'level' => 'required|in:' . implode(',', array_map(fn($e) => $e->value, UserLevel::cases())),
         ]);
@@ -81,7 +86,9 @@ class UserController extends Controller
         $statuses = UserStatusEnum::cases();
         $roles = \Spatie\Permission\Models\Role::pluck('name');
         $levels = UserLevel::cases();
-        return view('dashboard.users.edit', compact('user', 'statuses', 'roles', 'levels'));
+        $units = Unit::all();
+        $stations = Station::all();
+        return view('dashboard.users.edit', compact('user', 'statuses', 'roles', 'levels', 'units', 'stations'));
     }
 
     /**

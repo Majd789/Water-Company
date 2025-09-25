@@ -171,8 +171,8 @@
                             <div class="col-md-3 col-6">
                                 <div class="description-block"><i
                                         class="fas fa-ruler-combined text-primary fa-2x mb-2"></i><span
-                                        class="description-text">حجم اللوح</span>
-                                    <h5 class="description-header">{{ $solarEnergy->panel_size ?? '0' }} <small>م²</small>
+                                        class="description-text">قياس اللوح</span>
+                                    <h5 class="description-header">{{ $solarEnergy->panel_size ?? '0' }} <small>واط</small>
                                     </h5>
                                 </div>
                             </div>

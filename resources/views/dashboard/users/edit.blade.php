@@ -13,6 +13,7 @@
                             @csrf
                             @method('PUT')
                             <div class="row">
+                                {{-- حقول الاسم والبريد الإلكتروني وكلمة المرور (بدون تغيير) --}}
                                 <div class="col-md-6 mb-3">
                                     <label for="name" class="form-label">الاسم الكامل</label>
                                     <input type="text" name="name" id="name"
@@ -46,25 +47,24 @@
                                         class="form-control">
                                 </div>
 
+                                {{-- حقول الرتبة والصلاحية --}}
                                 <div class="col-md-6 mb-3">
                                     <label for="level" class="form-label">الرتبة</label>
-                                    <select name="level" id="level"
-                                        class="form-select @error('level') is-invalid @enderror">
+                                    <select name="level" id="level" class="form-select @error('level') is-invalid @enderror">
                                         <option value="">اختر رتبة</option>
                                         @foreach ($levels as $level)
-                                            <option value="{{ $level }}" {{ old('level', $user->level->value ?? $user->level) == $level ? 'selected' : '' }}>
-                                                {{ $level }}</option>
+                                            {{-- تم التصحيح هنا لاستخدام value و getLabel --}}
+                                            <option value="{{ $level->value }}" {{ old('level', $user->level->value) == $level->value ? 'selected' : '' }}>
+                                                {{ $level->getLabel() }}</option>
                                         @endforeach
                                     </select>
                                     @error('level')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                                 <div class="col-md-6 mb-3">
                                     <label for="role" class="form-label">الدور (الصلاحية)</label>
-                                    <select name="role" id="role"
-                                        class="form-select @error('role') is-invalid @enderror">
+                                    <select name="role" id="role" class="form-select @error('role') is-invalid @enderror">
                                         <option value="">اختر دوراً</option>
                                         @foreach ($roles as $role)
                                             <option value="{{ $role }}"
@@ -76,6 +76,38 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+
+                                {{-- *** الإضافة الجديدة هنا *** --}}
+                                <div class="col-md-6 mb-3">
+                                    <label for="unit_id" class="form-label">الوحدة</label>
+                                    <select name="unit_id" id="unit_id" class="form-select @error('unit_id') is-invalid @enderror">
+                                        <option value="">-- بدون وحدة --</option>
+                                        @foreach ($units as $unit)
+                                            <option value="{{ $unit->id }}" {{ old('unit_id', $user->unit_id) == $unit->id ? 'selected' : '' }}>
+                                                {{ $unit->unit_name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('unit_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="station_id" class="form-label">المحطة</label>
+                                    <select name="station_id" id="station_id" class="form-select @error('station_id') is-invalid @enderror">
+                                        <option value="">-- بدون محطة --</option>
+                                        @foreach ($stations as $station)
+                                            <option value="{{ $station->id }}" {{ old('station_id', $user->station_id) == $station->id ? 'selected' : '' }}>
+                                                {{ $station->station_name }} {{-- افترض أن اسم حقل المحطة هو name --}}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('station_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                {{-- *** نهاية الإضافة *** --}}
+
                                 <div class="col-md-6 mb-3">
                                     <label for="status" class="form-label">الحالة</label>
                                     <select name="status" id="status"
