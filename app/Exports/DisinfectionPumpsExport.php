@@ -17,7 +17,7 @@ class DisinfectionPumpsExport implements FromCollection, WithHeadings , WithTitl
         if ($userUnitId) {
             // جلب البلدات المرتبطة بالوحدة
             $towns = \App\Models\Town::where('unit_id', $userUnitId)->pluck('id');
-    
+
             // جلب المحطات المرتبطة بهذه البلدات
             $stations = \App\Models\Station::whereIn('town_id', $towns)->pluck('id');
 
@@ -33,6 +33,7 @@ class DisinfectionPumpsExport implements FromCollection, WithHeadings , WithTitl
                         'unit_name' => $disinfectionPump->station->town->unit->unit_name ?? 'غير محددة', // اسم الوحدة
                         'governorate_name' => $disinfectionPump->station->town->unit->governorate->name ?? 'غير محددة', // اسم المحافظة
                         'station_code' => $disinfectionPump->station->station_code,
+                        'station_name' => $disinfectionPump->station->station_name ?? 'غير محددة', // اسم المحطة
                         'disinfection_pump_status' => $disinfectionPump->disinfection_pump_status,
                         'pump_brand_model' => $disinfectionPump->pump_brand_model,
                         'pump_flow_rate' => $disinfectionPump->pump_flow_rate,
@@ -55,6 +56,7 @@ class DisinfectionPumpsExport implements FromCollection, WithHeadings , WithTitl
                     'unit_name' => $disinfectionPump->station->town->unit->unit_name ?? 'غير محددة', // اسم الوحدة
                     'governorate_name' => $disinfectionPump->station->town->unit->governorate->name ?? 'غير محددة', // اسم المحافظة
                     'station_code' => $disinfectionPump->station->station_code,
+                    'station_name' => $disinfectionPump->station->station_name ?? 'غير محددة', // اسم المحطة
                     'disinfection_pump_status' => $disinfectionPump->disinfection_pump_status,
                     'pump_brand_model' => $disinfectionPump->pump_brand_model,
                     'pump_flow_rate' => $disinfectionPump->pump_flow_rate,
@@ -73,6 +75,7 @@ class DisinfectionPumpsExport implements FromCollection, WithHeadings , WithTitl
             'اسم الوحدة',  // إضافة اسم الوحدة
             'اسم المحافظة',  // إضافة اسم المحافظة
             'كود المحطة',
+            'اسم المحطة',
             'الوضع التشغيلي',
             'ماركة وطراز المضخة',
             'غزارة المضخة (لتر/ساعة)',
