@@ -127,8 +127,13 @@
                                     </thead>
                                     <tbody>
                                         @forelse ($wells as $well)
-                                            <tr>
-                                                <td>{{ $loop->iteration }}</td>
+                                           <tr class="{{ $well->has_violation ? 'table-danger' : '' }}" data-toggle="tooltip" data-placement="top" title="{{ $well->violation_reason }}">
+                                                <td>
+                                                    @if($well->has_violation)
+                                                        <i class="fas fa-exclamation-triangle text-danger mr-1"></i>
+                                                    @endif
+                                                    {{ $well->id }}
+                                                </td>
                                                 <td>{{ $well->well_name }}</td>
                                                 <td>{{ $well->station->station_name ?? 'N/A' }}</td>
                                                 <td>{{ $well->well_status }}</td>
