@@ -19,8 +19,6 @@ class TownController extends Controller
         $this->middleware('permission:towns.create')->only(['create', 'store']);
         $this->middleware('permission:towns.edit')->only(['edit', 'update']);
         $this->middleware('permission:towns.delete')->only('destroy');
-        $this->middleware('permission:towns.export')->only('export');
-        $this->middleware('permission:towns.import')->only('import');
     }
     /**
      * Display a listing of the resource.

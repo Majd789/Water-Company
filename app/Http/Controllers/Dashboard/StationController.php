@@ -29,49 +29,72 @@ class StationController extends Controller
      */
     public function index(Request $request)
     {
-        // الحصول على المستخدم الحالي
         $user = Auth::user();
-
-        // استرجاع جميع الوحدات
         $units = Unit::all();
+        $query = Station::query();
 
-        // التحقق مما إذا كان للمستخدم وحدة محددة
+        // تطبيق فلتر الوحدة بناءً على صلاحيات المستخدم
         if ($user->unit_id) {
             $userUnitId = $user->unit_id;
-
-            // استرجاع البلدات المرتبطة بالوحدة الخاصة بالمستخدم
+            $query->whereHas('town', fn($q) => $q->where('unit_id', $userUnitId));
             $towns = Town::where('unit_id', $userUnitId)->get();
-
-            // تصفية المحطات المرتبطة فقط بالبلدات التابعة للوحدة الخاصة بالمستخدم
-            $stations = Station::whereHas('town', function ($query) use ($userUnitId) {
-                $query->where('unit_id', $userUnitId);
-            });
         } else {
-            // إذا لم يكن لديه وحدة، استرجاع جميع البلدات والمحطات
             $towns = Town::all();
-            $stations = Station::query();
         }
 
-        // تصفية المحطات بناءً على الوحدة إذا تم اختيار وحدة معينة (للمستخدمين غير المرتبطين بوحدة)
-        if ($request->has('unit_id') && $request->unit_id != '') {
-            $stations->whereHas('town', function ($query) use ($request) {
-                $query->where('unit_id', $request->unit_id);
-            });
+        // تطبيق الفلاتر من واجهة المستخدم
+        if ($request->filled('unit_id')) {
+            $query->whereHas('town', fn($q) => $q->where('unit_id', $request->unit_id));
             $towns = Town::where('unit_id', $request->unit_id)->get();
         }
-
-        // تصفية المحطات بناءً على البلدة المحددة
-        if ($request->has('town_id') && $request->town_id != '') {
-            $stations->where('town_id', $request->town_id);
+        if ($request->filled('town_id')) {
+            $query->where('town_id', $request->town_id);
+        }
+        if ($request->filled('station_code')) {
+            $query->where('station_code', 'like', '%' . $request->station_code . '%');
         }
 
-        // تصفية المحطات بناءً على كود المحطة
-        if ($request->has('station_code') && $request->station_code != '') {
-            $stations->where('station_code', 'like', '%' . $request->station_code . '%');
-        }
+        // تحميل عدد المعدات المرتبطة بكفاءة عالية
+        $stations = $query->with('town')->withCount([
+            'wells', 'infiltrator', 'dieselTank', 'groundTanks', 'elevatedTanks',
+            'solarEnergies', 'electricityHours', 'filters', 'pumpingSectors',
+            'generationGroups', 'electricityTransformer', 'horizontalPumps',
+            'disinfectionPump', 'manholes'
+        ])->paginate(500);
 
-        // استرجاع المحطات مع البلدات
-        $stations = $stations->with('town')->paginate(50000);
+        // المرور على كل محطة لتحديد ما إذا كانت تخالف القواعد
+        foreach ($stations as $station) {
+            $station->has_violation = false;
+            $violationReasons = [];
+
+            // القاعدة 1: عاملة ولكن فارغة من المعدات
+            $totalEquipment = $station->wells_count + $station->infiltrator_count + $station->diesel_tank_count + $station->ground_tanks_count + $station->elevated_tanks_count + $station->solar_energies_count + $station->electricity_hours_count + $station->filters_count + $station->pumping_sectors_count + $station->generation_groups_count + $station->electricity_transformer_count + $station->horizontal_pumps_count + $station->disinfection_pump_count + $station->manholes_count;
+            if ($station->operational_status == 'عاملة' && $totalEquipment == 0) {
+                $station->has_violation = true;
+                $violationReasons[] = 'المحطة عاملة لكن لا يوجد بها أي معدات مسجلة.';
+            }
+
+            // القاعدة 2: عاملة ولكن بدون مصدر طاقة
+            if ($station->operational_status == 'عاملة' && $station->energy_source == 'لا يوجد') {
+                $station->has_violation = true;
+                $violationReasons[] = 'المحطة عاملة لكن مصدر الطاقة هو "لا يوجد".';
+            }
+
+            // القاعدة 3: طاقة شمسية بدون انفلتر (عاكس)
+            if ($station->solar_energies_count > 0 && $station->infiltrator_count == 0) {
+                $station->has_violation = true;
+                $violationReasons[] = 'يوجد طاقة شمسية لكن لا يوجد انفلتر (عاكس).';
+            }
+
+            // القاعدة 4: مصدر الطاقة كهرباء ولا يوجد عداد
+            if (str_contains($station->energy_source ?? '', 'كهرباء') && $station->electricity_hours_count == 0) {
+                $station->has_violation = true;
+                $violationReasons[] = 'مصدر الطاقة كهرباء لكن لا يوجد عداد كهرباء مسجل.';
+            }
+
+            // إضافة سبب المخالفة للمحطة (للتوضيح في tooltip)
+            $station->violation_reason = implode("\n", $violationReasons);
+        }
 
         return view('dashboard.stations.index', compact('stations', 'towns', 'units'));
     }
