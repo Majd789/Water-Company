@@ -1,64 +1,81 @@
 <?php
 
-namespace App\Exports;
+namespace App\Http\Controllers\Dashboard;
 
+use App\Exports\ActivitiesExport;
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Activitylog\Models\Activity;
-use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
 
-class ActivitiesExport implements FromQuery, WithHeadings, WithMapping
+class ActivityLogController extends Controller
 {
-    protected $userId;
-    protected $modelName;
-
-    public function __construct($userId = null, $modelName = null)
+    public function __construct()
     {
-        $this->userId = $userId;
-        $this->modelName = $modelName;
+        $this->middleware('permission:activities_logs.view')->only(['index', 'show']);
+        $this->middleware('permission:activities_logs.create')->only(['create', 'store']);
+        $this->middleware('permission:activities_logs.edit')->only(['edit', 'update']);
+        // --- START: تعديل هنا ---
+        // أضف 'deleteAll' إلى هذه القائمة لحماية الدالة الجديدة
+        $this->middleware('permission:activities_logs.delete')->only(['destroy', 'deleteAll']);
+        // --- END: تعديل هنا ---
     }
 
-    public function query()
+    public function index(Request $request)
     {
-        $query = Activity::query()->with('causer');
+        $query = Activity::query()->latest();
 
-        if ($this->userId) {
-            $query->where('causer_id', $this->userId);
+        if ($request->filled('user_id')) {
+            $query->where('causer_id', $request->user_id);
         }
 
-        if ($this->modelName) {
-            $query->where('subject_type', 'like', '%' . $this->modelName);
+        if ($request->filled('model')) {
+            $query->where('subject_type', 'like', '%'.$request->model);
         }
 
-        return $query->latest(); // Ensure the same order as in the table
+        $activities = $query->paginate(1000);
+
+        $users = User::select('id', 'name')->get();
+        $models = Activity::select(DB::raw('DISTINCT(subject_type)'))->pluck('subject_type');
+
+        return view('dashboard.activity-log.index', compact('activities', 'users', 'models'));
     }
 
-    public function headings(): array
+    public function export(Request $request)
     {
-        return [
-            'المستخدم',
-            'الحدث',
-            'الموديل',
-            'رقم العنصر',
-            'التاريخ',
-            'تفاصيل التغيير (قبل)',
-            'تفاصيل التغيير (بعد)',
-        ];
+        $userId = $request->input('user_id');
+        $modelName = $request->input('model');
+
+        $filename = 'سجل_التغييرات';
+        if ($userId) {
+            $user = User::find($userId);
+            if ($user) {
+                $filename .= '_للمستخدم_' . $user->name;
+            }
+        }
+        if ($modelName) {
+            $filename .= '_للموديل_' . $modelName;
+        }
+        $filename .= '_' . now()->format('Ymd_His') . '.xlsx';
+
+        return Excel::download(new ActivitiesExport($userId, $modelName), $filename);
     }
 
-    public function map($activity): array
+    // --- START: الدالة الجديدة للحذف الشامل ---
+    /**
+     * Remove all activity logs from storage.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function deleteAll()
     {
-        $oldProperties = isset($activity->properties['old']) ? json_encode($activity->properties['old'], JSON_UNESCAPED_UNICODE) : '';
-        $newProperties = isset($activity->properties['attributes']) ? json_encode($activity->properties['attributes'], JSON_UNESCAPED_UNICODE) : '';
+        // استخدام truncate أسرع للحذف الكامل، أو delete للحذف مع الالتزام بالـ events
+        Activity::query()->truncate();
 
-        return [
-            $activity->causer ? $activity->causer->name : 'غير معروف',
-            ucfirst($activity->description),
-            class_basename($activity->subject_type),
-            $activity->subject_id,
-            $activity->created_at->format('Y-m-d H:i'),
-            $oldProperties,
-            $newProperties,
-        ];
+        return redirect()->route('dashboard.activity-log.index')
+                         ->with('success', 'تم حذف جميع سجلات النشاط بنجاح.');
     }
+    // --- END: الدالة الجديدة ---
 }

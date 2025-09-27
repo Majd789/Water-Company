@@ -258,8 +258,8 @@
 
                     {{-- 4. إدارة النظام --}}
                     @php
-                        $settingsPermissions = ['users.view', 'roles.view'];
-                        $settingsRoutes = ['dashboard.users.*', 'dashboard.roles.*'];
+                        $settingsPermissions = ['users.view', 'roles.view', 'activities_logs.view'];
+                        $settingsRoutes = ['dashboard.users.*', 'dashboard.roles.*', 'dashboard.activity-log.*'];
                     @endphp
                     <x-sidebar-menu-section title="إدارة النظام" icon="fas fa-cogs" :permissions="$settingsPermissions" :routes="$settingsRoutes">
                         @can('users.view')
@@ -275,6 +275,15 @@
                                         class="fas fa-user-shield nav-icon"></i>
                                     <p>الأدوار والصلاحيات</p>
                                 </a></li>
+                        @endcan
+                        @can('activities_logs.view')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.activity-log.index') }}"
+                                class="nav-link {{ Request::routeIs('dashboard.activity-log.*') ? 'active' : '' }}">
+                                    <i class="fas fa-history nav-icon"></i>
+                                    <p>نشاطات المستخدمين</p>
+                                </a>
+                            </li>
                         @endcan
                     </x-sidebar-menu-section>
 
