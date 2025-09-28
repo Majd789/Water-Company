@@ -24,64 +24,88 @@ class WellController extends Controller
         $this->middleware('permission:wells.edit')->only(['edit', 'update']);
         $this->middleware('permission:wells.delete')->only('destroy');
     }
-     private function getAllowedEnergySources()
+    private function getAllowedEnergySources()
     {
         return [
             'لا يوجد', 'كهرباء', 'مولدة', 'طاقة شمسية', 'كهرباء و مولدة',
             'كهرباء و طاقة شمسية', 'مولدة و طاقة شمسية', 'كهرباء و مولدة و طاقة شمسية'
         ];
     }
-    public function index(Request $request)
+   public function index(Request $request)
     {
-        // استرجاع جميع الوحدات
         $units = Unit::all();
-
-        // الحصول على وحدة المستخدم الحالية (إن وجدت)
         $userUnitId = auth()->user()->unit_id;
+        $query = Well::query();
 
-        // استعلام لجلب الآبار
-        $wells = Well::query();
-
-        // التحقق مما إذا كان المستخدم لديه وحدة مرتبطة أو تم اختيار وحدة من الطلب
         $selectedUnitId = $request->unit_id ?? $userUnitId;
 
         if (!empty($selectedUnitId)) {
-            // تصفية البلدات بناءً على الوحدة المحددة
             $towns = Town::where('unit_id', $selectedUnitId)->get();
-
-            // تصفية المحطات بناءً على البلدات المرتبطة بالوحدة
-            $stations = Station::whereIn('town_id', $towns->pluck('id'))->get();
-
-            // تصفية الآبار بناءً على المحطات المرتبطة
-            $wells = $wells->whereIn('station_id', $stations->pluck('id'));
+            $stationIds = Station::whereIn('town_id', $towns->pluck('id'))->pluck('id');
+            $query->whereIn('station_id', $stationIds);
         } else {
-            // إذا لم يكن هناك وحدة مرتبطة بالمستخدم، استرجاع جميع البلدات والمحطات
             $towns = Town::all();
-            $stations = Station::query();
         }
 
-        // تصفية الآبار بناءً على البلدة المحددة
-        if ($request->has('town_id') && $request->town_id != '') {
-            $stations = $stations->where('town_id', $request->town_id);
-            $wells = $wells->whereIn('station_id', $stations->pluck('id'));
-        }
+        // استخدام الترقيم الفعال بدلاً من جلب كل البيانات مرة واحدة
+        $wells = $query->with('station')->paginate(1000);
 
-        // تصفية الآبار بناءً على كود المحطة، اسم المحطة، أو اسم البئر
-        if ($request->has('search') && $request->search != '') {
-            $searchTerm = $request->search;
-            $wells = $wells->whereHas('station', function ($query) use ($searchTerm) {
-                $query->where('station_code', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('station_name', 'like', '%' . $searchTerm . '%');
-            })
-            ->orWhere('well_name', 'like', '%' . $searchTerm . '%');
-        }
+        // مصفوفة لترجمة أسماء الحقول إلى العربية
+        $fieldTranslations = [
+            'well_flow' => 'التدفق',
+            'static_depth' => 'العمق الساكن',
+            'dynamic_depth' => 'العمق الديناميكي',
+            'drilling_depth' => 'عمق الحفر',
+            'pump_installation_depth' => 'عمق تركيب المضخة',
+            'pump_capacity' => 'استطاعة المضخة',
+            'actual_pump_flow' => 'التدفق الفعلي للمضخة',
+            'pump_brand_model' => 'ماركة المضخة',
+            'energy_source' => 'مصدر الطاقة',
+        ];
 
-        // استرجاع الآبار مع المحطات
-        $wells = $wells->with('station')->paginate(5000);
+        foreach ($wells as $well) {
+            $well->has_violation = false;
+            $violationReasons = [];
+
+            if ($well->well_status == 'يعمل') {
+                if ($well->static_depth !== null && $well->dynamic_depth !== null && $well->static_depth >= $well->dynamic_depth) $violationReasons[] = 'العمق الساكن يجب أن يكون أصغر من الديناميكي.';
+                if ($well->drilling_depth !== null) {
+                    if ($well->static_depth !== null && $well->drilling_depth <= $well->static_depth) $violationReasons[] = 'عمق الحفر يجب أن يكون أكبر من الساكن.';
+                    if ($well->dynamic_depth !== null && $well->drilling_depth <= $well->dynamic_depth) $violationReasons[] = 'عمق الحفر يجب أن يكون أكبر من الديناميكي.';
+                }
+                if ($well->pump_installation_depth !== null) {
+                    if ($well->dynamic_depth !== null && $well->pump_installation_depth < $well->dynamic_depth) $violationReasons[] = 'عمق تركيب المضخة يجب أن يكون >= الديناميكي.';
+                    if ($well->drilling_depth !== null && $well->pump_installation_depth >= $well->drilling_depth) $violationReasons[] = 'عمق تركيب المضخة يجب أن يكون < عمق الحفر.';
+                }if ($well->energy_source == 'لا يوجد') {
+                $violationReasons[] = 'البئر يعمل لكن مصدر الطاقة المحدد هو "لا يوجد".';
+            }
+
+                foreach($fieldTranslations as $field => $translation) {
+                    if (empty($well->$field)) {
+                        $violationReasons[] = "البئر يعمل لكن حقل '{$translation}' فارغ.";
+                    }
+                }
+            }
+            elseif ($well->well_status == 'متوقف') {
+                if (empty($well->stop_reason)) {
+                    $violationReasons[] = 'البئر متوقف ولكن سبب التوقف غير مسجل.';
+                }
+            }
+
+            if (empty($well->well_type)) {
+                $violationReasons[] = 'نوع البئر غير محدد (جوفي/سطحي).';
+            }
+
+            if (!empty($violationReasons)) {
+                $well->has_violation = true;
+                $well->violation_reason = implode("\n", array_unique($violationReasons));
+            } else {
+                $well->violation_reason = '';
+            }
+        }
 
         return view('dashboard.wells.index', compact('wells', 'units', 'towns'));
     }
-
 
 
 

@@ -90,8 +90,14 @@
                                     </thead>
                                     <tbody>
                                         @forelse ($stations as $station)
-                                            <tr>
-                                                <td>{{ $loop->iteration }}</td>
+                                           <tr class="{{ $station->has_violation ? 'table-danger' : '' }}" title="{{ $station->violation_reason }}">
+                                                <td>
+                                                    {{-- إضافة أيقونة تحذير إذا كانت هناك مخالفة --}}
+                                                    @if($station->has_violation)
+                                                        <i class="fas fa-exclamation-triangle text-danger mr-1"></i>
+                                                    @endif
+                                                    {{ $station->id }} {{-- عرض ID المحطة الفعلي --}}
+                                                </td>
                                                 <td>{{ $station->station_name }}</td>
                                                 <td>{{ $station->station_code }}</td>
                                                 <td>{{ $station->operational_status }}</td>

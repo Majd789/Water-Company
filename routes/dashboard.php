@@ -30,11 +30,8 @@ Route::get('/', fn() => redirect()->route('login'));
 
 // --- 2. مسارات لوحة التحكم الرئيسية (محمية وتستخدم البادئة /dashboard) ---
 Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')->group(function () {
-      Route::get('/activity-log/export', [ActivityLogController::class, 'export'])->name('activity-log.export');
-
+    Route::get('/activity-log/export', [ActivityLogController::class, 'export'])->name('activity-log.export');
     Route::get('/towns/export', [TownController::class, 'export'])->name('towns.export');
-     Route::get('/activity-log/export', [ActivityLogController::class, 'export'])->name('activity-log.export');
-
     Route::get('/stations/export', [StationController::class, 'export'])->name('stations.export');
     Route::get('/wells/export', [WellController::class, 'export'])->name('wells.export');
     Route::get('/generation-groups/export', [GenerationGroupController::class, 'exportGenerationGroups'])->name('generation-groups.export');
@@ -129,6 +126,7 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     // === مسارات خاصة واستثنائية ===
     Route::get('stations-map', [StationMapController::class, 'index'])->name('stations.map');
     Route::get('activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
+    Route::delete('/activity-log/delete-all', [ActivityLogController::class, 'deleteAll'])->name('activity-log.deleteAll');
     Route::patch('notes/{note}/status', [NoteController::class, 'updateStatus'])->name('notes.updateStatus');
     Route::get('station-reports/paper/{station}/{year}/{month}', [StationReportsController::class, 'showPaperReport'])
     ->name('station-reports.paper');

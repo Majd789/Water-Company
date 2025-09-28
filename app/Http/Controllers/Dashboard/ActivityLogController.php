@@ -12,40 +12,55 @@ use Spatie\Activitylog\Models\Activity;
 
 class ActivityLogController extends Controller
 {
-      public function __construct()
+    public function __construct()
     {
         $this->middleware('permission:activities_logs.view')->only(['index', 'show']);
         $this->middleware('permission:activities_logs.create')->only(['create', 'store']);
         $this->middleware('permission:activities_logs.edit')->only(['edit', 'update']);
-        $this->middleware('permission:activities_logs.delete')->only('destroy');
-    }
-   public function index(Request $request)
-{
-    $query = Activity::query()->latest();
-
-    if ($request->filled('user_id')) {
-        $query->where('causer_id', $request->user_id);
+        // --- START: تعديل هنا ---
+        // أضف 'deleteAll' إلى هذه القائمة لحماية الدالة الجديدة
+        $this->middleware('permission:activities_logs.delete')->only(['destroy', 'deleteAll']);
+        // --- END: تعديل هنا ---
     }
 
-    if ($request->filled('model')) {
-        $query->where('subject_type', 'like', '%'.$request->model);
+    public function index(Request $request)
+    {
+        $query = Activity::query()->latest();
+
+        if ($request->filled('user_id')) {
+            $query->where('causer_id', $request->user_id);
+        }
+
+        if ($request->filled('model')) {
+            $query->where('subject_type', 'like', '%'.$request->model);
+        }
+
+        $activities = $query->paginate(1000);
+
+        $users = User::select('id', 'name')->get();
+        $models = Activity::select(DB::raw('DISTINCT(subject_type)'))->pluck('subject_type');
+       $activityLogTable = (new Activity)->getTable();
+
+        // جلب أكثر 5 مستخدمين نشاطاً
+        $userActivityCounts = Activity::query()
+            // استخدام اسم الجدول الصحيح هنا
+            ->join('users', "{$activityLogTable}.causer_id", '=', 'users.id')
+            ->select('users.name', DB::raw('count(*) as activity_count'))
+            // وهنا أيضاً
+            ->whereNotNull("{$activityLogTable}.causer_id")
+            ->groupBy('users.name')
+            ->orderByDesc('activity_count')
+            ->limit(5)
+            ->get();
+
+        return view('dashboard.activity-log.index', compact('activities', 'users', 'models', 'userActivityCounts'));
     }
 
-    $activities = $query->paginate(1000);
-
-    // للحصول على المستخدمين والموديلات لاستخدامهم في الفلتر
-    $users = User::select('id', 'name')->get();
-    $models = Activity::select(DB::raw('DISTINCT(subject_type)'))->pluck('subject_type');
-
-    return view('dashboard.activity-log.index', compact('activities', 'users', 'models'));
-}
- // --- New Export Method ---
     public function export(Request $request)
     {
         $userId = $request->input('user_id');
         $modelName = $request->input('model');
 
-        // Generate a dynamic filename based on filters
         $filename = 'سجل_التغييرات';
         if ($userId) {
             $user = User::find($userId);
@@ -60,4 +75,20 @@ class ActivityLogController extends Controller
 
         return Excel::download(new ActivitiesExport($userId, $modelName), $filename);
     }
+
+    // --- START: الدالة الجديدة للحذف الشامل ---
+    /**
+     * Remove all activity logs from storage.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function deleteAll()
+    {
+        // استخدام truncate أسرع للحذف الكامل، أو delete للحذف مع الالتزام بالـ events
+        Activity::query()->truncate();
+
+        return redirect()->route('dashboard.activity-log.index')
+                         ->with('success', 'تم حذف جميع سجلات النشاط بنجاح.');
+    }
+    // --- END: الدالة الجديدة ---
 }
