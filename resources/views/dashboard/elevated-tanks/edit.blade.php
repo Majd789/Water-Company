@@ -193,7 +193,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="in_pipe_diameter">قطر أنبوب الدخول (بوصة)<span
+                                        <label for="in_pipe_diameter">قطر أنبوب الدخول (مم)<span
                                                 class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <div class="input-group-prepend"><span class="input-group-text"><i
@@ -207,7 +207,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="out_pipe_diameter">قطر أنبوب الخروج (بوصة)<span
+                                        <label for="out_pipe_diameter">قطر أنبوب الخروج (مم)<span
                                                 class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <div class="input-group-prepend"><span class="input-group-text"><i
