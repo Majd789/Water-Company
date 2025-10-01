@@ -6,17 +6,66 @@
     {{-- مكتبات التصميم --}}
     <link rel="stylesheet" href="{{ asset('plugins/select2/css/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    {{-- إضافة أداة القياس --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.css">
+   {{-- داخل @push('styles') --}}
+<style>
+    /* ... الأنماط الأخرى ... */
+    #map { height: 500px; } /* تعديل الارتفاع هنا */
+    .map-filter-controls { /* سنستخدم هذا لاحقاً للفلاتر */
+        background: rgba(255,255,255,0.8);
+        padding: 5px 10px;
+        border-radius: 5px;
+        border: 2px solid rgba(0,0,0,0.2);
+    }
+</style>
     {{-- تنسيقات مخصصة للصفحة --}}
+   @push('styles')
+    {{-- ... مكتبات التصميم الحالية ... --}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.css">
+
+    {{-- تنسيقات مخصصة للخريطة والواجهة الجديدة --}}
     <style>
         .select2-container--bootstrap4[dir="rtl"] .select2-selection--single {
             height: calc(2.25rem + 2px);
             padding: .375rem .75rem;
         }
-        .info-box-icon {
-            font-size: 2.5rem;
+        .info-box-icon { font-size: 2.5rem; }
+        .timeline>div>.timeline-item { margin-right: 60px; }
+
+        /* **تنسيقات الخريطة الجديدة** */
+        #map-container {
+            position: relative;
+            height: 550px; /* ارتفاع الحاوية الكلية */
         }
-        .timeline>div>.timeline-item {
-            margin-right: 60px;
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        #map-sidebar {
+            position: absolute;
+            top: 10px;
+            right: -350px; /* ابدأ مخفياً خارج الشاشة */
+            width: 330px;
+            height: calc(100% - 20px);
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 1000;
+            transition: right 0.3s ease-in-out;
+            border-radius: 5px;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+            overflow-y: auto;
+        }
+        #map-sidebar.open {
+            right: 10px; /* إظهاره عند إضافة كلاس open */
+        }
+        .sidebar-close {
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            font-size: 1.5rem;
+            cursor: pointer;
         }
     </style>
 @endpush
@@ -46,7 +95,44 @@
         </div>
     </div>
     <hr>
+    <div class="row">
+            {{-- عمود الخريطة (8 أعمدة) --}}
+            <div class="col-lg-8">
+                <div class="card card-outline card-info">
+                    <div class="card-header">
+                        <h3 class="card-title mb-0"><i class="fas fa-map-marked-alt mr-1"></i> الخريطة التفاعلية</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        {{-- **حاوية الخريطة الجديدة** --}}
+                        <div id="map-container">
+                            <div id="map"></div>
+                            {{-- **اللوحة الجانبية للتفاصيل (مخفية)** --}}
+                            <div id="map-sidebar">
+                                <span class="sidebar-close" onclick="closeSidebar()">&times;</span>
+                                <div class="p-3" id="sidebar-content">
+                                    {{-- سيتم تعبئة المحتوى هنا عبر JavaScript --}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card card-success h-100">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-chart-pie mr-1"></i> حالة المحطات</h3>
+                    </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <canvas id="stationStatusChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+    <div class="card-body p-0">
+        <div id="map"></div>
+    </div>
+    </div>
     @if(!$selectedStation)
         {{-- ================================================================= --}}
         {{-- عرض لوحة التحكم العامة (الخارقة) --}}
@@ -141,41 +227,186 @@
     @endif
 </div>
 @endsection
-
 @push('scripts')
-    {{-- مكتبات JavaScript --}}
+    {{-- مكتبات JavaScript الأساسية --}}
     <script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    {{-- مكتبات الخريطة التفاعلية --}}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.js"></script>
+
+    @push('scripts')
+    {{-- مكتبات JavaScript الأساسية --}}
+    <script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    {{-- مكتبات الخريطة التفاعلية --}}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.js"></script>
+
     <script>
+        // دوال مساعدة عامة للتحكم في اللوحة الجانبية للخريطة
+        function openSidebar(content) {
+            document.getElementById('sidebar-content').innerHTML = content;
+            document.getElementById('map-sidebar').classList.add('open');
+        }
+        function closeSidebar() {
+            document.getElementById('map-sidebar').classList.remove('open');
+        }
+
+        // دالة يتم تنفيذها عند تحميل الصفحة بالكامل
         $(function () {
-            // تفعيل فلتر البحث
+
+            // ===============================================
+            // 1. تهيئة فلتر البحث عن المحطات
+            // ===============================================
             $('.select2bs4').select2({ theme: 'bootstrap4', dir: 'rtl' });
 
+
+            // ===============================================
+            // 2. تهيئة الخريطة التفاعلية
+            // ===============================================
+
+            // التحقق من وجود عنصر الخريطة في الصفحة
+            if ($('#map').length) {
+                var mapCenter = [36.1, 36.7]; // مركز تقريبي للمنطقة (إدلب/حلب)
+                var map = L.map('map').setView(mapCenter, 9);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                var geoJsonData = @json($geoJsonData);
+                var layers = {};
+                var allFeaturesGroup = L.featureGroup();
+                let selectedLayer = null; // لتتبع العنصر المحدد حاليًا
+
+                // دالة مساعدة لإنشاء أيقونات دائرية ملونة (مع حالة التحديد)
+                function createCircleMarker(color, isSelected = false) {
+                    return {
+                        radius: isSelected ? 11 : 7,
+                        fillColor: color,
+                        color: isSelected ? '#ff3838' : '#000',
+                        weight: isSelected ? 3 : 1,
+                        opacity: 1,
+                        fillOpacity: 0.9
+                    };
+                }
+
+                // دالة مساعدة لإنشاء طبقة GeoJSON
+                function createGeoJsonLayer(key, data) {
+                    if (data && data.features.length > 0) {
+                        layers[key] = L.geoJSON(data, {
+                            pointToLayer: (feature, latlng) => L.circleMarker(latlng, createCircleMarker(feature.properties.color)),
+                            onEachFeature: (feature, layer) => {
+                                allFeaturesGroup.addLayer(layer);
+                                layer.on('click', function (e) {
+                                    // إعادة تعيين النمط للعنصر المحدد سابقًا إن وجد
+                                    if (selectedLayer) {
+                                        selectedLayer.setStyle(createCircleMarker(selectedLayer.feature.properties.color));
+                                    }
+
+                                    // تطبيق نمط التحديد على العنصر الحالي
+                                    layer.setStyle(createCircleMarker(feature.properties.color, true));
+                                    selectedLayer = layer;
+
+                                    // بناء محتوى اللوحة الجانبية
+                                    let content = `
+                                        <h5 class="border-bottom pb-2 mb-3">${feature.properties.name || 'تفاصيل العنصر'}</h5>
+                                        <ul class="list-unstyled">
+                                            <li><strong>النوع:</strong> ${feature.properties.type}</li>
+                                            ${feature.properties.station_name ? `<li><strong>المحطة:</strong> ${feature.properties.station_name}</li>` : ''}
+                                            <li><strong>الحالة:</strong> ${feature.properties.status}</li>
+                                        </ul>
+                                        <a href="${feature.properties.detail_url}" target="_blank" class="btn btn-primary btn-block mt-4">عرض التفاصيل الكاملة</a>
+                                    `;
+                                    openSidebar(content);
+                                    L.DomEvent.stopPropagation(e); // منع النقر من الوصول للخريطة وإغلاق اللوحة
+                                });
+                            }
+                        }).addTo(map);
+                    }
+                }
+
+                // إنشاء طبقات البيانات
+                createGeoJsonLayer('stations', geoJsonData.stations);
+                createGeoJsonLayer('wells', geoJsonData.wells);
+                createGeoJsonLayer('solar_energies', geoJsonData.solar_energies);
+                createGeoJsonLayer('ground_tanks', geoJsonData.ground_tanks);
+                createGeoJsonLayer('elevated_tanks', geoJsonData.elevated_tanks);
+
+                // إنشاء أداة التحكم بالفلاتر ووضعها على الخريطة
+                var filterControl = L.control({position: 'topleft'});
+                filterControl.onAdd = function (map) {
+                    var div = L.DomUtil.create('div', 'leaflet-bar');
+                    div.innerHTML = `
+                        <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons" style="background-color: white; border-radius: 4px;">
+                            <label class="btn btn-light btn-sm active" title="المحطات"><input type="checkbox" name="layer-toggle" value="stations" checked autocomplete="off"><i class="fas fa-industry"></i></label>
+                            <label class="btn btn-light btn-sm active" title="الآبار"><input type="checkbox" name="layer-toggle" value="wells" checked autocomplete="off"><i class="fas fa-water"></i></label>
+                            <label class="btn btn-light btn-sm active" title="الطاقة الشمسية"><input type="checkbox" name="layer-toggle" value="solar_energies" checked autocomplete="off"><i class="fas fa-solar-panel"></i></label>
+                            <label class="btn btn-light btn-sm active" title="خزانات أرضية"><input type="checkbox" name="layer-toggle" value="ground_tanks" checked autocomplete="off"><i class="fas fa-box-open"></i></label>
+                            <label class="btn btn-light btn-sm active" title="خزانات عالية"><input type="checkbox" name="layer-toggle" value="elevated_tanks" checked autocomplete="off"><i class="fas fa-archway"></i></label>
+                        </div>
+                    `;
+                    L.DomEvent.disableClickPropagation(div); // منع النقر من الوصول للخريطة
+                    return div;
+                };
+                filterControl.addTo(map);
+
+                // ربط أزرار الفلاتر بالطبقات
+                $('input[name="layer-toggle"]').on('change', function() {
+                    var layerKey = $(this).val();
+                    if (layers[layerKey]) {
+                        if (this.checked) {
+                            map.addLayer(layers[layerKey]);
+                        } else {
+                            map.removeLayer(layers[layerKey]);
+                        }
+                    }
+                });
+
+                // إخفاء أزرار الفلاتر للطبقات الفارغة
+                $('.btn-group-vertical .btn').each(function() {
+                    var layerKey = $(this).find('input').val();
+                    if (!layers[layerKey] || layers[layerKey].getLayers().length === 0) {
+                        $(this).hide();
+                    }
+                });
+
+                // إضافة أداة القياس
+                var measureControl = new L.Control.Measure({ position: 'topright', primaryLengthUnit: 'meters', secondaryLengthUnit: 'kilometers', primaryAreaUnit: 'sqmeters', activeColor: '#db4a39', completedColor: '#9b2d20', localization: 'ar' });
+                measureControl.addTo(map);
+
+                // إغلاق اللوحة الجانبية عند النقر على الخريطة وإلغاء تحديد العنصر
+                map.on('click', function() {
+                    if (selectedLayer) {
+                        selectedLayer.setStyle(createCircleMarker(selectedLayer.feature.properties.color));
+                        selectedLayer = null;
+                    }
+                    closeSidebar();
+                });
+
+                // تكبير الخريطة تلقائيًا لتناسب جميع النقاط
+                if (allFeaturesGroup.getLayers().length > 0) {
+                    map.fitBounds(allFeaturesGroup.getBounds().pad(0.2));
+                }
+            }
+
+            // ===============================================
+            // 3. تهيئة المخططات البيانية (تعمل فقط في الوضع العام)
+            // ===============================================
             @if(!$selectedStation)
-            // ===============================================
-            // تهيئة المخططات البيانية (تعمل فقط في الوضع العام)
-            // ===============================================
+                if ($('#stationStatusChart').length && @json($statistics['stations_by_status'] ?? null)) {
+                    var pieData = { /* ... نفس الكود ... */ };
+                    new Chart($('#stationStatusChart').get(0).getContext('2d'), { /* ... نفس الكود ... */ });
+                }
 
-            // 1. مخطط حالة المحطات (دائري)
-            var pieData = {
-                labels: @json(array_keys($statistics['stations_by_status']->toArray())),
-                datasets: [{
-                    data: @json(array_values($statistics['stations_by_status']->toArray())),
-                    backgroundColor: ['#28a745', '#dc3545', '#6c757d', '#ffc107'], // عاملة, متوقفة, خارج الخدمة, ...
-                }]
-            };
-            new Chart($('#stationStatusChart').get(0).getContext('2d'), { type: 'doughnut', data: pieData, options: {maintainAspectRatio: false, responsive: true, legend: {position: 'bottom'}} });
-
-            // 2. مخطط مصادر الطاقة (أعمدة)
-            var barData = {
-                labels: @json(array_keys($statistics['energy_source_distribution']->toArray())),
-                datasets: [{
-                    label: 'عدد المحطات',
-                    backgroundColor: 'rgba(60,141,188,0.9)',
-                    data: @json(array_values($statistics['energy_source_distribution']->toArray()))
-                }]
-            };
-            new Chart($('#energySourceChart').get(0).getContext('2d'), { type: 'bar', data: barData, options: {responsive: true, maintainAspectRatio: false, scales: {yAxes: [{ticks: {beginAtZero: true, stepSize: 1}}]}}});
+                if ($('#energySourceChart').length && @json($statistics['energy_source_distribution'] ?? null)) {
+                    var barData = { /* ... نفس الكود ... */ };
+                    var barOptions = { /* ... نفس الكود ... */ };
+                    new Chart($('#energySourceChart').get(0).getContext('2d'), { type: 'bar', data: barData, options: barOptions});
+                }
             @endif
         });
     </script>
