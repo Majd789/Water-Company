@@ -16,7 +16,7 @@ use Spatie\Activitylog\Models\Activity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Route;
 class DashboardController extends Controller
 {
     public function index(Request $request): View
@@ -110,25 +110,29 @@ class DashboardController extends Controller
             $statistics['top_well_stop_reasons'] = DB::table('wells')->whereIn('station_id', $scopedStationIds)->select('stop_reason', DB::raw('count(*) as count'))->where('well_status', 'متوقف')->whereNotNull('stop_reason')->groupBy('stop_reason')->orderByDesc('count')->limit(5)->get();
             $statistics['recent_activities'] = Activity::with('causer')->latest()->limit(5)->get(); // آخر النشاطات تبقى عامة
         }
-      if ($selectedStation) {
-    $geoJsonData = [
-        'stations' => $this->getGeoJsonForModel(Station::where('id', $selectedStation->id), 'station_name', 'blue', 'dashboard.stations.show'),
-        'wells' => $this->getGeoJsonForModel($selectedStation->wells(), 'well_name', 'darkblue', 'dashboard.wells.show'),
-        'solar_energies' => $this->getGeoJsonForModel($selectedStation->solarEnergies(), 'panel_brand', 'orange', 'dashboard.solar_energies.show'),
-        'ground_tanks' => $this->getGeoJsonForModel($selectedStation->groundTanks(), 'tank_name', 'brown', 'dashboard.ground_tanks.show'),
-        'elevated_tanks' => $this->getGeoJsonForModel($selectedStation->elevatedTanks(), 'tank_name', 'purple', 'dashboard.elevated_tanks.show'),
-    ];
-} else {
-    $scopedStationIds = $stationQuery->pluck('id');
-    $geoJsonData = [
-        'stations' => $this->getGeoJsonForModel(Station::whereIn('id', $scopedStationIds), 'station_name', 'blue', 'dashboard.stations.show'),
-        'wells' => $this->getGeoJsonForModel(Well::whereIn('station_id', $scopedStationIds), 'well_name', 'darkblue', 'dashboard.wells.show'),
-        'solar_energies' => $this->getGeoJsonForModel(SolarEnergy::whereIn('station_id', $scopedStationIds), 'panel_brand', 'orange', 'dashboard.solar_energies.show'),
-        'ground_tanks' => $this->getGeoJsonForModel(GroundTank::whereIn('station_id', $scopedStationIds), 'tank_name', 'brown', 'dashboard.ground_tanks.show'),
-        'elevated_tanks' => $this->getGeoJsonForModel(ElevatedTank::whereIn('station_id', $scopedStationIds), 'tank_name', 'purple', 'dashboard.elevated_tanks.show'),
-    ];
-}
+     if ($selectedStation) {
+            $geoJsonData = [
+                // **تعديل: لا نمرر اسم عمود الموقع للمحطات**
+                'stations' => $this->getGeoJsonForModel(Station::where('id', $selectedStation->id), 'station_name', 'blue', 'dashboard.stations.show'),
 
+                // **تعديل: نمرر اسم عمود الموقع للآبار فقط**
+                'wells' => $this->getGeoJsonForModel($selectedStation->wells(), 'well_name', 'darkblue', 'dashboard.wells.show', 'well_location'),
+
+                // افترض أن البقية لديها أعمدة منفصلة (عدّل إذا كان العكس)
+                'solar_energies' => $this->getGeoJsonForModel($selectedStation->solarEnergies(), 'panel_brand', 'orange', 'dashboard.solar_energies.show'),
+                'ground_tanks' => $this->getGeoJsonForModel($selectedStation->groundTanks(), 'tank_name', 'brown', 'dashboard.ground_tanks.show'),
+                'elevated_tanks' => $this->getGeoJsonForModel($selectedStation->elevatedTanks(), 'tank_name', 'purple', 'dashboard.elevated_tanks.show'),
+            ];
+        } else {
+            $scopedStationIds = $stationQuery->pluck('id');
+            $geoJsonData = [
+                'stations' => $this->getGeoJsonForModel(Station::whereIn('id', $scopedStationIds), 'station_name', 'blue', 'dashboard.stations.show'),
+                'wells' => $this->getGeoJsonForModel(Well::whereIn('station_id', $scopedStationIds), 'well_name', 'darkblue', 'dashboard.wells.show', 'well_location'),
+                'solar_energies' => $this->getGeoJsonForModel(SolarEnergy::whereIn('station_id', $scopedStationIds), 'panel_brand', 'orange', 'dashboard.solar_energies.show'),
+                'ground_tanks' => $this->getGeoJsonForModel(GroundTank::whereIn('station_id', $scopedStationIds), 'tank_name', 'brown', 'dashboard.ground_tanks.show'),
+                'elevated_tanks' => $this->getGeoJsonForModel(ElevatedTank::whereIn('station_id', $scopedStationIds), 'tank_name', 'purple', 'dashboard.elevated_tanks.show'),
+            ];
+        }
         return view('dashboard', [
             'statistics' => $statistics,
             'message' => $message,
@@ -137,50 +141,83 @@ class DashboardController extends Controller
             'geoJsonData' => $geoJsonData,
         ]);
     }
-    /**
- * دالة مساعدة لتحويل بيانات الموديل إلى تنسيق GeoJSON FeatureCollection.
- */
-private function getGeoJsonForModel($query, string $nameField, string $color, string $routeName)
-{
-    // Get the underlying model from the query builder (e.g., "App\Models\Well")
-    $modelClass = get_class($query->getModel());
+   /**
+     * دالة مساعدة لتحويل بيانات الموديل إلى تنسيق GeoJSON FeatureCollection.
+     * **نسخة معدلة لتعمل مع عمود موقع نصي واحد**
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $nameField
+     * @param string $color
+     * @param string $routeName
+     * @param string $locationColumn // **الإضافة الجديدة: اسم عمود الموقع**
+     * @return array
+     */
+    private function getGeoJsonForModel($query, string $nameField, string $color, string $routeName, ?string $locationColumn = null)
+    {
+        $modelClass = get_class($query->getModel());
 
-    // Only load the 'station' relationship if the model is not a Station.
-    if ($modelClass !== \App\Models\Station::class) {
-        $query->with('station');
-    }
+        if ($modelClass !== \App\Models\Station::class) {
+            $query->with('station');
+        }
 
-    $items = $query->whereNotNull('latitude')->whereNotNull('longitude')->get();
+        // **المنطق الجديد: تحديد الأعمدة بناءً على وجود $locationColumn**
+        if ($locationColumn) {
+            // الحالة 1: لدينا عمود نصي واحد (مثل 'well_location')
+            $items = $query->whereNotNull($locationColumn)->where($locationColumn, '!=', '')->get();
+        } else {
+            // الحالة 2: لدينا أعمدة منفصلة 'latitude' و 'longitude'
+            $items = $query->whereNotNull('latitude')->whereNotNull('longitude')->get();
+        }
 
-    $features = $items->map(function ($item) use ($modelClass, $nameField, $color, $routeName) {
+        $features = $items->map(function ($item) use ($modelClass, $nameField, $color, $routeName, $locationColumn) {
 
-        // التحقق من وجود الـ route قبل إنشائه لتجنب الأخطاء
-        $detailUrl = \Illuminate\Support\Facades\Route::has($routeName) ? route($routeName, $item->id) : '#';
+            $coordinates = [];
 
-        // الحصول على اسم المحطة فقط إذا لم يكن العنصر نفسه محطة
-        $stationName = ($modelClass !== \App\Models\Station::class) ? optional($item->station)->station_name : null;
+            if ($locationColumn) {
+                // **تحليل من عمود نصي**
+                $locationString = $item->{$locationColumn};
+                preg_match_all('/[-+]?\d+\.\d+/', $locationString, $matches);
+
+                if (isset($matches[0]) && count($matches[0]) >= 2) {
+                    $latCandidates = array_filter($matches[0], fn($n) => $n > 35 && $n < 37);
+                    $lonCandidates = array_filter($matches[0], fn($n) => $n > 36 && $n < 38);
+
+                    if (!empty($latCandidates) && !empty($lonCandidates)) {
+                        $coordinates = [(float)reset($lonCandidates), (float)reset($latCandidates)];
+                    }
+                }
+            } else {
+                // **قراءة مباشرة من الأعمدة المنفصلة**
+                $coordinates = [(float)$item->longitude, (float)$item->latitude];
+            }
+
+            if (empty($coordinates)) {
+                return null;
+            }
+
+            $detailUrl = Route::has($routeName) ? route($routeName, $item->id) : '#';
+            $stationName = ($modelClass !== \App\Models\Station::class) ? optional($item->station)->station_name : null;
+
+            return [
+                'type' => 'Feature',
+                'properties' => [
+                    'name' => $item->{$nameField},
+                    'station_name' => $stationName,
+                    'detail_url' => $detailUrl,
+                    'color' => $color,
+                    'status' => $item->operational_status ?? $item->well_status ?? 'غير معروف',
+                    'type' => class_basename($item),
+                ],
+                'geometry' => [
+                    'type' => 'Point',
+                    'coordinates' => $coordinates,
+                ],
+            ];
+        })->filter();
 
         return [
-            'type' => 'Feature',
-            'properties' => [
-                'name' => $item->{$nameField},
-                'station_name' => $stationName,
-                'detail_url' => $detailUrl,
-                'color' => $color,
-                // بيانات إضافية للوحة الجانبية
-                'status' => $item->operational_status ?? $item->well_status ?? 'غير معروف',
-                'type' => class_basename($item), // للحصول على نوع العنصر (Well, Station, etc.)
-            ],
-            'geometry' => [
-                'type' => 'Point',
-                'coordinates' => [(float)$item->longitude, (float)$item->latitude],
-            ],
+            'type' => 'FeatureCollection',
+            'features' => $features->values(),
         ];
-    });
-
-    return [
-        'type' => 'FeatureCollection',
-        'features' => $features,
-    ];
-}
+    }
 }
