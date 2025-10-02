@@ -3,30 +3,15 @@
 @section('title', 'لوحة التحكم الرئيسية')
 
 @push('styles')
-    {{-- مكتبات التصميم --}}
+    {{-- مكتبات التصميم الأساسية --}}
     <link rel="stylesheet" href="{{ asset('plugins/select2/css/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    {{-- إضافة أداة القياس --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.css">
-   {{-- داخل @push('styles') --}}
-<style>
-    /* ... الأنماط الأخرى ... */
-    #map { height: 500px; } /* تعديل الارتفاع هنا */
-    .map-filter-controls { /* سنستخدم هذا لاحقاً للفلاتر */
-        background: rgba(255,255,255,0.8);
-        padding: 5px 10px;
-        border-radius: 5px;
-        border: 2px solid rgba(0,0,0,0.2);
-    }
-</style>
-    {{-- تنسيقات مخصصة للصفحة --}}
-   @push('styles')
-    {{-- ... مكتبات التصميم الحالية ... --}}
+
+    {{-- مكتبات الخريطة التفاعلية --}}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.css">
 
-    {{-- تنسيقات مخصصة للخريطة والواجهة الجديدة --}}
+    {{-- تنسيقات مخصصة للصفحة --}}
     <style>
         .select2-container--bootstrap4[dir="rtl"] .select2-selection--single {
             height: calc(2.25rem + 2px);
@@ -35,10 +20,10 @@
         .info-box-icon { font-size: 2.5rem; }
         .timeline>div>.timeline-item { margin-right: 60px; }
 
-        /* **تنسيقات الخريطة الجديدة** */
+        /* **تنسيقات الخريطة الجديدة واللوحة الجانبية** */
         #map-container {
             position: relative;
-            height: 550px; /* ارتفاع الحاوية الكلية */
+            height: 550px; /* ارتفاع الحاوية الكلية للخريطة */
         }
         #map {
             height: 100%;
@@ -51,14 +36,14 @@
             width: 330px;
             height: calc(100% - 20px);
             background: rgba(255, 255, 255, 0.95);
-            z-index: 1000;
+            z-index: 1000; /* للتأكد من أنها فوق الخريطة */
             transition: right 0.3s ease-in-out;
             border-radius: 5px;
             box-shadow: -2px 0 10px rgba(0,0,0,0.2);
             overflow-y: auto;
         }
         #map-sidebar.open {
-            right: 10px; /* إظهاره عند إضافة كلاس open */
+            right: 10px; /* إظهاره عند إضافة كلاس 'open' */
         }
         .sidebar-close {
             position: absolute;
@@ -66,6 +51,10 @@
             left: 10px;
             font-size: 1.5rem;
             cursor: pointer;
+            color: #555;
+        }
+        .sidebar-close:hover {
+            color: #000;
         }
     </style>
 @endpush
@@ -73,7 +62,7 @@
 @section('content')
 <div class="container-fluid">
     {{-- ========================================================== --}}
-    {{-- القسم العلوي: العنوان وفلتر المحطات (مشترك) --}}
+    {{-- القسم العلوي: العنوان وفلتر المحطات --}}
     {{-- ========================================================== --}}
     <div class="row mb-3 align-items-center">
         <div class="col-md-6">
@@ -95,58 +84,61 @@
         </div>
     </div>
     <hr>
+
+    {{-- ================================================================= --}}
+    {{-- عرض الخريطة (مشترك بين الوضع العام ووضع المحطة) --}}
+    {{-- ================================================================= --}}
     <div class="row">
-            {{-- عمود الخريطة (8 أعمدة) --}}
-            <div class="col-lg-8">
-                <div class="card card-outline card-info">
-                    <div class="card-header">
-                        <h3 class="card-title mb-0"><i class="fas fa-map-marked-alt mr-1"></i> الخريطة التفاعلية</h3>
-                    </div>
-                    <div class="card-body p-0">
-                        {{-- **حاوية الخريطة الجديدة** --}}
-                        <div id="map-container">
-                            <div id="map"></div>
-                            {{-- **اللوحة الجانبية للتفاصيل (مخفية)** --}}
-                            <div id="map-sidebar">
-                                <span class="sidebar-close" onclick="closeSidebar()">&times;</span>
-                                <div class="p-3" id="sidebar-content">
-                                    {{-- سيتم تعبئة المحتوى هنا عبر JavaScript --}}
-                                </div>
+        <div class="col-lg-8">
+            <div class="card card-outline card-info">
+                <div class="card-header">
+                    <h3 class="card-title mb-0"><i class="fas fa-map-marked-alt mr-1"></i> الخريطة التفاعلية</h3>
+                </div>
+                <div class="card-body p-0">
+                    <div id="map-container">
+                        <div id="map"></div>
+                        <div id="map-sidebar">
+                            <span class="sidebar-close" onclick="closeSidebar()">&times;</span>
+                            <div class="p-3" id="sidebar-content">
+                                {{-- سيتم تعبئة هذا القسم عبر JavaScript --}}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4">
-                <div class="card card-success h-100">
-                    <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-chart-pie mr-1"></i> حالة المحطات</h3>
-                    </div>
-                    <div class="card-body d-flex align-items-center justify-content-center">
-                        <canvas id="stationStatusChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                    </div>
+        </div>
+
+        {{-- في الوضع العام، نعرض مخطط حالة المحطات بجانب الخريطة --}}
+        @if(!$selectedStation)
+        <div class="col-lg-4">
+            <div class="card card-success h-100">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-chart-pie mr-1"></i> حالة المحطات</h3>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <canvas id="stationStatusChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
                 </div>
             </div>
         </div>
+        @endif
+    </div>
 
-    <div class="card-body p-0">
-        <div id="map"></div>
-    </div>
-    </div>
     @if(!$selectedStation)
         {{-- ================================================================= --}}
-        {{-- عرض لوحة التحكم العامة (الخارقة) --}}
+        {{-- عرض محتوى لوحة التحكم العامة (الخارقة) --}}
         {{-- ================================================================= --}}
-
+        <hr>
         {{-- مؤشرات الأداء الرئيسية (KPIs) --}}
         <div class="row">
             <div class="col-md-3 col-sm-6 col-12"><div class="info-box"><span class="info-box-icon bg-info"><i class="fas fa-users"></i></span><div class="info-box-content"><span class="info-box-text">العائلات المستفيدة</span><span class="info-box-number">{{ number_format($statistics['beneficiary_families'] ?? 0) }}</span></div></div></div>
             <div class="col-md-3 col-sm-6 col-12"><div class="info-box"><span class="info-box-icon bg-success"><i class="fas fa-database"></i></span><div class="info-box-content"><span class="info-box-text">سعة التخزين (م³)</span><span class="info-box-number">{{ number_format($statistics['total_water_storage_m3'] ?? 0) }}</span></div></div></div>
-            <div class="col-md-3 col-sm-6 col-12"><div class="info-box"><span class="info-box-icon bg-warning"><i class="fas fa-bolt"></i></span><div class="info-box-content"><span class="info-box-text">القدرة التوليدية للمولدات (KVA)</span><span class="info-box-number">{{ number_format($statistics['total_generation_capacity_kva'] ?? 0) }}</span></div></div></div>
+            <div class="col-md-3 col-sm-6 col-12"><div class="info-box"><span class="info-box-icon bg-warning"><i class="fas fa-bolt"></i></span><div class="info-box-content"><span class="info-box-text">القدرة التوليدية (KVA)</span><span class="info-box-number">{{ number_format($statistics['total_generation_capacity_kva'] ?? 0) }}</span></div></div></div>
             <div class="col-md-3 col-sm-6 col-12"><div class="info-box"><span class="info-box-icon bg-danger"><i class="fas fa-tools"></i></span><div class="info-box-content"><span class="info-box-text">صيانة قيد التنفيذ</span><span class="info-box-number">{{ $statistics['maintenance_in_progress'] ?? 0 }}</span></div></div></div>
         </div>
-        <h4 class="mb-3">جرد مكونات النظام</h4>
+
+        <h4 class="mb-3 mt-4">جرد مكونات النظام</h4>
         <div class="row">
+            {{-- بطاقات الجرد --}}
             <div class="col-12 col-sm-6 col-md-3"><div class="info-box mb-3"><span class="info-box-icon bg-primary"><i class="fas fa-industry"></i></span><div class="info-box-content"><span class="info-box-text">المحطات</span><span class="info-box-number">{{ $statistics['stations_count'] ?? 0 }}</span></div></div></div>
             <div class="col-12 col-sm-6 col-md-3"><div class="info-box mb-3"><span class="info-box-icon bg-info"><i class="fas fa-building"></i></span><div class="info-box-content"><span class="info-box-text">الوحدات الإدارية</span><span class="info-box-number">{{ $statistics['units_count'] ?? 0 }}</span></div></div></div>
             <div class="col-12 col-sm-6 col-md-3"><div class="info-box mb-3"><span class="info-box-icon bg-success"><i class="fas fa-city"></i></span><div class="info-box-content"><span class="info-box-text">البلدات</span><span class="info-box-number">{{ $statistics['towns_count'] ?? 0 }}</span></div></div></div>
@@ -177,7 +169,6 @@
 
             {{-- العمود الأيسر (4 أعمدة) للملخصات --}}
             <div class="col-lg-4">
-                <div class="card card-success"><div class="card-header"><h3 class="card-title"><i class="fas fa-chart-pie mr-1"></i> حالة المحطات</h3></div><div class="card-body"><canvas id="stationStatusChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas></div></div>
                 <div class="card card-warning"><div class="card-header"><h3 class="card-title"><i class="fas fa-wrench mr-1"></i> أبرز أسباب توقف الآبار</h3></div><div class="card-body">
                     @forelse($statistics['top_well_stop_reasons'] as $reason)<div class="progress-group">{{ Str::limit($reason->stop_reason, 25) }}<span class="float-right"><b>{{ $reason->count }}</b></span></div>
                     @empty <p class="text-center">لا توجد أسباب مسجلة حالياً.</p> @endforelse
@@ -206,9 +197,10 @@
 
     @else
         {{-- ================================================================= --}}
-        {{-- عرض لوحة التحكم الخاصة بمحطة (القائمة الكاملة) --}}
+        {{-- عرض لوحة التحكم الخاصة بمحطة --}}
         {{-- ================================================================= --}}
         <div class="row">
+            {{-- بطاقات الجرد الخاصة بالمحطة --}}
             <div class="col-12 col-sm-6 col-md-3"><div class="info-box mb-3"><span class="info-box-icon bg-primary"><i class="fas fa-water"></i></span><div class="info-box-content"><span class="info-box-text">الآبار</span><span class="info-box-number">{{ $statistics['wells_count'] ?? 0 }}</span></div></div></div>
             <div class="col-12 col-sm-6 col-md-3"><div class="info-box mb-3"><span class="info-box-icon bg-secondary"><i class="fas fa-bolt"></i></span><div class="info-box-content"><span class="info-box-text">مجموعات التوليد</span><span class="info-box-number">{{ $statistics['generation_groups_count'] ?? 0 }}</span></div></div></div>
             <div class="col-12 col-sm-6 col-md-3"><div class="info-box mb-3"><span class="info-box-icon bg-info"><i class="fas fa-exchange-alt"></i></span><div class="info-box-content"><span class="info-box-text">المضخات الأفقية</span><span class="info-box-number">{{ $statistics['horizontal_pumps_count'] ?? 0 }}</span></div></div></div>
@@ -227,16 +219,8 @@
     @endif
 </div>
 @endsection
+
 @push('scripts')
-    {{-- مكتبات JavaScript الأساسية --}}
-    <script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    {{-- مكتبات الخريطة التفاعلية --}}
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.js"></script>
-
-    @push('scripts')
     {{-- مكتبات JavaScript الأساسية --}}
     <script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -302,16 +286,12 @@
                             onEachFeature: (feature, layer) => {
                                 allFeaturesGroup.addLayer(layer);
                                 layer.on('click', function (e) {
-                                    // إعادة تعيين النمط للعنصر المحدد سابقًا إن وجد
                                     if (selectedLayer) {
                                         selectedLayer.setStyle(createCircleMarker(selectedLayer.feature.properties.color));
                                     }
-
-                                    // تطبيق نمط التحديد على العنصر الحالي
                                     layer.setStyle(createCircleMarker(feature.properties.color, true));
                                     selectedLayer = layer;
 
-                                    // بناء محتوى اللوحة الجانبية
                                     let content = `
                                         <h5 class="border-bottom pb-2 mb-3">${feature.properties.name || 'تفاصيل العنصر'}</h5>
                                         <ul class="list-unstyled">
@@ -322,7 +302,7 @@
                                         <a href="${feature.properties.detail_url}" target="_blank" class="btn btn-primary btn-block mt-4">عرض التفاصيل الكاملة</a>
                                     `;
                                     openSidebar(content);
-                                    L.DomEvent.stopPropagation(e); // منع النقر من الوصول للخريطة وإغلاق اللوحة
+                                    L.DomEvent.stopPropagation(e);
                                 });
                             }
                         }).addTo(map);
@@ -398,16 +378,44 @@
             // ===============================================
             @if(!$selectedStation)
                 if ($('#stationStatusChart').length && @json($statistics['stations_by_status'] ?? null)) {
-                    var pieData = { /* ... نفس الكود ... */ };
-                    new Chart($('#stationStatusChart').get(0).getContext('2d'), { /* ... نفس الكود ... */ });
+                    var pieData = {
+                        labels: @json(array_keys($statistics['stations_by_status']->toArray())),
+                        datasets: [{
+                            data: @json(array_values($statistics['stations_by_status']->toArray())),
+                            backgroundColor: ['#28a745', '#dc3545', '#6c757d', '#ffc107'], // عاملة, متوقفة, خارج الخدمة, ...
+                        }]
+                    };
+                    new Chart($('#stationStatusChart').get(0).getContext('2d'), {
+                        type: 'doughnut',
+                        data: pieData,
+                        options: { maintainAspectRatio: false, responsive: true, legend: { position: 'bottom' }}
+                    });
                 }
 
                 if ($('#energySourceChart').length && @json($statistics['energy_source_distribution'] ?? null)) {
-                    var barData = { /* ... نفس الكود ... */ };
-                    var barOptions = { /* ... نفس الكود ... */ };
+                    var barData = {
+                        labels: @json(array_keys($statistics['energy_source_distribution']->toArray())),
+                        datasets: [{
+                            label: 'عدد المحطات',
+                            backgroundColor: 'rgba(60,141,188,0.9)',
+                            borderColor: 'rgba(60,141,188,0.8)',
+                            borderWidth: 1,
+                            data: @json(array_values($statistics['energy_source_distribution']->toArray()))
+                        }]
+                    };
+                    var barOptions = {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            yAxes: [{ ticks: { beginAtZero: true, callback: function(value) {if (value % 1 === 0) {return value;}} }}],
+                            xAxes: [{ ticks: { autoSkip: false } }]
+                        },
+                        legend: { display: false }
+                    };
                     new Chart($('#energySourceChart').get(0).getContext('2d'), { type: 'bar', data: barData, options: barOptions});
                 }
             @endif
+
         });
     </script>
 @endpush
