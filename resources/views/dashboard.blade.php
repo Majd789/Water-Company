@@ -56,6 +56,22 @@
         .sidebar-close:hover {
             color: #000;
         }
+        .powerbi-container {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            padding-top: 62.25%; /* Aspect Ratio: (373.5 / 600) * 100 */
+        }
+
+        .powerbi-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+        }
     </style>
 @endpush
 
@@ -84,7 +100,24 @@
         </div>
     </div>
     <hr>
-
+      <div class="row">
+        <div class="col-12">
+            <div class="card card-primary card-outline">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-line mr-1"></i>
+                        التقرير التفاعلي (Power BI)
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {{-- حاوية لجعل الـ iframe متجاوب --}}
+                    <div class="powerbi-container">
+                        <iframe title="Water_Station_2025_Phase1" src="https://app.powerbi.com/view?r=eyJrIjoiNDI5NTlhNmQtOTA1Zi00OTA2LThmNmMtYjgyM2ZjODU4N2FiIiwidCI6ImU5ZTdmYjA0LWYzZTAtNDZjMC1hNjZlLTBiZTAxNzljOWFiMiIsImMiOjl9" frameborder="0" allowFullScreen="true"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     {{-- ================================================================= --}}
     {{-- عرض الخريطة (مشترك بين الوضع العام ووضع المحطة) --}}
     {{-- ================================================================= --}}
