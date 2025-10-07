@@ -72,6 +72,22 @@
             width: 100%;
             height: 100%;
         }
+        .powerbi-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f4f6f9; /* لون خلفية قريب من تصميم المنصة */
+            color: #6c757d;
+            font-size: 1.1rem;
+            border: 1px dashed #ddd;
+            border-radius: .25rem;
+            z-index: 1; /* للتأكد من أنه يظهر فوق الـ iframe الفارغ */
+        }
     </style>
 @endpush
 
@@ -111,9 +127,18 @@
                 </div>
                 <div class="card-body">
                     {{-- حاوية لجعل الـ iframe متجاوب --}}
-                    <div class="powerbi-container">
-                        <iframe title="Water_Station_2025_Phase1" src="https://app.powerbi.com/view?r=eyJrIjoiNDI5NTlhNmQtOTA1Zi00OTA2LThmNmMtYjgyM2ZjODU4N2FiIiwidCI6ImU5ZTdmYjA0LWYzZTAtNDZjMC1hNjZlLTBiZTAxNzljOWFiMiIsImMiOjl9" frameborder="0" allowFullScreen="true"></iframe>
-                    </div>
+                 <div class="powerbi-container" id="powerbi-wrapper">
+    {{-- 1. عنصر نائب يظهر قبل تحميل التقرير --}}
+    <div class="powerbi-placeholder">
+        <i class="fas fa-spinner fa-spin mr-2"></i>
+        <span>جاري تحميل التقرير التفاعلي...</span>
+    </div>
+
+    {{-- 2. الـ iframe بدون src، ولكن مع data-src --}}
+    <iframe id="powerbi-frame" title="Water_Station_2025_Phase1"
+            data-src="https://app.powerbi.com/view?r=eyJrIjoiNDI5NTlhNmQtOTA1Zi00OTA2LThmNmMtYjgyM2ZjODU4N2FiIiwidCI6ImU5ZTdmYjA0LWYzZTAtNDZjMC1hNjZlLTBiZTAxNzljOWFiMiIsImMiOjl9"
+            frameborder="0" allowFullScreen="true"></iframe>
+</div>
                 </div>
             </div>
         </div>
@@ -449,6 +474,40 @@
                 }
             @endif
 
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            const powerBiWrapper = document.getElementById('powerbi-wrapper');
+            const powerBiFrame = document.getElementById('powerbi-frame');
+
+            // التأكد من وجود العنصر وأن المتصفح يدعم IntersectionObserver
+            if (powerBiWrapper && powerBiFrame && 'IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        // إذا أصبح العنصر مرئياً في الشاشة
+                        if (entry.isIntersecting) {
+                            // 1. خذ الرابط من data-src وضعه في src لبدء التحميل
+                            powerBiFrame.src = powerBiFrame.dataset.src;
+
+                            // 2. عند اكتمال تحميل التقرير، قم بإخفاء العنصر النائب
+                            powerBiFrame.onload = () => {
+                                const placeholder = powerBiWrapper.querySelector('.powerbi-placeholder');
+                                if (placeholder) {
+                                    placeholder.style.display = 'none';
+                                }
+                            };
+
+                            // 3. أوقف المراقبة لأننا لم نعد بحاجة إليها
+                            observer.unobserve(powerBiWrapper);
+                        }
+                    });
+                }, { rootMargin: '100px' }); // ابدأ التحميل 100 بكسل قبل أن يظهر العنصر بالكامل
+
+                // ابدأ بمراقبة حاوية التقرير
+                observer.observe(powerBiWrapper);
+            } else if (powerBiFrame) {
+                // حل بديل للمتصفحات القديمة جداً: قم بتحميله مباشرة
+                powerBiFrame.src = powerBiFrame.dataset.src;
+            }
         });
     </script>
 @endpush
