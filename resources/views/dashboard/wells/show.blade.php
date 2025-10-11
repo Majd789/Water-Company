@@ -264,7 +264,19 @@
                                 </div>
                             </div>
                         @endif
+                            <strong>التقييمات المسجلة:</strong>
+                                    <ul>
+                                    @forelse($well->assessments as $assessment)
+                                        <li>{{ $assessment->assessment_key }}: {{ $assessment->value }}</li>
+                                    @empty
+                                        <li>لا توجد تقييمات مسجلة لهذا البئر.</li>
+                                    @endforelse
+                                    </ul>
 
+                                    {{-- زر لإضافة تقييم جديد --}}
+                                    <a href="{{ route('dashboard.assessments.create', ['assessmentable_type' => 'Well', 'assessmentable_id' => $well->id]) }}" class="btn btn-info mt-3">
+                                        <i class="fas fa-plus"></i> إضافة تقييم جديد
+                                    </a>
                     </div> {{-- نهاية card-footer --}}
                 </div> {{-- نهاية card --}}
             </div> {{-- نهاية col-md-12 --}}

@@ -195,7 +195,17 @@
                 </div> {{-- نهاية card --}}
             </div> {{-- نهاية col-md-12 --}}
         </div> {{-- نهاية row --}}
+                <strong>القياسات المسجلة:</strong>
+        <ul>
+        @foreach($dieselTank->metrics as $metric)
+            <li>{{ $metric->metric_key }}: {{ $metric->value }} {{ $metric->unit }}</li>
+        @endforeach
+        </ul>
 
+        {{-- زر لإضافة قياس جديد --}}
+        <a href="{{ route('dashboard.metrics.create', ['metricable_type' => 'DieselTank', 'metricable_id' => $dieselTank->id]) }}" class="btn btn-success mt-3">
+            <i class="fas fa-plus"></i> إضافة قياس جديد
+        </a>
         {{-- قسم الأزرار --}}
         <div class="row mt-3 mb-4">
             <div class="col-12 text-center">

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 class ManholeReport extends Model
 {
     use HasFactory;
@@ -13,7 +13,7 @@ class ManholeReport extends Model
      *
      * @var string
      */
-    protected $table = 'manholes_reports'; 
+    protected $table = 'manholes_reports';
     protected $fillable = [
         'unit_id',
         'station_id',
@@ -65,4 +65,12 @@ class ManholeReport extends Model
         return $this->belongsTo(User::class, 'operator_id');
     }
 
+    public function metrics(): MorphMany
+    {
+        return $this->morphMany(Metric::class, 'metricable');
+    }
+     public function assessments(): MorphMany
+    {
+        return $this->morphMany(Assessment::class, 'assessmentable');
+    }
 }

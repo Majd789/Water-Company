@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 class GroundTank extends Model
 {
   use HasFactory, LogsActivity;
@@ -39,8 +39,8 @@ class GroundTank extends Model
         'altitude',
         'precision',
     ];
-    
-    
+
+
     /**
      * العلاقة مع المحطة
      */
@@ -48,5 +48,13 @@ class GroundTank extends Model
     {
         return $this->belongsTo(Station::class);
     }
-    
+
+    public function metrics(): MorphMany
+    {
+        return $this->morphMany(Metric::class, 'metricable');
+    }
+     public function assessments(): MorphMany
+    {
+        return $this->morphMany(Assessment::class, 'assessmentable');
+    }
 }

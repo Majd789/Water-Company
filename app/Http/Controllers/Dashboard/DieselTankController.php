@@ -130,6 +130,7 @@ class DieselTankController extends Controller
      */
     public function show(DieselTank $dieselTank)
     {
+        $dieselTank->load('station', 'metrics');
         return view('dashboard.diesel_tanks.show', compact('dieselTank'));
     }
 

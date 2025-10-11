@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
@@ -43,7 +43,7 @@ class GenerationGroup extends Model
 
     /**
      * العلاقة مع جدول المحطات (stations)
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function station()
@@ -53,7 +53,7 @@ class GenerationGroup extends Model
 
     /**
      * التحقق من إذا كانت المجموعة قيد التشغيل
-     * 
+     *
      * @return bool
      */
     public function isWorking()
@@ -63,7 +63,7 @@ class GenerationGroup extends Model
 
     /**
      * حساب نسبة كفاءة المجموعة بناءً على استطاعة العمل الفعلية واستطاعة التوليد
-     * 
+     *
      * @return float|null
      */
     public function calculateEfficiency()
@@ -73,5 +73,13 @@ class GenerationGroup extends Model
         }
 
         return null;
+    }
+    public function metrics(): MorphMany
+    {
+        return $this->morphMany(Metric::class, 'metricable');
+    }
+     public function assessments(): MorphMany
+    {
+        return $this->morphMany(Assessment::class, 'assessmentable');
     }
 }

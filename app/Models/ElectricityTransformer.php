@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
@@ -38,11 +38,11 @@ class ElectricityTransformer extends Model
         'how_mush_capacity_need',
         'notes',
     ];
-    
+
 
     /**
      * العلاقة مع جدول المحطات (stations)
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function station()
@@ -52,7 +52,7 @@ class ElectricityTransformer extends Model
 
     /**
      * التحقق مما إذا كانت المحولة قيد العمل
-     * 
+     *
      * @return bool
      */
     public function isOperational()
@@ -62,11 +62,19 @@ class ElectricityTransformer extends Model
 
     /**
      * التحقق مما إذا كانت المحولة خاصة بالمحطة
-     * 
+     *
      * @return bool
      */
     public function isStationTransformer()
     {
         return $this->is_station_transformer;
+    }
+    public function metrics(): MorphMany
+    {
+        return $this->morphMany(Metric::class, 'metricable');
+    }
+     public function assessments(): MorphMany
+    {
+        return $this->morphMany(Assessment::class, 'assessmentable');
     }
 }
