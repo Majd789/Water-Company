@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
@@ -46,5 +46,13 @@ class PumpingSector extends Model
     {
         return $this->belongsTo(Town::class);
     }
-    
+
+    public function metrics(): MorphMany
+    {
+        return $this->morphMany(Metric::class, 'metricable');
+    }
+     public function assessments(): MorphMany
+    {
+        return $this->morphMany(Assessment::class, 'assessmentable');
+    }
 }

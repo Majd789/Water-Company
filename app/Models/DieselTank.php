@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -29,7 +30,7 @@ class DieselTank extends Model
         'tank_capacity',
         'readiness_percentage',
         'type',
-       
+
         'general_notes',
     ];
 
@@ -40,4 +41,14 @@ class DieselTank extends Model
     {
         return $this->belongsTo(Station::class);
     }
+
+    public function metrics(): MorphMany
+    {
+        return $this->morphMany(Metric::class, 'metricable');
+    }
+     public function assessments(): MorphMany
+    {
+        return $this->morphMany(Assessment::class, 'assessmentable');
+    }
+
 }

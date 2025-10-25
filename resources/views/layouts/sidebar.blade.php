@@ -77,6 +77,11 @@
                             'filters.view',
                             'manholes.view',
                             'diesel_tanks.view',
+                            'water_quality_tests.view',
+                            'station_teams.view',
+                            'safety_profiles.view',
+                            'metrics.view',
+                            'assessments.view',
                         ];
                         $technicalRoutes = [
                             'dashboard.station_reports.*',
@@ -98,6 +103,11 @@
                             'dashboard.filters.*',
                             'dashboard.manholes.*',
                             'dashboard.diesel-tanks.*',
+                            'dashboard.water-quality-tests.*',
+                            'dashboard.station-teams.*',
+                            'dashboard.safety-profiles.*',
+                            'dashboard.metrics.*',
+                            'dashboard.assessments.*',
                         ];
                     @endphp
                     <x-sidebar-menu-section title="القسم التقني" icon="fas fa-desktop" :permissions="$technicalPermissions" :routes="$technicalRoutes">
@@ -229,6 +239,60 @@
                                     <p>خزانات الديزل</p>
                                 </a></li>
                         @endcan
+
+                        <li class="nav-header">التقييمات والإدارة</li>
+
+                        @can('water_quality_tests.view')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.water-quality-tests.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.water-quality-tests.*') ? 'active' : '' }}">
+                                    <i class="fas fa-vial nav-icon text-info"></i>
+                                    <p>جودة المياه</p>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('safety_profiles.view')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.safety-profiles.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.safety-profiles.*') ? 'active' : '' }}">
+                                    <i class="fas fa-shield-alt nav-icon text-warning"></i>
+                                    <p>ملفات السلامة</p>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('station_teams.view')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.station-teams.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.station-teams.*') ? 'active' : '' }}">
+                                    <i class="fas fa-users-cog nav-icon text-success"></i>
+                                    <p>فرق المحطات</p>
+                                </a>
+                            </li>
+                        @endcan
+
+                        {{-- الروابط للجداول العامة (Polymorphic) --}}
+                        {{-- هذه اختيارية، قد ترغب في الوصول إليها من خلال مكونات أخرى فقط --}}
+                        @can('metrics.view')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.metrics.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.metrics.*') ? 'active' : '' }}">
+                                    <i class="fas fa-chart-line nav-icon text-muted"></i>
+                                    <p>القياسات الرقمية</p>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('assessments.view')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.assessments.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.assessments.*') ? 'active' : '' }}">
+                                    <i class="fas fa-tasks nav-icon text-muted"></i>
+                                    <p>التقييمات النوعية</p>
+                                </a>
+                            </li>
+                        @endcan
                     </x-sidebar-menu-section>
 
                     {{-- 3. قسم الصيانة --}}
@@ -247,11 +311,24 @@
                             </li>
                         @endcan
                     </x-sidebar-menu-section>
-
-                    @php
-                        $subscriberManagementPermissions = ['subscribers.view'];
-                        $subscriberManagementRoutes = ['dashboard.subscribers.*'];
+                     @php
+                        // نحدد الصلاحيات التي يجب أن يمتلكها المستخدم ليرى هذا القسم
+                        $subscriberPermissions = ['unit_stats.view'];
+                        // نحدد المسارات التي تجعل هذا القسم "نشطًا"
+                        $subscriberRoutes = ['dashboard.unit-stats.*'];
                     @endphp
+                    <x-sidebar-menu-section title="قسم المشتركين" icon="fas fa-users" :permissions="$subscriberPermissions" :routes="$subscriberRoutes">
+                        @can('unit_stats.view')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.unit-stats.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.unit-stats.*') ? 'active' : '' }}">
+                                    <i class="fas fa-file-invoice-dollar nav-icon"></i>
+                                    <p>الإحصائيات الشهرية</p>
+                                </a>
+                            </li>
+                        @endcan
+                        {{-- يمكنك إضافة المزيد من الروابط الخاصة بقسم المشتركين هنا في المستقبل --}}
+                    </x-sidebar-menu-section>
 
 
                     <li class="nav-header">الإعدادات</li>

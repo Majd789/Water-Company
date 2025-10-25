@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 class HorizontalPump extends Model
 {
    use HasFactory, LogsActivity;
@@ -25,8 +25,8 @@ class HorizontalPump extends Model
 
 
     protected $fillable = [
-        'station_id', 'pump_status', 'pump_name', 
-        'pump_capacity_hp', 'pump_flow_rate_m3h', 'pump_head', 
+        'station_id', 'pump_status', 'pump_name',
+        'pump_capacity_hp', 'pump_flow_rate_m3h', 'pump_head',
         'pump_brand_model', 'technical_condition', 'energy_source', 'notes'
     ];
 
@@ -34,5 +34,13 @@ class HorizontalPump extends Model
     public function station()
     {
         return $this->belongsTo(Station::class);
+    }
+    public function metrics(): MorphMany
+    {
+        return $this->morphMany(Metric::class, 'metricable');
+    }
+     public function assessments(): MorphMany
+    {
+        return $this->morphMany(Assessment::class, 'assessmentable');
     }
 }

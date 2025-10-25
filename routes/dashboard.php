@@ -10,11 +10,15 @@ use App\Http\Controllers\Dashboard\{
 
     ManholeController, NoteController, PrivateWellController, PumpingSectionController,
     SolarEnergyController, StationMapController, StationReportsController,
-    WeeklyReportController, ActivityLogController, DataExportController, DailyStationReportController,
+    WeeklyReportController, ActivityLogController, AssessmentController, DataExportController, DailyStationReportController,
 
     DieselTankController, DisinfectionPumpController, ElectricityHourController,
     ElectricityTransformerController, MaintenanceTaskController,
-
+    MetricController,
+    SafetyProfileController,
+    StationTeamController,
+    UnitMonthlyStatController,
+    WaterQualityTestController,
 };
 
 
@@ -47,6 +51,9 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::get('/export/manholes', [ManholeController::class, 'export'])->name('manholes.export');
     Route::get('/export/solar-energies', [SolarEnergyController::class, 'export'])->name('solar-energies.export');
     Route::get('/export/diesel-tanks', [DieselTankController::class, 'export'])->name('diesel-tanks.export');
+    Route::get('water-quality-tests/export', [WaterQualityTestController::class, 'export'])->name('water-quality-tests.export');
+    Route::get('station-teams/export', [StationTeamController::class, 'export'])->name('station-teams.export');
+    Route::get('safety-profiles/export', [SafetyProfileController::class, 'export'])->name('safety-profiles.export');
     Route::get('/export/all-data', [DataExportController::class, 'exportAll'])->name('export.all');
     // داخل مجموعة الروابط الخاصة بـ dashboard
     Route::get('maintenance_tasks.export', [MaintenanceTaskController::class, 'export'])->name('maintenance_tasks.export');
@@ -55,6 +62,8 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::post('/towns/import', [TownController::class, 'import'])->name('towns.import');
     Route::post('/stations/import', [StationController::class, 'import'])->name('stations.import');
     Route::post('wells/import', [WellController::class, 'import'])->name('wells.import');
+    Route::post('water-quality-tests/import', [WaterQualityTestController::class, 'import'])->name('water-quality-tests.import');
+    Route::post('station-teams/import', [StationTeamController::class, 'import'])->name('station-teams.import');
     Route::post('generation-groups/import', [GenerationGroupController::class, 'import'])->name('generation_groups.import');
     Route::post('disinfection-pumps/import', [DisinfectionPumpController::class, 'import'])->name('disinfection_pumps.import');
     Route::post('horizontal-pumps/import', [HorizontalPumpController::class, 'import'])->name('horizontal_pumps.import');
@@ -68,10 +77,41 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::post('manholes/import', [ManholeController::class, 'import'])->name('manholes.import');
     Route::post('solar_energy/import', [SolarEnergyController::class, 'import'])->name('import.solar_energies');
     Route::post('diesel_tanks/import', [DieselTankController::class, 'import'])->name('import.diesel_tanks');
+    Route::post('safety-profiles/import', [SafetyProfileController::class, 'import'])->name('import.safety_profiles');
     Route::post('/maintenance_tasks/import', [MaintenanceTaskController::class, 'import'])->name('maintenance_tasks.import');
     Route::get('/stations/{id}/export-card', [StationController::class, 'exportStationCard'])->name('stations.exportCard');    Route::resource('wells', WellController::class);
     Route::resource('generation-groups', GenerationGroupController::class);
     Route::resource('horizontal-pumps', HorizontalPumpController::class);
+
+    Route::prefix('unit-stats')->name('unit-stats.')->group(function () {
+        Route::get('/', [UnitMonthlyStatController::class, 'index'])->name('index');
+        Route::get('/create', [UnitMonthlyStatController::class, 'create'])->name('create');
+        Route::post('/', [UnitMonthlyStatController::class, 'store'])->name('store');
+        Route::get('/{unitMonthlyStat}', [UnitMonthlyStatController::class, 'show'])->name('show');
+        Route::delete('/{unitMonthlyStat}', [UnitMonthlyStatController::class, 'destroy'])->name('destroy');
+
+        // مسارات التعديل المنفصلة
+        Route::get('/{unitMonthlyStat}/edit-technical', [UnitMonthlyStatController::class, 'editTechnical'])->name('edit_technical');
+        Route::patch('/{unitMonthlyStat}/edit-technical', [UnitMonthlyStatController::class, 'updateTechnical'])->name('update_technical');
+
+        Route::get('/{unitMonthlyStat}/edit-subscribers', [UnitMonthlyStatController::class, 'editSubscribers'])->name('edit_subscribers');
+        Route::patch('/{unitMonthlyStat}/edit-subscribers', [UnitMonthlyStatController::class, 'updateSubscribers'])->name('update_subscribers');
+    });
+    Route::resource('water-quality-tests', WaterQualityTestController::class);
+    Route::get('station-teams', [StationTeamController::class, 'index'])->name('station-teams.index');
+    Route::get('stations/{station}/team/edit', [StationTeamController::class, 'edit'])->name('station-teams.edit');
+    Route::put('stations/{station}/team', [StationTeamController::class, 'update'])->name('station-teams.update');
+    Route::delete('station-teams/{stationTeam}', [StationTeamController::class, 'destroy'])->name('station-teams.destroy');
+
+    Route::get('safety-profiles', [SafetyProfileController::class, 'index'])->name('safety-profiles.index');
+    Route::get('stations/{station}/safety-profile/edit', [SafetyProfileController::class, 'edit'])->name('safety-profiles.edit');
+    Route::put('stations/{station}/safety-profile', [SafetyProfileController::class, 'update'])->name('safety-profiles.update');
+    Route::get('stations/{station}/safety-profile', [SafetyProfileController::class, 'show'])->name('safety-profiles.show');
+    Route::delete('safety-profiles/{safetyProfile}', [SafetyProfileController::class, 'destroy'])->name('safety-profiles.destroy');
+
+    Route::resource('metrics', MetricController::class)->except(['show']);
+    Route::resource('assessments', AssessmentController::class)->except(['show']);
+
     Route::resource('ground-tanks', GroundTankController::class);
     Route::resource('elevated-tanks', ElevatedTankController::class);
     Route::resource('pumping-sectors', PumpingSectionController::class);
@@ -123,6 +163,7 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::resource('station-reports', StationReportsController::class);
     Route::resource('notes', NoteController::class);
     Route::resource('maintenance_tasks', MaintenanceTaskController::class);
+
     // === مسارات خاصة واستثنائية ===
     Route::get('stations-map', [StationMapController::class, 'index'])->name('stations.map');
     Route::get('activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');

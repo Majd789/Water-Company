@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 class Manhole extends Model
 {
     use HasFactory;
@@ -57,5 +57,13 @@ class Manhole extends Model
         return $this->hasMany(ManholeReport::class);
     }
 
-    
+    public function metrics(): MorphMany
+    {
+        return $this->morphMany(Metric::class, 'metricable');
+    }
+     public function assessments(): MorphMany
+    {
+        return $this->morphMany(Assessment::class, 'assessmentable');
+    }
+
 }

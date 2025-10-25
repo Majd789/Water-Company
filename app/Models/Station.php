@@ -85,7 +85,6 @@ class Station extends Model implements HasMedia
         return $this->hasMany(Manhole::class);
     }
 
-
     public function infiltrator() //المحولات رافع الجهد
     {
         return $this->hasMany(Infiltrator::class);
@@ -117,5 +116,31 @@ class Station extends Model implements HasMedia
     {
         return $this->hasMany(StationReport::class, 'station_id');
     }
-    
+
+    public function waterQualityTests()
+{
+    return $this->hasMany(WaterQualityTest::class);
+}
+
+public function team()
+{
+    return $this->hasOne(StationTeam::class);
+}
+
+public function safetyProfile()
+{
+    return $this->hasOne(SafetyProfile::class);
+}
+
+// Polymorphic Relations
+public function assessments()
+{
+    return $this->morphMany(Assessment::class, 'assessmentable');
+}
+
+public function metrics()
+{
+    return $this->morphMany(Metric::class, 'metricable');
+}
+
 }

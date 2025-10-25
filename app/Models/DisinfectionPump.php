@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
@@ -24,7 +24,7 @@ class DisinfectionPump extends Model
     }
 
     protected $fillable = [
-        'station_id', 'has_disinfection_pump', 'disinfection_pump_status', 'pump_brand_model', 
+        'station_id', 'has_disinfection_pump', 'disinfection_pump_status', 'pump_brand_model',
         'pump_flow_rate', 'operating_pressure', 'technical_condition', 'notes'
     ];
 
@@ -32,5 +32,13 @@ class DisinfectionPump extends Model
     public function station()
     {
         return $this->belongsTo(Station::class);
+    }
+    public function metrics(): MorphMany
+    {
+        return $this->morphMany(Metric::class, 'metricable');
+    }
+     public function assessments(): MorphMany
+    {
+        return $this->morphMany(Assessment::class, 'assessmentable');
     }
 }

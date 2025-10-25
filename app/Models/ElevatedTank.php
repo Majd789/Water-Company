@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
@@ -42,7 +42,7 @@ class ElevatedTank extends Model
         'precision',
         'notes',
     ];
-    
+
 
     /**
      * العلاقة مع المحطة
@@ -50,5 +50,13 @@ class ElevatedTank extends Model
     public function station()
     {
         return $this->belongsTo(Station::class);
+    }
+    public function metrics(): MorphMany
+    {
+        return $this->morphMany(Metric::class, 'metricable');
+    }
+     public function assessments(): MorphMany
+    {
+        return $this->morphMany(Assessment::class, 'assessmentable');
     }
 }

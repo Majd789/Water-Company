@@ -56,38 +56,6 @@
         .sidebar-close:hover {
             color: #000;
         }
-        .powerbi-container {
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-            padding-top: 62.25%; /* Aspect Ratio: (373.5 / 600) * 100 */
-        }
-
-        .powerbi-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            width: 100%;
-            height: 100%;
-        }
-        .powerbi-placeholder {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f4f6f9; /* لون خلفية قريب من تصميم المنصة */
-            color: #6c757d;
-            font-size: 1.1rem;
-            border: 1px dashed #ddd;
-            border-radius: .25rem;
-            z-index: 1; /* للتأكد من أنه يظهر فوق الـ iframe الفارغ */
-        }
     </style>
 @endpush
 
@@ -116,33 +84,7 @@
         </div>
     </div>
     <hr>
-      <div class="row">
-        <div class="col-12">
-            <div class="card card-primary card-outline">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-chart-line mr-1"></i>
-                        التقرير التفاعلي (Power BI)
-                    </h3>
-                </div>
-                <div class="card-body">
-                    {{-- حاوية لجعل الـ iframe متجاوب --}}
-                 <div class="powerbi-container" id="powerbi-wrapper">
-    {{-- 1. عنصر نائب يظهر قبل تحميل التقرير --}}
-    <div class="powerbi-placeholder">
-        <i class="fas fa-spinner fa-spin mr-2"></i>
-        <span>جاري تحميل التقرير التفاعلي...</span>
-    </div>
 
-    {{-- 2. الـ iframe بدون src، ولكن مع data-src --}}
-    <iframe id="powerbi-frame" title="Water_Station_2025_Phase1"
-            data-src="https://app.powerbi.com/view?r=eyJrIjoiNDI5NTlhNmQtOTA1Zi00OTA2LThmNmMtYjgyM2ZjODU4N2FiIiwidCI6ImU5ZTdmYjA0LWYzZTAtNDZjMC1hNjZlLTBiZTAxNzljOWFiMiIsImMiOjl9"
-            frameborder="0" allowFullScreen="true"></iframe>
-</div>
-                </div>
-            </div>
-        </div>
-    </div>
     {{-- ================================================================= --}}
     {{-- عرض الخريطة (مشترك بين الوضع العام ووضع المحطة) --}}
     {{-- ================================================================= --}}
@@ -367,50 +309,8 @@
                     }
                 }
 
-                // إنشاء طبقات البيانات
+                // إنشاء طبقة المحطات فقط
                 createGeoJsonLayer('stations', geoJsonData.stations);
-                createGeoJsonLayer('wells', geoJsonData.wells);
-                createGeoJsonLayer('solar_energies', geoJsonData.solar_energies);
-                createGeoJsonLayer('ground_tanks', geoJsonData.ground_tanks);
-                createGeoJsonLayer('elevated_tanks', geoJsonData.elevated_tanks);
-
-                // إنشاء أداة التحكم بالفلاتر ووضعها على الخريطة
-                var filterControl = L.control({position: 'topleft'});
-                filterControl.onAdd = function (map) {
-                    var div = L.DomUtil.create('div', 'leaflet-bar');
-                    div.innerHTML = `
-                        <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons" style="background-color: white; border-radius: 4px;">
-                            <label class="btn btn-light btn-sm active" title="المحطات"><input type="checkbox" name="layer-toggle" value="stations" checked autocomplete="off"><i class="fas fa-industry"></i></label>
-                            <label class="btn btn-light btn-sm active" title="الآبار"><input type="checkbox" name="layer-toggle" value="wells" checked autocomplete="off"><i class="fas fa-water"></i></label>
-                            <label class="btn btn-light btn-sm active" title="الطاقة الشمسية"><input type="checkbox" name="layer-toggle" value="solar_energies" checked autocomplete="off"><i class="fas fa-solar-panel"></i></label>
-                            <label class="btn btn-light btn-sm active" title="خزانات أرضية"><input type="checkbox" name="layer-toggle" value="ground_tanks" checked autocomplete="off"><i class="fas fa-box-open"></i></label>
-                            <label class="btn btn-light btn-sm active" title="خزانات عالية"><input type="checkbox" name="layer-toggle" value="elevated_tanks" checked autocomplete="off"><i class="fas fa-archway"></i></label>
-                        </div>
-                    `;
-                    L.DomEvent.disableClickPropagation(div); // منع النقر من الوصول للخريطة
-                    return div;
-                };
-                filterControl.addTo(map);
-
-                // ربط أزرار الفلاتر بالطبقات
-                $('input[name="layer-toggle"]').on('change', function() {
-                    var layerKey = $(this).val();
-                    if (layers[layerKey]) {
-                        if (this.checked) {
-                            map.addLayer(layers[layerKey]);
-                        } else {
-                            map.removeLayer(layers[layerKey]);
-                        }
-                    }
-                });
-
-                // إخفاء أزرار الفلاتر للطبقات الفارغة
-                $('.btn-group-vertical .btn').each(function() {
-                    var layerKey = $(this).find('input').val();
-                    if (!layers[layerKey] || layers[layerKey].getLayers().length === 0) {
-                        $(this).hide();
-                    }
-                });
 
                 // إضافة أداة القياس
                 var measureControl = new L.Control.Measure({ position: 'topright', primaryLengthUnit: 'meters', secondaryLengthUnit: 'kilometers', primaryAreaUnit: 'sqmeters', activeColor: '#db4a39', completedColor: '#9b2d20', localization: 'ar' });
@@ -474,40 +374,6 @@
                 }
             @endif
 
-        });
-        document.addEventListener('DOMContentLoaded', function() {
-            const powerBiWrapper = document.getElementById('powerbi-wrapper');
-            const powerBiFrame = document.getElementById('powerbi-frame');
-
-            // التأكد من وجود العنصر وأن المتصفح يدعم IntersectionObserver
-            if (powerBiWrapper && powerBiFrame && 'IntersectionObserver' in window) {
-                const observer = new IntersectionObserver((entries, observer) => {
-                    entries.forEach(entry => {
-                        // إذا أصبح العنصر مرئياً في الشاشة
-                        if (entry.isIntersecting) {
-                            // 1. خذ الرابط من data-src وضعه في src لبدء التحميل
-                            powerBiFrame.src = powerBiFrame.dataset.src;
-
-                            // 2. عند اكتمال تحميل التقرير، قم بإخفاء العنصر النائب
-                            powerBiFrame.onload = () => {
-                                const placeholder = powerBiWrapper.querySelector('.powerbi-placeholder');
-                                if (placeholder) {
-                                    placeholder.style.display = 'none';
-                                }
-                            };
-
-                            // 3. أوقف المراقبة لأننا لم نعد بحاجة إليها
-                            observer.unobserve(powerBiWrapper);
-                        }
-                    });
-                }, { rootMargin: '100px' }); // ابدأ التحميل 100 بكسل قبل أن يظهر العنصر بالكامل
-
-                // ابدأ بمراقبة حاوية التقرير
-                observer.observe(powerBiWrapper);
-            } else if (powerBiFrame) {
-                // حل بديل للمتصفحات القديمة جداً: قم بتحميله مباشرة
-                powerBiFrame.src = powerBiFrame.dataset.src;
-            }
         });
     </script>
 @endpush
