@@ -17,6 +17,7 @@ use App\Http\Controllers\Dashboard\{
     MetricController,
     SafetyProfileController,
     StationTeamController,
+    UnitMonthlyStatController,
     WaterQualityTestController,
 };
 
@@ -82,6 +83,20 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::resource('generation-groups', GenerationGroupController::class);
     Route::resource('horizontal-pumps', HorizontalPumpController::class);
 
+    Route::prefix('unit-stats')->name('unit-stats.')->group(function () {
+        Route::get('/', [UnitMonthlyStatController::class, 'index'])->name('index');
+        Route::get('/create', [UnitMonthlyStatController::class, 'create'])->name('create');
+        Route::post('/', [UnitMonthlyStatController::class, 'store'])->name('store');
+        Route::get('/{unitMonthlyStat}', [UnitMonthlyStatController::class, 'show'])->name('show');
+        Route::delete('/{unitMonthlyStat}', [UnitMonthlyStatController::class, 'destroy'])->name('destroy');
+
+        // مسارات التعديل المنفصلة
+        Route::get('/{unitMonthlyStat}/edit-technical', [UnitMonthlyStatController::class, 'editTechnical'])->name('edit_technical');
+        Route::patch('/{unitMonthlyStat}/edit-technical', [UnitMonthlyStatController::class, 'updateTechnical'])->name('update_technical');
+
+        Route::get('/{unitMonthlyStat}/edit-subscribers', [UnitMonthlyStatController::class, 'editSubscribers'])->name('edit_subscribers');
+        Route::patch('/{unitMonthlyStat}/edit-subscribers', [UnitMonthlyStatController::class, 'updateSubscribers'])->name('update_subscribers');
+    });
     Route::resource('water-quality-tests', WaterQualityTestController::class);
     Route::get('station-teams', [StationTeamController::class, 'index'])->name('station-teams.index');
     Route::get('stations/{station}/team/edit', [StationTeamController::class, 'edit'])->name('station-teams.edit');

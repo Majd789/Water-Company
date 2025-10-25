@@ -4,8 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Permission;
 use App\Models\Role;
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class RolePermissionSeeder extends Seeder
@@ -13,27 +11,12 @@ class RolePermissionSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-  public function run(): void
+    public function run(): void
     {
-       // Reset cached roles and permissions
+        // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        //  // إنشاء الصلاحيات
-        // $permissions = [
-        //     // إدارة المستخدمين
-        //     ['name' => 'users.view', 'group' => 'users', 'display_name' => 'عرض المستخدمين'],
-        //     ['name' => 'users.create', 'group' => 'users', 'display_name' => 'إنشاء مستخدمين'],
-        //     ['name' => 'users.edit', 'group' => 'users', 'display_name' => 'تعديل المستخدمين'],
-        //     ['name' => 'users.delete', 'group' => 'users', 'display_name' => 'حذف المستخدمين'],
-
-        //     // إدارة الأدوار
-        //     ['name' => 'roles.view', 'group' => 'roles', 'display_name' => 'عرض الأدوار'],
-        //     ['name' => 'roles.create', 'group' => 'roles', 'display_name' => 'إنشاء أدوار'],
-        //     ['name' => 'roles.edit', 'group' => 'roles', 'display_name' => 'تعديل الأدوار'],
-        //     ['name' => 'roles.delete', 'group' => 'roles', 'display_name' => 'حذف الأدوار'],
-
-
-           // الموديلات التي سنولد لها صلاحيات
+        // الموديلات التي سنولد لها صلاحيات قياسية (view, create, edit, delete)
         $models = [
             'users' => 'المستخدمين',
             'roles' => 'الأدوار',
@@ -65,10 +48,11 @@ class RolePermissionSeeder extends Seeder
             'maintenance_tasks' => 'مهام الصيانة',
             'projects' => 'المشاريع',
             'project_activities' => 'أنشطة المشاريع',
+            // 'unit_stats' will be handled separately to create custom permissions
         ];
 
+        // --- 1. إنشاء الصلاحيات القياسية ---
         $permissions = [];
-
         foreach ($models as $key => $displayGroup) {
             $permissions[] = ['name' => $key . '.view', 'group' => $key, 'display_name' => "عرض $displayGroup"];
             $permissions[] = ['name' => $key . '.create', 'group' => $key, 'display_name' => "إنشاء $displayGroup"];
@@ -76,41 +60,70 @@ class RolePermissionSeeder extends Seeder
             $permissions[] = ['name' => $key . '.delete', 'group' => $key, 'display_name' => "حذف $displayGroup"];
         }
 
-        // إدخال الصلاحيات
+        // --- 2. إضافة الصلاحيات المخصصة لـ Unit Stats ---
+        $permissions[] = ['name' => 'unit_stats.view', 'group' => 'unit_stats', 'display_name' => 'عرض الإحصائيات الشهرية'];
+        $permissions[] = ['name' => 'unit_stats.create', 'group' => 'unit_stats', 'display_name' => 'إنشاء الإحصائيات الشهرية'];
+        $permissions[] = ['name' => 'unit_stats.delete', 'group' => 'unit_stats', 'display_name' => 'حذف الإحصائيات الشهرية'];
+        // الصلاحيات المنفصلة للتعديل
+        $permissions[] = ['name' => 'unit_stats.edit_technical', 'group' => 'unit_stats', 'display_name' => 'تعديل البيانات التقنية (مياه)'];
+        $permissions[] = ['name' => 'unit_stats.edit_subscribers', 'group' => 'unit_stats', 'display_name' => 'تعديل بيانات المشتركين'];
+
+        // --- 3. إدخال كل الصلاحيات في قاعدة البيانات ---
         foreach ($permissions as $permission) {
-            if (!\App\Models\Permission::where('name', $permission['name'])->exists()) {
-                \App\Models\Permission::create($permission);
-            }
+            Permission::firstOrCreate(
+                ['name' => $permission['name']],
+                ['group' => $permission['group'], 'display_name' => $permission['display_name']]
+            );
         }
 
-
+        // ===================================================================
         // إنشاء الأدوار وتعيين الصلاحيات
-        if (!Role::where('name', 'admin')->exists()) {
-            $adminRole = Role::create([
-                'name' => 'admin',
-                'display_name' => 'مدير النظام',
-                'description' => 'لديه جميع الصلاحيات'
-            ]);
-            $adminRole->givePermissionTo(Permission::all());
-        } else {
-            $adminRole = Role::where('name', 'admin')->first();
-            $adminRole->syncPermissions(Permission::all());
-        }
+        // ===================================================================
 
-        if (!Role::where('name', 'accountant')->exists()) {
-            $accountantRole = Role::create([
-                'name' => 'accountant',
-                'display_name' => 'محاسب',
-                'description' => 'مسؤول عن الفواتير والحسابات'
-            ]);
-            $accountantRole->givePermissionTo([
-                'invoices.view', 'invoices.create', 'invoices.edit'
-            ]);
-        } else {
-            $accountantRole = Role::where('name', 'accountant')->first();
-            $accountantRole->syncPermissions([
-                'invoices.view', 'invoices.create', 'invoices.edit'
-            ]);
-        }
+        // --- 4. دور مدير النظام (Admin) - يمتلك كل الصلاحيات ---
+        $adminRole = Role::firstOrCreate(
+            ['name' => 'admin'],
+            ['display_name' => 'مدير النظام', 'description' => 'لديه جميع الصلاحيات']
+        );
+        $adminRole->syncPermissions(Permission::all());
+
+        // --- 5. دور مدير الوحدة (AdminUnit) - مسؤول عن البيانات التقنية ---
+        $adminUnitRole = Role::firstOrCreate(
+            ['name' => 'AdminUnit'],
+            ['display_name' => 'مدير الوحدة', 'description' => 'مسؤول عن البيانات التقنية للمحطات والوحدات']
+        );
+        $adminUnitRole->syncPermissions([
+            // صلاحيات أساسية لعرض البيانات
+            'units.view',
+            'towns.view',
+            'stations.view',
+            // صلاحيات الإحصائيات الشهرية الخاصة به
+            'unit_stats.view',
+            'unit_stats.create',
+            'unit_stats.edit_technical', // الصلاحية الرئيسية
+        ]);
+
+        // --- 6. دور قسم المشتركين (subscribers) - مسؤول عن بيانات المشتركين والمالية ---
+        $subscribersRole = Role::firstOrCreate(
+            ['name' => 'subscribers'],
+            ['display_name' => 'قسم المشتركين', 'description' => 'مسؤول عن بيانات المشتركين والمالية']
+        );
+        $subscribersRole->syncPermissions([
+            // صلاحيات أساسية لعرض البيانات
+            'units.view',
+            // صلاحيات الإحصائيات الشهرية الخاصة به
+            'unit_stats.view',
+            'unit_stats.create',
+            'unit_stats.edit_subscribers', // الصلاحية الرئيسية
+        ]);
+
+        // --- 7. دور المحاسب (accountant) - كمثال إضافي ---
+        $accountantRole = Role::firstOrCreate(
+            ['name' => 'accountant'],
+            ['display_name' => 'محاسب', 'description' => 'مسؤول عن الفواتير والحسابات']
+        );
+        $accountantRole->syncPermissions([
+            'invoices.view', 'invoices.create', 'invoices.edit'
+        ]);
     }
 }

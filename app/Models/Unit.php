@@ -29,7 +29,10 @@ public function governorate()
         // نصل إلى نموذج Station::class من خلال نموذج Town::class
         return $this->hasManyThrough(Station::class, Town::class);
     }
+    public function monthlyStats()
+{
+    return $this->hasMany(UnitMonthlyStat::class)->orderBy('year', 'desc')->orderBy('month', 'desc');
+}
 
-    
 
 }

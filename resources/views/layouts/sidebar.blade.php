@@ -311,11 +311,24 @@
                             </li>
                         @endcan
                     </x-sidebar-menu-section>
-
-                    @php
-                        $subscriberManagementPermissions = ['subscribers.view'];
-                        $subscriberManagementRoutes = ['dashboard.subscribers.*'];
+                     @php
+                        // نحدد الصلاحيات التي يجب أن يمتلكها المستخدم ليرى هذا القسم
+                        $subscriberPermissions = ['unit_stats.view'];
+                        // نحدد المسارات التي تجعل هذا القسم "نشطًا"
+                        $subscriberRoutes = ['dashboard.unit-stats.*'];
                     @endphp
+                    <x-sidebar-menu-section title="قسم المشتركين" icon="fas fa-users" :permissions="$subscriberPermissions" :routes="$subscriberRoutes">
+                        @can('unit_stats.view')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.unit-stats.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.unit-stats.*') ? 'active' : '' }}">
+                                    <i class="fas fa-file-invoice-dollar nav-icon"></i>
+                                    <p>الإحصائيات الشهرية</p>
+                                </a>
+                            </li>
+                        @endcan
+                        {{-- يمكنك إضافة المزيد من الروابط الخاصة بقسم المشتركين هنا في المستقبل --}}
+                    </x-sidebar-menu-section>
 
 
                     <li class="nav-header">الإعدادات</li>
