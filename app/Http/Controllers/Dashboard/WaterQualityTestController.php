@@ -94,7 +94,7 @@ class WaterQualityTestController extends Controller
 
         WaterQualityTest::create($validatedData);
 
-        return redirect()->route('dashboard.water_quality_tests.index')->with('success', 'تمت إضافة سجل جودة المياه بنجاح.');
+        return redirect()->route('dashboard.water-quality-tests.index')->with('success', 'تمت إضافة سجل جودة المياه بنجاح.');
     }
 
     /**
@@ -131,7 +131,7 @@ class WaterQualityTestController extends Controller
 
         $waterQualityTest->update($validatedData);
 
-        return redirect()->route('dashboard.water_quality_tests.index')->with('success', 'تم تحديث سجل جودة المياه بنجاح.');
+        return redirect()->route('dashboard.water-quality-tests.index')->with('success', 'تم تحديث سجل جودة المياه بنجاح.');
     }
 
     /**
@@ -141,7 +141,7 @@ class WaterQualityTestController extends Controller
     {
         $waterQualityTest->delete();
 
-        return redirect()->route('dashboard.water_quality_tests.index')->with('success', 'تم حذف سجل جودة المياه بنجاح.');
+        return redirect()->route('dashboard.water-quality-tests.index')->with('success', 'تم حذف سجل جودة المياه بنجاح.');
     }
 
     /**
