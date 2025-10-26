@@ -1,5 +1,21 @@
 @extends('layouts.app')
+ <style>
+        /* 1. تعديل التبويب المُفعّل (Active) */
+        .card-primary.card-tabs .nav-tabs .nav-link.active {
+            background-color: #ffffff;
+            color: #007bff;
+        }
 
+        /* 2. تحسين لون التبويبات غير المفعلة */
+        .card-primary.card-tabs .nav-tabs .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* 3. تحسين شكل التبويب عند مرور الماوس (Hover) */
+        .card-primary.card-tabs .nav-tabs .nav-link:not(.active):hover {
+            color: #ffffff;
+        }
+    </style>
 @section('title', 'تفاصيل السجل الإحصائي')
 
 @section('content')
@@ -60,7 +76,7 @@
             {{-- Section 2: Detailed Data in Tabs --}}
             <div class="card card-primary card-tabs">
                 <div class="card-header p-0 pt-1">
-                    <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                    <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist" >
                         <li class="nav-item"><a class="nav-link active" data-toggle="pill" href="#tab-water">إحصائيات المياه</a></li>
                         <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#tab-counts">أعداد المشتركين</a></li>
                         <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#tab-segments">شرائح المشتركين</a></li>
