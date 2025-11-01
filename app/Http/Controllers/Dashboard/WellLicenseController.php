@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Exports\WellLicensesExport;
 use App\Http\Controllers\Controller;
+use App\Imports\WellLicensesImport;
 use App\Models\Station;
 use App\Models\WellLicense;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 
 class WellLicenseController extends Controller
 {
@@ -51,6 +54,33 @@ class WellLicenseController extends Controller
 
         return view('dashboard.well-licenses.index', compact('wellLicenses', 'requestTypes'));
     }
+
+    public function export()
+{
+    return Excel::download(new WellLicensesExport, 'well_licenses.xlsx');
+}
+
+/**
+ * استيراد البيانات من ملف إكسل.
+ */
+public function import(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,xls,csv',
+    ]);
+
+    try {
+        Excel::import(new WellLicensesImport, $request->file('file'));
+        return redirect()->route('dashboard.well-licenses.index')->with('success', 'تم استيراد تراخيص الآبار بنجاح.');
+    } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+        $failures = $e->failures();
+        $errorMessages = [];
+        foreach ($failures as $failure) {
+            $errorMessages[] = "خطأ في الصف رقم {$failure->row()}: " . implode(', ', $failure->errors());
+        }
+        return redirect()->route('dashboard.well-licenses.index')->with('error', 'حدثت أخطاء أثناء الاستيراد: <br>' . implode('<br>', $errorMessages));
+    }
+}
 
     /**
      * عرض نموذج إنشاء ترخيص بئر جديد.
