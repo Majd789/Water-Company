@@ -47,6 +47,7 @@ class RolePermissionSeeder extends Seeder
             'project_activities' => 'أنشطة المشاريع',
             'water_quality_tests' => 'اختبارات جودة المياه',
             'unit-stats' => 'الإحصائيات الشهرية للوحدات',
+            'well_licenses' => 'تراخيص الآبار',
             // 'unit_stats' will be handled separately to create custom permissions
         ];
 
@@ -222,6 +223,20 @@ class RolePermissionSeeder extends Seeder
             'unit_stats.edit_subscribers', // الصلاحية الرئيسية
         ]);
 
+        $wellLicensingRole = Role::updateOrCreate(
+            ['name' => 'well_licensing_department'], // اسم برمجي للدور
+            [
+                'display_name' => 'قسم ترخيص الآبار',
+                'description' => 'مسؤول عن أرشفة ومتابعة تراخيص الآبار'
+            ]
+        );
+        // إعطاء الدور جميع الصلاحيات المتعلقة بتراخيص الآبار
+        $wellLicensingRole->syncPermissions([
+            'well_licenses.view',
+            'well_licenses.create',
+            'well_licenses.edit',
+            'well_licenses.delete',
+        ]);
         // --- 7. دور المحاسب (accountant) - كمثال إضافي ---
         $accountantRole = Role::firstOrCreate(
             ['name' => 'accountant'],
