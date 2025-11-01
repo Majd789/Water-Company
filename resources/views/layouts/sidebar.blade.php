@@ -330,7 +330,24 @@
                         {{-- يمكنك إضافة المزيد من الروابط الخاصة بقسم المشتركين هنا في المستقبل --}}
                     </x-sidebar-menu-section>
 
-
+                @php
+                    // نحدد الصلاحية المطلوبة لعرض هذا القسم
+                    $wellLicensePermissions = ['well_licenses.view'];
+                    // نحدد المسارات التي تجعل هذا القسم "نشطًا"
+                    $wellLicenseRoutes = ['dashboard.well-licenses.*'];
+                @endphp
+                <x-sidebar-menu-section title="قسم تراخيص الآبار" icon="fas fa-file-contract" :permissions="$wellLicensePermissions" :routes="$wellLicenseRoutes">
+                    @can('well_licenses.view')
+                        <li class="nav-item">
+                            <a href="{{ route('dashboard.well-licenses.index') }}"
+                                class="nav-link {{ Request::routeIs('dashboard.well-licenses.*') ? 'active' : '' }}">
+                                <i class="fas fa-archive nav-icon"></i>
+                                <p>أرشيف التراخيص</p>
+                            </a>
+                        </li>
+                    @endcan
+                    {{-- يمكنك إضافة المزيد من الروابط هنا مستقبلاً --}}
+                </x-sidebar-menu-section>
                     <li class="nav-header">الإعدادات</li>
 
                     {{-- 4. إدارة النظام --}}

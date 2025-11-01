@@ -19,6 +19,7 @@ use App\Http\Controllers\Dashboard\{
     StationTeamController,
     UnitMonthlyStatController,
     WaterQualityTestController,
+    WellLicenseController,
 };
 
 
@@ -126,6 +127,7 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::resource('station-reports', StationReportsController::class);
     Route::resource('notes', NoteController::class);
     Route::resource('maintenance_tasks', MaintenanceTaskController::class);
+    Route::resource('well-licenses', WellLicenseController::class);
     // === مسارات خاصة واستثنائية ===
     Route::get('stations-map', [StationMapController::class, 'index'])->name('stations.map');
     Route::get('activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
