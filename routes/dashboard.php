@@ -55,6 +55,10 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::get('water-quality-tests/export', [WaterQualityTestController::class, 'export'])->name('water-quality-tests.export');
     Route::get('station-teams/export', [StationTeamController::class, 'export'])->name('station-teams.export');
     Route::get('safety-profiles/export', [SafetyProfileController::class, 'export'])->name('safety-profiles.export');
+    Route::get('well-licenses/export', [WellLicenseController::class, 'export'])->name('well-licenses.export');
+    Route::post('well-licenses/import', [WellLicenseController::class, 'import'])->name('well-licenses.import');
+
+    Route::resource('well-licenses', WellLicenseController::class);
     Route::get('/export/all-data', [DataExportController::class, 'exportAll'])->name('export.all');
     // داخل مجموعة الروابط الخاصة بـ dashboard
     Route::get('maintenance_tasks.export', [MaintenanceTaskController::class, 'export'])->name('maintenance_tasks.export');

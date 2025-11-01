@@ -29,6 +29,47 @@
     </section>
 
     <section class="content">
+        <div class="row">
+    <div class="col-12">
+        {{-- قسم الاستيراد --}}
+        <div class="card card-success collapsed-card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-file-excel mr-1"></i> استيراد / تصدير</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 border-right">
+                        <h4>استيراد من ملف Excel</h4>
+                        <p class="text-muted">يمكنك استيراد قائمة بالتراخيص دفعة واحدة.</p>
+                        <form action="{{ route('dashboard.well-licenses.import') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="form-group">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="importFile" name="file" required>
+                                    <label class="custom-file-label" for="importFile">اختر ملف Excel</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success"><i class="fas fa-upload mr-1"></i> بدء الاستيراد</button>
+                            {{-- زر تحميل القالب --}}
+                            <a href="{{ asset('templates/well_licenses_template.csv') }}" class="btn btn-info" download>
+                                <i class="fas fa-download mr-1"></i> تحميل القالب
+                            </a>
+                        </form>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>تصدير إلى ملف Excel</h4>
+                        <p class="text-muted">تصدير جميع تراخيص الآبار الموجودة في قاعدة البيانات إلى ملف إكسل.</p>
+                        <a href="{{ route('dashboard.well-licenses.export') }}" class="btn btn-primary">
+                            <i class="fas fa-file-export mr-1"></i> تصدير الكل
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
         <div class="container-fluid">
             <div class="row">
                 <div class="col-12">
@@ -56,7 +97,13 @@
                                     {{ session('success') }}
                                 </div>
                             @endif
-
+                            @if (session('error'))
+                            <div class="alert alert-danger alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            <h5><i class="icon fas fa-ban"></i> خطأ!</h5>
+                            {!! session('error') !!}
+                            </div>
+                            @endif
                             <div class="table-responsive">
                                 <table id="licensesTable" class="table table-bordered table-striped table-hover">
                                     <thead>
@@ -138,10 +185,12 @@
     <script src="{{ asset('plugins/datatables-buttons/js/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('plugins/datatables-buttons/js/buttons.print.min.js') }}"></script>
     <script src="{{ asset('plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
+    <script src="{{ asset('plugins/bs-custom-file-input/bs-custom-file-input.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         $(function() {
+            bsCustomFileInput.init();
             // تهيئة DataTable مع تفعيل جميع ميزاتها
             var table = $("#licensesTable").DataTable({
                 "responsive": true,
