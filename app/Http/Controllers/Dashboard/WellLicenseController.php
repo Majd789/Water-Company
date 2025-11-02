@@ -101,7 +101,6 @@ public function import(Request $request)
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'archive_code' => 'required|string|max:255|unique:well_licenses,archive_code',
             'property_number' => 'required|string|max:255',
             'property_zone' => 'required|string|max:255',
             'applicant_name' => 'required|string|max:255',
@@ -119,12 +118,26 @@ public function import(Request $request)
             'notes' => 'nullable|string',
             'file_url' => 'nullable|string', // أو 'file' إذا كان سيتم رفع ملف
         ]);
+$year = now()->year;
+    $propertyNumber = $validatedData['property_number'];
 
-        WellLicense::create($validatedData);
+    // حساب عدد السجلات الموجودة لنفس العقار في نفس السنة
+    $count = WellLicense::where('property_number', $propertyNumber)
+                        ->whereYear('created_at', $year)
+                        ->count();
 
-        return redirect()->route('dashboard.well-licenses.index')->with('success', 'تمت إضافة الترخيص بنجاح.');
+    $counter = str_pad($count + 1, 2, '0', STR_PAD_LEFT); // يعطينا 01, 02, ..., 10
+
+    // تركيب الكود النهائي
+    $archiveCode = "{$year}-{$propertyNumber}-{$counter}";
+
+    // 3. إضافة الكود إلى البيانات قبل الحفظ
+    $validatedData['archive_code'] = $archiveCode;
+
+    WellLicense::create($validatedData);
+
+    return redirect()->route('dashboard.well-licenses.index')->with('success', "تمت إضافة الترخيص بنجاح بالكود: {$archiveCode}");
     }
-
     /**
      * عرض تفاصيل ترخيص بئر معين.
      * استخدام Route Model Binding لجلب السجل تلقائياً.
@@ -151,7 +164,6 @@ public function import(Request $request)
     public function update(Request $request, WellLicense $wellLicense)
     {
         $validatedData = $request->validate([
-            'archive_code' => ['required', 'string', 'max:255', Rule::unique('well_licenses')->ignore($wellLicense->id)],
             'property_number' => 'required|string|max:255',
             'property_zone' => 'required|string|max:255',
             'applicant_name' => 'required|string|max:255',

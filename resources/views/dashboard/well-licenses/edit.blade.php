@@ -67,12 +67,13 @@
                                 {{-- 1. معلومات الترخيص الأساسية --}}
                                 <h5 class="mt-2 mb-3 section-title"><i class="fas fa-file-alt text-primary mr-2"></i>معلومات الترخيص الأساسية</h5>
                                 <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label for="archive_code">كود الأرشفة<span class="text-danger">*</span></label>
-                                            <input type="text" name="archive_code" class="form-control" value="{{ old('archive_code', $wellLicense->archive_code) }}" placeholder="مثال: 2025-317-01" required>
-                                        </div>
-                                    </div>
+                                <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="archive_code">كود الأرشفة (يتم إنشاؤه تلقائياً)</label>
+                                    <input type="text" name="archive_code" class="form-control"
+                                        value="{{ $wellLicense->archive_code }}" readonly> {{--  أضف readonly --}}
+                                </div>
+                                </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="applicant_name">اسم مقدم الطلب<span class="text-danger">*</span></label>
