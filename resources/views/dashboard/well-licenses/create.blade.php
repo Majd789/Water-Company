@@ -68,12 +68,6 @@
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="archive_code">كود الأرشفة<span class="text-danger">*</span></label>
-                                            <input type="text" name="archive_code" class="form-control" value="{{ old('archive_code') }}" placeholder="مثال: 2025-317-01" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
                                             <label for="applicant_name">اسم مقدم الطلب<span class="text-danger">*</span></label>
                                             <input type="text" name="applicant_name" class="form-control" value="{{ old('applicant_name') }}" placeholder="أدخل اسم مقدم الطلب" required>
                                         </div>
