@@ -110,6 +110,7 @@
                                         <tr>
                                             <th>#</th>
                                             <th>كود الأرشفة</th>
+                                            <th>رقم كتاب الموارد المائية</th>
                                             <th>رقم العقار</th>
                                             <th>مقدم الطلب</th>
                                             <th>نوع الطلب</th>
@@ -122,6 +123,7 @@
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $license->archive_code }}</td>
+                                                <td>{{ $license->directorate_letter_number }}</td>
                                                 <td>{{ $license->property_number }}</td>
                                                 <td>{{ $license->applicant_name }}</td>
                                                 <td>
