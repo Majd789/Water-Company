@@ -47,7 +47,7 @@ class WellLicenseController extends Controller
         }
 
         // جلب البيانات بعد التصفية مع تحميل العلاقة (المحطة) لتجنب N+1 problem
-        $wellLicenses = $query->with('station')->latest()->paginate(20);
+        $wellLicenses = $query->with('station')->get();
 
         // جلب أنواع الطلبات من الموديل لاستخدامها في فلتر الواجهة
         $requestTypes = WellLicense::REQUEST_TYPES;
