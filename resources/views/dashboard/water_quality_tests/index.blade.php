@@ -72,11 +72,46 @@
                             عرض السجلات <span class="badge badge-primary ml-2">{{ $waterQualityTests->total() }}</span>
                         </h3>
                         <div class="card-tools d-flex align-items-center">
-                            {{-- أزرار التصدير والاستيراد هنا إذا لزم الأمر --}}
+                            {{-- زر الاستيراد الجديد --}}
+                            <button type="button" class="btn btn-success ml-2" data-toggle="modal" data-target="#importModal">
+                                <i class="fas fa-file-import mr-1"></i> استيراد ملف
+                            </button>
+
                             <a href="{{ route('dashboard.water-quality-tests.create') }}" class="btn btn-primary">
                                 <i class="fas fa-plus mr-1"></i> إضافة فحص
                             </a>
                         </div>
+                        <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">استيراد بيانات من ملف Excel/CSV</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('dashboard.water-quality-tests.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="file">اختر الملف</label>
+                        <input type="file" name="file" class="form-control" id="file" required accept=".xlsx, .xls, .csv">
+                        <small class="form-text text-muted">
+                            يجب أن يكون الملف بصيغة Excel أو CSV.<br>
+                            تأكد من أن أسماء الأعمدة في الصف الأول مطابقة للنموذج المطلوب.
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">إغلاق</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload mr-1"></i> بدء الاستيراد
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">

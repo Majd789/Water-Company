@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Imports\WaterQualityTestsImport;
 use App\Models\WaterQualityTest;
 use App\Models\Station;
 use App\Models\Unit;
@@ -157,12 +158,32 @@ class WaterQualityTestController extends Controller
      * استيراد البيانات من ملف Excel.
      */
     public function import(Request $request)
-    {
-        $request->validate(['file' => 'required|mimes:xlsx,csv']);
+{
+    // التحقق من وجود الملف وأنه بالصيغة الصحيحة
+    $request->validate([
+        'file' => 'required|mimes:xlsx,csv,xls'
+    ]);
 
-        // Excel::import(new WaterQualityTestsImport, $request->file('file'));
+    try {
+        // تنفيذ عملية الاستيراد
+        Excel::import(new WaterQualityTestsImport, $request->file('file'));
 
-        // return redirect()->route('dashboard.water_quality_tests.index')->with('success', 'تم استيراد البيانات بنجاح');
-        return back()->with('info', 'ميزة الاستيراد قيد التطوير.');
+        // في حال النجاح، ارجع لصفحة القائمة مع رسالة نجاح
+        return redirect()->route('dashboard.water-quality-tests.index')
+                         ->with('success', 'تم استيراد البيانات بنجاح، قد تستغرق المعالجة بعض الوقت إذا كانت في الخلفية.');
+
+    } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+        // في حال وجود أخطاء في بيانات الملف نفسه
+        $failures = $e->failures();
+        $errorMessages = [];
+        foreach ($failures as $failure) {
+            $errorMessages[] = 'خطأ في الصف رقم ' . $failure->row() . ': ' . implode(', ', $failure->errors());
+        }
+        return back()->with('error', 'حدثت أخطاء في بيانات الملف: <br>' . implode('<br>', $errorMessages));
+
+    } catch (\Exception $e) {
+        // لأي أخطاء أخرى غير متوقعة
+        return back()->with('error', 'حدث خطأ غير متوقع أثناء عملية الاستيراد: ' . $e->getMessage());
     }
+}
 }
