@@ -32,6 +32,8 @@ class SolarEnergiesExport implements FromCollection, WithHeadings , WithTitle
 
         // تعديل البيانات قبل تصديرها
         return $solarEnergies->map(function ($solarEnergy) {
+                $totalPower = ($solarEnergy->panel_size * $solarEnergy->panel_count) / 1000;
+
             return [
                 'ID' => $solarEnergy->id,
                 'governorate_name' => $solarEnergy->station->town->unit->governorate->name ?? 'غير محددة', // اسم المحافظة
@@ -40,6 +42,7 @@ class SolarEnergiesExport implements FromCollection, WithHeadings , WithTitle
                 'station_name' => $solarEnergy->station->station_name ?? 'غير معروف', // اسم المحطة
                 'panel_size' => $solarEnergy->panel_size, // قياس اللوح
                 'panel_count' => $solarEnergy->panel_count, // عدد الألواح
+                'total_power' => $totalPower, // القدرة الكلية
                 'manufacturer' => $solarEnergy->manufacturer, // الجهة المنشئة
                 'base_type' => $solarEnergy->base_type, // نوع القاعدة
                 'technical_condition' => $solarEnergy->technical_condition, // الحالة الفنية
@@ -62,6 +65,7 @@ class SolarEnergiesExport implements FromCollection, WithHeadings , WithTitle
             'اسم المحطة',
             'قياس اللوح (متر مربع)',
             'عدد الألواح',
+            'القدرة الكلية (كيلوواط)',
             'الجهة المنشئة',
             'نوع القاعدة',
             'الحالة الفنية',
