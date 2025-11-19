@@ -14,8 +14,11 @@ return new class extends Migration
        Schema::create('project_contractors', function (Blueprint $table) {
             $table->id();
             $table->string('contract_code', 100)->unique();
-            $table->foreignId('project_id')->constrained('projects')->onDelete('cascade');
-            $table->foreignId('contractor_id')->constrained('contractors')->nullable()->onDelete('set null');
+            $table->foreignId('project_id')->nullable()->constrained('projects')->onDelete('cascade');
+            $table->foreignId('contractor_id')
+              ->nullable() // هذا هو التعديل المهم
+              ->constrained('contractors')
+              ->onDelete('set null');
             $table->date('contract_date')->nullable();
             $table->decimal('value', 15, 2)->nullable();
             $table->string('currency', 10)->default('USD');
