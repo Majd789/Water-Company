@@ -294,7 +294,136 @@
                             </li>
                         @endcan
                     </x-sidebar-menu-section>
+                     @php
+                        $projectManagementPermissions = [
+                            'projects.view', 'project_activities.view', 'project_contractors.view',
+                            'contractor_tasks.view', 'organizations.view', 'contractors.view',
+                            'master_activities.view', 'project_types.view', 'project_main_statuses.view',
+                            'project_general_statuses.view', 'contractor_statuses.view', 'handover_statuses.view',
+                        ];
+                        $projectManagementRoutes = [
+                            'dashboard.projects.*', 'dashboard.project-activities.*', 'dashboard.project-contractors.*',
+                            'dashboard.contractor-tasks.*', 'dashboard.organizations.*', 'dashboard.contractors.*',
+                            'dashboard.master-activities.*', 'dashboard.project-types.*', 'dashboard.project-main-statuses.*',
+                            'dashboard.project-general-statuses.*', 'dashboard.contractor-statuses.*', 'dashboard.handover-statuses.*',
+                        ];
+                    @endphp
+                    <x-sidebar-menu-section title="إدارة المشاريع" icon="fas fa-project-diagram" :permissions="$projectManagementPermissions" :routes="$projectManagementRoutes">
+                        @can('projects.view')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.projects.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.projects.*') ? 'active' : '' }}">
+                                    <i class="fas fa-folder-open nav-icon"></i>
+                                    <p>المشاريع</p>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('organizations.view')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.organizations.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.organizations.*') ? 'active' : '' }}">
+                                    <i class="fas fa-sitemap nav-icon"></i>
+                                    <p>المنظمات</p>
+                                </a>
+                            </li>
+                        @endcan
+                         @can('contractors.view')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.contractors.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.contractors.*') ? 'active' : '' }}">
+                                    <i class="fas fa-hard-hat nav-icon"></i>
+                                    <p>المقاولين</p>
+                                </a>
+                            </li>
+                        @endcan
 
+                        <li class="nav-header">تفاصيل المشاريع</li>
+
+                        @can('project_activities.view')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.project-activities.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.project-activities.*') ? 'active' : '' }}">
+                                    <i class="fas fa-tasks nav-icon text-info"></i>
+                                    <p>أنشطة المشاريع</p>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('project_contractors.view')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.project-contractors.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.project-contractors.*') ? 'active' : '' }}">
+                                    <i class="fas fa-file-signature nav-icon text-success"></i>
+                                    <p>عقود المقاولين</p>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('contractor_tasks.view')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.contractor-tasks.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.contractor-tasks.*') ? 'active' : '' }}">
+                                    <i class="fas fa-clipboard-check nav-icon text-warning"></i>
+                                    <p>مهام المقاولين</p>
+                                </a>
+                            </li>
+                        @endcan
+
+                        <li class="nav-header">إعدادات المشاريع</li>
+
+                        @can('master_activities.view')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.master-activities.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.master-activities.*') ? 'active' : '' }}">
+                                    <i class="fas fa-stream nav-icon"></i>
+                                    <p>قائمة الأنشطة الرئيسية</p>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('project_types.view')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard.project-types.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.project-types.*') ? 'active' : '' }}">
+                                    <i class="fas fa-list-alt nav-icon"></i>
+                                    <p>أنواع المشاريع</p>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('project_main_statuses.view')
+                             <li class="nav-item">
+                                <a href="{{ route('dashboard.project-main-statuses.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.project-main-statuses.*') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>حالات المشاريع (الرئيسية)</p>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('project_general_statuses.view')
+                             <li class="nav-item">
+                                <a href="{{ route('dashboard.project-general-statuses.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.project-general-statuses.*') ? 'active' : '' }}">
+                                    <i class="far fa-dot-circle nav-icon"></i>
+                                    <p>حالات المشاريع (العامة)</p>
+                                </a>
+                            </li>
+                        @endcan
+                         @can('contractor_statuses.view')
+                             <li class="nav-item">
+                                <a href="{{ route('dashboard.contractor-statuses.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.contractor-statuses.*') ? 'active' : '' }}">
+                                    <i class="far fa-check-circle nav-icon"></i>
+                                    <p>حالات تنفيذ المقاول</p>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('handover_statuses.view')
+                             <li class="nav-item">
+                                <a href="{{ route('dashboard.handover-statuses.index') }}"
+                                    class="nav-link {{ Request::routeIs('dashboard.handover-statuses.*') ? 'active' : '' }}">
+                                    <i class="far fa-handshake nav-icon"></i>
+                                    <p>حالات محضر التسليم</p>
+                                </a>
+                            </li>
+                        @endcan
+                    </x-sidebar-menu-section>
                     {{-- 3. قسم الصيانة --}}
                     @php
                         $maintenancePermissions = ['maintenance_tasks.view'];

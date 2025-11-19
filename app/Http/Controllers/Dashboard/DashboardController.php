@@ -8,6 +8,9 @@ use App\Models\DieselTank;
 use App\Models\ElevatedTank;
 use App\Models\GroundTank;
 use App\Models\SolarEnergy;
+use App\Models\Project;
+use App\Models\ProjectContractor;
+use App\Models\ContractorTask;
 use App\Models\Station;
 use App\Models\Unit;
 use App\Models\User;
@@ -66,7 +69,6 @@ class DashboardController extends Controller
             $selectedStation = $station;
             $message = "إحصائيات محطة: '{$station->station_name}'";
 
-            // استخدام العلاقات المحسوبة `withCount` لتحسين الأداء
             $statistics = [
                 'wells_count' => $station->wells_count,
                 'pumping_sectors_count' => $station->pumping_sectors_count,
@@ -100,6 +102,18 @@ class DashboardController extends Controller
             $message = $baseMessage;
             $scopedStationIds = $stationQuery->pluck('id');
 
+            // ------------------ (بداية الإضافات الجديدة) ------------------
+            // تحديد المشاريع التي تقع ضمن نطاق صلاحيات المستخدم
+            $projectIdsQuery = Project::query();
+            if ($user->unit_id) {
+                // إذا كان المستخدم في وحدة، أظهر فقط المشاريع التي لها أنشطة في هذه الوحدة
+                $projectIdsQuery->whereHas('activities', function ($q) use ($user) {
+                    $q->where('unit_id', $user->unit_id);
+                });
+            }
+            $projectIds = $projectIdsQuery->pluck('id');
+            // ------------------ (نهاية الإضافات الجديدة) ------------------
+
             // -- الجرد التفصيلي لمكونات النطاق --
             $statistics = [
                 'stations_count' => $scopedStationIds->count(),
@@ -120,7 +134,24 @@ class DashboardController extends Controller
                 'solar_energy_count' => DB::table('solar_energies')->whereIn('station_id', $scopedStationIds)->count(),
                 'diesel_tanks_count' => DB::table('diesel_tanks')->whereIn('station_id', $scopedStationIds)->count(),
                 'disinfection_pumps_count' => DB::table('disinfection_pumps')->whereIn('station_id', $scopedStationIds)->count(),
+                'well_licenses_count' => WellLicense::count(), // هذا عام على مستوى النظام
             ];
+
+            // ------------------ (بداية الإضافات الجديدة) ------------------
+            // -- إحصائيات قسم المشاريع --
+            $statistics['projects_count'] = $projectIds->count();
+            $statistics['active_projects_count'] = Project::whereIn('id', $projectIds)->whereHas('generalStatus', function ($query) {
+                $query->whereIn('name', ['قيد التنفيذ', 'قيد التنفيذ ويحوي أنشطة شاغرة', 'تنفيذ جزئي']);
+            })->count();
+            $statistics['pending_contractor_projects_count'] = Project::whereIn('id', $projectIds)->whereHas('generalStatus', function ($query) {
+                $query->where('name', 'ينتظر مقاولين');
+            })->count();
+            $statistics['total_contracts_value'] = ProjectContractor::whereIn('project_id', $projectIds)->sum('value');
+            $statistics['discrepant_tasks_count'] = ContractorTask::where('is_discrepant', true)
+                ->whereHas('projectActivity', function($q) use ($projectIds) {
+                    $q->whereIn('project_id', $projectIds);
+                })->count();
+            // ------------------ (نهاية الإضافات الجديدة) ------------------
 
             // -- مؤشرات الأداء والرؤى التحليلية للنطاق --
             $statistics['beneficiary_families'] = Station::whereIn('id', $scopedStationIds)->sum('beneficiary_families_count');
@@ -134,17 +165,18 @@ class DashboardController extends Controller
             $statistics['top_well_stop_reasons'] = DB::table('wells')->whereIn('station_id', $scopedStationIds)->select('stop_reason', DB::raw('count(*) as count'))->where('well_status', 'متوقف')->whereNotNull('stop_reason')->groupBy('stop_reason')->orderByDesc('count')->limit(5)->get();
             $statistics['recent_activities'] = Activity::with('causer')->latest()->limit(5)->get();
 
-            // === إحصائيات تراخيص الآبار (تم وضعها في المكان الصحيح) ===
-            $statistics['well_licenses_count'] = WellLicense::count();
-            $statistics['licenses_by_type'] = WellLicense::query()
-                ->select('request_type', DB::raw('count(*) as count'))
-                ->groupBy('request_type')
-                ->orderBy('count', 'desc')
-                ->pluck('count', 'request_type');
-            $statistics['recent_licenses'] = WellLicense::query()
-                ->latest()
-                ->take(5)
+            $statistics['licenses_by_type'] = WellLicense::query()->select('request_type', DB::raw('count(*) as count'))->groupBy('request_type')->orderBy('count', 'desc')->pluck('count', 'request_type');
+            $statistics['recent_licenses'] = WellLicense::query()->latest()->take(5)->get();
+
+            // ------------------ (بداية الإضافات الجديدة) ------------------
+            $statistics['upcoming_deadline_projects'] = Project::with('organization')
+                ->whereIn('id', $projectIds)
+                ->whereNotNull('end_date')
+                ->whereBetween('end_date', [now(), now()->addDays(30)])
+                ->orderBy('end_date')
+                ->limit(5)
                 ->get();
+            // ------------------ (نهاية الإضافات الجديدة) ------------------
 
             // إعداد بيانات الخريطة للوضع العام (عرض المحطات فقط)
             $geoJsonData = [
@@ -163,26 +195,15 @@ class DashboardController extends Controller
 
    /**
      * دالة مساعدة لتحويل بيانات الموديل إلى تنسيق GeoJSON FeatureCollection.
-     * نسخة محسنة تتعامل مع كل من كائنات الاستعلام (Builder) والعلاقات (Relation).
-     *
-     * @param \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Relations\Relation $query
-     * @param string $nameField
-     * @param string $color
-     * @param string $routeName
-     * @param string|null $locationColumn
-     * @return array
+     * (الكود هنا لم يتغير)
      */
     private function getGeoJsonForModel($query, string $nameField, string $color, string $routeName, ?string $locationColumn = null): array
     {
-        // *** بداية التعديل ***
-        // نتحقق إذا كان الكائن من نوع علاقة للحصول على الموديل المرتبط،
-        // وإلا نحصل عليه مباشرة من كائن الاستعلام.
         if ($query instanceof \Illuminate\Database\Eloquent\Relations\Relation) {
             $modelClass = get_class($query->getRelated());
         } else {
             $modelClass = get_class($query->getModel());
         }
-        // *** نهاية التعديل ***
 
         if ($modelClass !== \App\Models\Station::class) {
             $query->with('station:id,station_name');
