@@ -10,11 +10,20 @@ use App\Http\Controllers\Dashboard\{
 
     ManholeController, NoteController, PrivateWellController, PumpingSectionController,
     SolarEnergyController, StationMapController, StationReportsController,
-    WeeklyReportController, ActivityLogController, AssessmentController, DataExportController, DailyStationReportController,
+    WeeklyReportController, ActivityLogController, AssessmentController, ContractorController, ContractorStatusController, ContractorTaskController, DataExportController, DailyStationReportController,
 
     DieselTankController, DisinfectionPumpController, ElectricityHourController,
-    ElectricityTransformerController, MaintenanceTaskController,
+    ElectricityTransformerController, HandoverStatusController, MaintenanceTaskController,
+    MasterActivityController,
     MetricController,
+    MonthController,
+    OrganizationController,
+    ProjectActivityController,
+    ProjectContractorController,
+    ProjectController,
+    ProjectGeneralStatusController,
+    ProjectMainStatusController,
+    ProjectTypeController,
     SafetyProfileController,
     StationTeamController,
     UnitMonthlyStatController,
@@ -180,6 +189,30 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::get('reports/submission-status', [StationReportsController::class, 'submissionStatusDashboard'])
         ->name('reports.submission-status');
 
+        // --- مسارات رئيسية ---
+    // أضفت مسارات تصدير واستيراد للمشروع كنمط شائع في نظامك
+    Route::get('/projects/export', [ProjectController::class, 'export'])->name('projects.export');
+    Route::post('/projects/import', [ProjectController::class, 'import'])->name('projects.import');
+    Route::resource('projects', ProjectController::class);
+
+    // --- مسارات الجداول المرتبطة بالمشاريع ---
+    Route::resource('project-activities', ProjectActivityController::class);
+    Route::resource('project-contractors', ProjectContractorController::class);
+    Route::resource('contractor-tasks', ContractorTaskController::class);
+
+    // --- مسارات الجداول المرجعية الرئيسية ---
+    Route::resource('organizations', OrganizationController::class);
+    Route::resource('contractors', ContractorController::class);
+    Route::resource('master-activities', MasterActivityController::class);
+
+    // --- مسارات الجداول المرجعية للحالات والأنواع ---
+    Route::resource('project-types', ProjectTypeController::class);
+    Route::resource('project-main-statuses', ProjectMainStatusController::class);
+    Route::resource('project-general-statuses', ProjectGeneralStatusController::class);
+    Route::resource('contractor-statuses', ContractorStatusController::class);
+    Route::resource('handover-statuses', HandoverStatusController::class);
+    Route::resource('months', MonthController::class);
+    Route::get('/projects/{project}/related-data',[ProjectController::class, 'getRelatedData'])->name('projects.related-data');
 
 });
 

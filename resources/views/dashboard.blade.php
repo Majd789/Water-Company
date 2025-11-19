@@ -23,6 +23,10 @@
         .sidebar-close { position: absolute; top: 5px; left: 10px; font-size: 1.5rem; cursor: pointer; color: #555; }
         .sidebar-close:hover { color: #000; }
         .h-100 { height: 100% !important; }
+        .bg-gradient-purple { background-color: #6f42c1 !important; color: #fff; }
+        .bg-gradient-teal { background-color: #20c997 !important; color: #fff; }
+        .bg-gradient-maroon { background-color: #d81b60 !important; color: #fff; }
+        .bg-gradient-dark { background-color: #343a40 !important; color: #fff; }
     </style>
 @endpush
 
@@ -93,6 +97,47 @@
             <div class="col-md-3 col-sm-6 col-12"><div class="info-box"><span class="info-box-icon bg-success"><i class="fas fa-database"></i></span><div class="info-box-content"><span class="info-box-text">سعة التخزين (م³)</span><span class="info-box-number">{{ number_format($statistics['total_water_storage_m3'] ?? 0) }}</span></div></div></div>
             <div class="col-md-3 col-sm-6 col-12"><div class="info-box"><span class="info-box-icon bg-warning"><i class="fas fa-bolt"></i></span><div class="info-box-content"><span class="info-box-text">القدرة التوليدية (KVA)</span><span class="info-box-number">{{ number_format($statistics['total_generation_capacity_kva'] ?? 0) }}</span></div></div></div>
             <div class="col-md-3 col-sm-6 col-12"><div class="info-box"><span class="info-box-icon bg-danger"><i class="fas fa-tools"></i></span><div class="info-box-content"><span class="info-box-text">صيانة قيد التنفيذ</span><span class="info-box-number">{{ $statistics['maintenance_in_progress'] ?? 0 }}</span></div></div></div>
+
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box bg-gradient-purple shadow">
+                    <span class="info-box-icon"><i class="fas fa-tasks"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">مشاريع قيد التنفيذ</span>
+                        <span class="info-box-number">{{ $statistics['active_projects_count'] ?? 0 }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box bg-gradient-teal shadow">
+                    <span class="info-box-icon"><i class="fas fa-hard-hat"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">تنتظر مقاولين</span>
+                        <span class="info-box-number">{{ $statistics['pending_contractor_projects_count'] ?? 0 }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box bg-gradient-maroon shadow">
+                    <span class="info-box-icon"><i class="fas fa-not-equal"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">مهام غير مطابقة</span>
+                        <span class="info-box-number">{{ $statistics['discrepant_tasks_count'] ?? 0 }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box bg-gradient-dark shadow">
+                    <span class="info-box-icon"><i class="fas fa-dollar-sign"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">إجمالي قيمة العقود</span>
+                        <span class="info-box-number">${{ number_format($statistics['total_contracts_value'] ?? 0, 0) }}</span>
+                    </div>
+                </div>
+            </div>
+
+        <hr>
+
+        </div>
         </div>
 
         <h4 class="mb-3 mt-4">جرد مكونات النظام</h4>
@@ -121,20 +166,31 @@
         {{-- ========================================================= --}}
         {{-- ==== بداية الهيكل الشبكي الصحيح ==== --}}
         {{-- ========================================================= --}}
-        <div class="row">
-            {{-- العمود الأيمن (8 أعمدة) للمخططات والقوائم الرئيسية --}}
+             <div class="row">
             <div class="col-lg-8">
                 <div class="card card-primary"><div class="card-header"><h3 class="card-title"><i class="fas fa-chart-bar mr-1"></i> توزيع مصادر الطاقة</h3></div><div class="card-body"><canvas id="energySourceChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas></div></div>
+                {{-- بطاقة المشاريع قيد الانتهاء (الجديدة) --}}
+                <div class="card card-danger">
+                    <div class="card-header"><h3 class="card-title"><i class="fas fa-calendar-times mr-1"></i> مشاريع قيد الانتهاء (30 يوم)</h3></div>
+                    <div class="card-body p-0">
+                        <ul class="products-list product-list-in-card pl-2 pr-2">
+                            @forelse($statistics['upcoming_deadline_projects'] as $project)
+                            <li class="item"><div class="product-info ml-2"><a href="{{ route('dashboard.projects.show', $project->id) }}" class="product-title">{{ $project->name }}<span class="badge badge-danger float-right">ينتهي في: {{ \Carbon\Carbon::parse($project->end_date)->format('Y-m-d') }}</span></a><span class="product-description">منظمة: {{ optional($project->organization)->name }}</span></div></li>
+                            @empty
+                            <li class="item text-center p-3 text-success"><i class="fas fa-check-circle"></i> لا توجد مشاريع ستنتهي قريباً.</li>
+                            @endforelse
+                        </ul>
+                    </div>
+                    <div class="card-footer text-center"><a href="{{ route('dashboard.projects.index') }}">عرض كل المشاريع</a></div>
+                </div>
                 <div class="card card-info"><div class="card-header"><h3 class="card-title"><i class="fas fa-trophy mr-1"></i> أكثر المحطات امتلاكاً للآبار</h3></div><div class="card-body p-0"><ul class="products-list product-list-in-card pl-2 pr-2">@forelse($statistics['top_stations_by_wells'] as $station)<li class="item"><div class="product-info ml-2"><a href="{{ route('dashboard.stations.show', $station->id) }}" class="product-title">{{ $station->station_name }}<span class="badge badge-info float-right">{{ $station->wells_count }} بئر</span></a><span class="product-description">وحدة: {{ optional(optional($station->town)->unit)->unit_name }}</span></div></li>@empty<li class="item text-center p-3">لا توجد بيانات كافية للعرض.</li>@endforelse</ul></div></div>
-                {{-- تم نقل هذا القسم إلى هنا --}}
                 <div class="card card-secondary"><div class="card-header"><h3 class="card-title"><i class="fas fa-archive mr-1"></i> آخر التراخيص المسجلة</h3></div><div class="card-body p-0"><ul class="products-list product-list-in-card pl-2 pr-2">@forelse($statistics['recent_licenses'] as $license)<li class="item"><div class="product-info ml-2"><a href="{{ route('dashboard.well-licenses.show', $license->id) }}" class="product-title">{{ $license->archive_code }}<span class="badge badge-info float-right">{{ $license->request_type }}</span></a><span class="product-description">مقدم الطلب: {{ $license->applicant_name }} ({{ $license->created_at->diffForHumans() }})</span></div></li>@empty<li class="item text-center p-3">لا توجد تراخيص مسجلة حديثاً.</li>@endforelse</ul></div><div class="card-footer text-center"><a href="{{ route('dashboard.well-licenses.index') }}">عرض كل التراخيص</a></div></div>
             </div>
 
-            {{-- العمود الأيسر (4 أعمدة) للملخصات والمخططات الصغيرة --}}
             <div class="col-lg-4">
                 <div class="card card-warning"><div class="card-header"><h3 class="card-title"><i class="fas fa-wrench mr-1"></i> أبرز أسباب توقف الآبار</h3></div><div class="card-body">@forelse($statistics['top_well_stop_reasons'] as $reason)<div class="progress-group">{{ Str::limit($reason->stop_reason, 25) }}<span class="float-right"><b>{{ $reason->count }}</b></span></div>@empty<p class="text-center">لا توجد أسباب مسجلة حالياً.</p>@endforelse</div></div>
-                {{-- تم نقل هذا القسم إلى هنا --}}
                 <div class="card card-info"><div class="card-header"><h3 class="card-title"><i class="fas fa-chart-pie mr-1"></i> توزيع أنواع التراخيص</h3></div><div class="card-body"><canvas id="licenseTypeChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas></div></div>
+                <div class="card card-danger"><div class="card-header"><h3 class="card-title"><i class="fas fa-exclamation-triangle mr-1"></i> تنبيهات الجاهزية المنخفضة</h3></div><div class="card-body p-0"><ul class="products-list product-list-in-card pl-2 pr-2">@forelse($statistics['low_readiness_diesel_tanks'] as $tank)<li class="item"><div class="product-info ml-2"><a href="{{ route('dashboard.diesel_tanks.edit', $tank->id) }}" class="product-title text-danger">جاهزية منخفضة لخزان: {{ $tank->tank_name }}<span class="badge badge-danger float-right">{{ $tank->readiness_percentage }}%</span></a><span class="product-description">محطة: {{ optional($tank->station)->station_name }}</span></div></li>@empty<li class="item text-center p-3 text-success"><i class="fas fa-check-circle"></i> لا توجد تنبيهات حالياً.</li>@endforelse</ul></div><div class="card-footer text-center"><a href="{{ route('dashboard.diesel_tanks.index') }}">عرض جميع خزانات الديزل</a></div></div>
             </div>
         </div>
         {{-- ========================================================= --}}

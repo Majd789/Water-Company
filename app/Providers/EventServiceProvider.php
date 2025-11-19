@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Providers;
-
+use App\Models\Project;
+use App\Observers\ProjectObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -19,7 +20,15 @@ class EventServiceProvider extends ServiceProvider
             SendEmailVerificationNotification::class,
         ],
     ];
-
+    /**
+     * The model observers for your application.
+     *
+     * @var array
+     */
+    protected $observers = [
+        // أضف هذا السطر هنا
+        Project::class => [ProjectObserver::class],
+    ];
     /**
      * Register any events for your application.
      */
