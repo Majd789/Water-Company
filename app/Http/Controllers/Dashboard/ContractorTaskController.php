@@ -43,7 +43,7 @@ class ContractorTaskController extends Controller
                   ->orWhere('description', 'like', "%{$searchTerm}%");
         }
 
-        $contractorTasks = $query->latest()->paginate(30);
+        $contractorTasks = $query->latest()->paginate(1000);
 
         return view('dashboard.contractor-tasks.index', compact('contractorTasks'));
     }

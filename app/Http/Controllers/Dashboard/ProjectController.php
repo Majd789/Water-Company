@@ -11,7 +11,8 @@ use App\Models\ProjectMainStatus;
 use App\Models\ProjectType;
 use App\Models\Unit;
 use Illuminate\Http\Request;
-
+use App\Imports\ProjectsImport;
+use Maatwebsite\Excel\Facades\Excel;
 class ProjectController extends Controller
 {
     public function __construct()
@@ -62,7 +63,7 @@ class ProjectController extends Controller
             });
         }
 
-        $projects = $query->latest()->paginate(25);
+        $projects = $query->latest()->paginate(1000);
 
         return view('dashboard.projects.index', compact('projects', 'units', 'organizations', 'selectedUnitId'));
     }
@@ -86,8 +87,7 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'project_code' => 'required|string|max:100|unique:projects,project_code',
+        $validatedData =$request->validate([
             'name' => 'required|string|max:255',
             'organization_id' => 'required|exists:organizations,id',
             'donor_name' => 'nullable|string|max:255',
@@ -102,12 +102,43 @@ class ProjectController extends Controller
             'total_duration_days' => 'nullable|integer',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
+            'hac_issue_number' => 'nullable|string|max:100',
+            'hac_issue_date' => 'nullable|date',
+            'hac_received_date' => 'nullable|date|after_or_equal:hac_issue_date',
             'approval_number' => 'nullable|string|max:100',
             'approval_date' => 'nullable|date',
             'notes' => 'nullable|string',
         ]);
+        $organization = Organization::findOrFail($validatedData['organization_id']);
 
-        Project::create($request->all());
+        // الجزء الأول: كود المنظمة (e.g., "GOL")
+        $orgCode = $organization->code;
+
+        // الجزء الثاني: السنة المختصرة (e.g., "25")
+        $year = date('y');
+
+        // الجزء الثالث: الشهر المختصر بحروف كبيرة (e.g., "JAN")
+        $month = strtoupper(date('M'));
+
+        // الجزء الرابع: الرقم التسلسلي (الأكثر أهمية)
+        // إنشاء البادئة للبحث عنها في قاعدة البيانات
+        $prefix = "{$orgCode}-{$year}-{$month}-";
+
+        // البحث عن آخر مشروع بنفس البادئة لتحديد الرقم التالي
+        $lastProjectCount = Project::where('project_code', 'LIKE', "{$prefix}%")->count();
+        $nextId = $lastProjectCount + 1;
+
+        // تنسيق الرقم التسلسلي ليكون 3 أرقام مع أصفار بادئة (e.g., "001")
+        $sequence = str_pad($nextId, 3, '0', STR_PAD_LEFT);
+
+        // تجميع الكود النهائي
+        $projectCode = $prefix . $sequence;
+
+        // 3. إضافة الكود المُولّد إلى البيانات التي سيتم حفظها
+        $validatedData['project_code'] = $projectCode;
+
+        // 4. إنشاء المشروع
+        Project::create($validatedData);
 
         return redirect()->route('dashboard.projects.index')->with('success', 'تم إنشاء المشروع بنجاح.');
     }
@@ -141,7 +172,6 @@ class ProjectController extends Controller
     public function update(Request $request, Project $project)
     {
         $request->validate([
-            'project_code' => 'required|string|max:100|unique:projects,project_code,' . $project->id,
             'name' => 'required|string|max:255',
             'organization_id' => 'required|exists:organizations,id',
             'donor_name' => 'nullable|string|max:255',
@@ -156,12 +186,15 @@ class ProjectController extends Controller
             'total_duration_days' => 'nullable|integer',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
+            'hac_issue_number' => 'nullable|string|max:100',
+            'hac_issue_date' => 'nullable|date',
+            'hac_received_date' => 'nullable|date|after_or_equal:hac_issue_date',
             'approval_number' => 'nullable|string|max:100',
             'approval_date' => 'nullable|date',
             'notes' => 'nullable|string',
         ]);
 
-        $project->update($request->all());
+        $project->update($request->except('project_code'));
 
         return redirect()->route('dashboard.projects.index')->with('success', 'تم تحديث المشروع بنجاح.');
     }
@@ -205,4 +238,5 @@ class ProjectController extends Controller
             'contractors' => $contractors,
         ]);
     }
+
 }

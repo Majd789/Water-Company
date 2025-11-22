@@ -76,7 +76,7 @@ class PumpingSectionController extends Controller
         ]);
 
         // استيراد البيانات
-        Excel::import(new PumpingSectorsImport, $request->file('file'));
+        // Excel::import(new PumpingSectorsImport, $request->file('file'));
 
         return redirect()->route('dashboard.pumping-sectors.index')->with('success', 'تم استيراد قطاعات الضخ بنجاح.');
     }

@@ -34,7 +34,7 @@ class ProjectTypeController extends Controller
             $query->where('name', 'like', '%' . trim($request->search) . '%');
         }
 
-        $projectTypes = $query->paginate(20);
+        $projectTypes = $query->paginate(1000);
 
         return view('dashboard.project-types.index', compact('projectTypes'));
     }

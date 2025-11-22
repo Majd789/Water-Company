@@ -34,7 +34,7 @@ class ContractorStatusController extends Controller
             $query->where('name', 'like', '%' . trim($request->search) . '%');
         }
 
-        $contractorStatuses = $query->paginate(20);
+        $contractorStatuses = $query->paginate(1000);
 
         return view('dashboard.contractor-statuses.index', compact('contractorStatuses'));
     }

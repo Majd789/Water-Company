@@ -45,7 +45,7 @@ class ProjectActivityController extends Controller
                   ->orWhere('village_name', 'like', "%{$searchTerm}%");
         }
 
-        $projectActivities = $query->latest()->paginate(30);
+        $projectActivities = $query->latest()->paginate(3000);
         $projects = Project::orderBy('name')->get(); // For the filter dropdown
 
         return view('dashboard.project-activities.index', compact('projectActivities', 'projects'));

@@ -48,9 +48,11 @@
                                 </a> --}}
 
                                 @can('projects.create')
+                                <div class="card-tools">
                                     <a href="{{ route('dashboard.projects.create') }}" class="btn btn-primary">
-                                        <i class="fas fa-plus mr-1"></i> إضافة مشروع
+                                        <i class="fas fa-plus ml-1"></i> إضافة مشروع جديد
                                     </a>
+                                </div>
                                 @endcan
                             </div>
                         </div>

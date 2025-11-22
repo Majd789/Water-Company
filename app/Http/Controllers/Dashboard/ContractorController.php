@@ -39,7 +39,7 @@ class ContractorController extends Controller
             });
         }
 
-        $contractors = $query->orderBy('name')->paginate(50);
+        $contractors = $query->orderBy('name')->paginate(1000);
 
         return view('dashboard.contractors.index', compact('contractors'));
     }

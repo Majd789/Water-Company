@@ -118,9 +118,7 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="mt-3">
-                                {{ $contractors->links() }}
-                            </div>
+
                         </div>
                     </div>
                 </div>

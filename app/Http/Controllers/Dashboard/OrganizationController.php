@@ -26,7 +26,7 @@ class OrganizationController extends Controller
                   ->orWhere('code', 'like', "%{$searchTerm}%");
         }
 
-        $organizations = $query->orderBy('name')->paginate(50);
+        $organizations = $query->orderBy('name')->paginate(1000);
         return view('dashboard.organizations.index', compact('organizations'));
     }
 

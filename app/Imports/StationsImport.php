@@ -2,59 +2,104 @@
 
 namespace App\Imports;
 
-use App\Models\Station;
+use App\Models\Project;
+use App\Models\Organization;
+use App\Models\ProjectType;
+use App\Models\ProjectMainStatus;
+use App\Models\ProjectGeneralStatus;
+use App\Models\HandoverStatus;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
+use Carbon\Carbon;
 
-class StationsImport implements ToCollection
+class ProjectsImport implements ToCollection
 {
+    private $organizations;
+    private $projectTypes;
+    private $mainStatuses;
+    private $generalStatuses;
+    private $handoverStatuses;
+
+    public function __construct()
+    {
+        // تحميل البيانات المساعدة لربط الأسماء بالـ ID
+        $this->organizations = Organization::all()->pluck('id', 'name')->toArray();
+        $this->projectTypes = ProjectType::all()->pluck('id', 'name')->toArray();
+        $this->mainStatuses = ProjectMainStatus::all()->pluck('id', 'name')->toArray();
+        $this->generalStatuses = ProjectGeneralStatus::all()->pluck('id', 'name')->toArray();
+        $this->handoverStatuses = HandoverStatus::all()->pluck('id', 'name')->toArray();
+    }
+
     public function collection(Collection $rows)
     {
-        // إزالة السطر الأول (العناوين)
+        // إزالة الصف الأول (العناوين)
         $rows->shift();
 
-        // استيراد المحطات
-        foreach ($rows as $row) {
-            Station::create([
-                'station_code' => $row[0],
-                'station_name' => $row[1],
-                'operational_status' => $row[2],
-                'stop_reason' => $row[3] ?? null,
-                'energy_source' => $row[4] ?? null,
-                'operator_entity' => $row[5] ?? null,
-                'operator_name' => $row[6] ?? null,
-                'general_notes' => $row[7] ?? null,
-                'town_id' => $row[8], // تأكد من أن town_id موجود في العمود الصحيح
-                'water_delivery_method' => $row[9] ?? null,
-                'network_readiness_percentage' => $row[10] ?? null,
-                'network_type' => $row[11] ?? null,
-                'beneficiary_families_count' => $row[12] ?? null,
-                'has_disinfection' => $row[13] ?? false,
-                'disinfection_reason' => $row[14] ?? null,
-                'served_locations' => $row[15] ?? null,
-                'actual_flow_rate' => $row[16] ?? null,
-                'station_type' => $row[17] ?? null,
-                'detailed_address' => $row[18] ?? null,
-                'land_area' => $row[19] ?? null,
-                'soil_type' => $row[20] ?? null,
-                'building_notes' => $row[21] ?? null,
-                'latitude' => $row[22] ?? null,
-                'longitude' => $row[23] ?? null,
-                'is_verified' => $row[24] ?? false,
+        foreach ($rows as $row)
+        {
+            // تخطي الصفوف الفارغة تماماً
+            if ($row->filter()->isEmpty()) {
+                continue;
+            }
+
+            // التحقق من أن كود المشروع موجود
+            if (empty($row[0])) {
+                continue;
+            }
+
+            // البحث عن الـ ID المطابق للأسماء
+            $organization_id = $this->organizations[trim($row[4])] ?? null;
+            $project_type_id = $this->projectTypes[trim($row[2])] ?? null;
+            $main_status_id = $this->mainStatuses[trim($row[3])] ?? null;
+            $general_status_id = $this->generalStatuses[trim($row[19])] ?? null;
+            $handover_status_id = $this->handoverStatuses[trim($row[18])] ?? null;
+
+            Project::create([
+                'project_code'         => $row[0],
+                'name'                 => $row[1],
+                'project_type_id'      => $project_type_id,
+                'main_status_id'       => $main_status_id,
+                'organization_id'      => $organization_id,
+                'donor_name'           => $row[5],
+                'supervisor_name'      => $row[6],
+                'supervisor_phone'     => $row[7],
+                'total_value'          => $this->cleanNumeric($row[8]),
+                'contract_date'        => $this->transformDate($row[9]),
+                'total_duration_days'  => $this->cleanNumeric($row[10]),
+                'start_date'           => $this->transformDate($row[11]),
+                'end_date'             => $this->transformDate($row[12]),
+                'hac_issue_number'     => $row[13],
+                'hac_issue_date'       => $this->transformDate($row[14]),
+                'hac_received_date'    => $this->transformDate($row[15]),
+                'approval_number'      => $row[16],
+                'approval_date'        => $this->transformDate($row[17]),
+                'handover_status_id'   => $handover_status_id,
+                'general_status_id'    => $general_status_id,
+                'notes'                => $row[20],
             ]);
         }
     }
-    /**
-     * قواعد التحقق من البيانات
-     */
-    public function rules(): array
+
+    private function cleanNumeric($value)
     {
-        return [
-            '*.station_code' => 'required|unique:stations,station_code', // التحقق من عدم وجود قيمة مكررة في `station_code`
-            '*.station_name' => 'required|string',
-            '*.operational_status' => 'required|in:عاملة,متوقفة,خارج الخدمة',
-            '*.town_id' => 'required|exists:towns,id', // التحقق من وجود town_id في جدول towns
-        ];
+        if (empty($value) || $value === 'لا يوجد') return null;
+        $cleaned = preg_replace('/[^0-9.]/', '', $value);
+        return is_numeric($cleaned) ? $cleaned : null;
     }
-    
+
+    private function transformDate($value)
+    {
+        if (empty($value) || $value === 'لا يوجد' || $value === 'لايوجد') {
+            return null;
+        }
+        try {
+            return Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value))->format('Y-m-d');
+        } catch (\ErrorException $e) {
+            try {
+                 return Carbon::parse($value)->format('Y-m-d');
+            } catch (\Exception $ex) {
+                return null;
+            }
+        }
+    }
 }
