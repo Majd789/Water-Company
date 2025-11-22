@@ -38,7 +38,7 @@ class MasterActivityController extends Controller
             });
         }
 
-        $masterActivities = $query->orderBy('name')->paginate(50);
+        $masterActivities = $query->orderBy('name')->paginate(1000);
 
         return view('dashboard.master-activities.index', compact('masterActivities'));
     }

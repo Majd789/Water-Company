@@ -33,7 +33,7 @@ class ProjectMainStatusController extends Controller
             $query->where('name', 'like', '%' . trim($request->search) . '%');
         }
 
-        $projectMainStatuses = $query->paginate(20);
+        $projectMainStatuses = $query->paginate(1000);
 
         return view('dashboard.project-main-statuses.index', compact('projectMainStatuses'));
     }

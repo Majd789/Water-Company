@@ -34,7 +34,7 @@ class HandoverStatusController extends Controller
             $query->where('name', 'like', '%' . trim($request->search) . '%');
         }
 
-        $handoverStatuses = $query->paginate(20);
+        $handoverStatuses = $query->paginate(1000);
 
         return view('dashboard.handover-statuses.index', compact('handoverStatuses'));
     }

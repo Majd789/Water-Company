@@ -41,7 +41,7 @@ class ProjectContractorController extends Controller
             $query->where('contractor_id', $request->contractor_id);
         }
 
-        $projectContractors = $query->latest()->paginate(25);
+        $projectContractors = $query->latest()->paginate(2500);
         $projects = Project::orderBy('name')->get(); // For filters
         $contractors = Contractor::orderBy('name')->get(); // For filters
 

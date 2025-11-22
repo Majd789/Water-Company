@@ -30,7 +30,7 @@ class AssessmentController extends Controller
             }
         }
 
-        $assessments = $assessments->paginate(50);
+        $assessments = $assessments->paginate(1000);
 
         return view('dashboard.assessments.index', compact('assessments'));
     }
