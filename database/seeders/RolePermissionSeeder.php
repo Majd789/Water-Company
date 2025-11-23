@@ -48,6 +48,10 @@ class RolePermissionSeeder extends Seeder
             'water_quality_tests' => 'اختبارات جودة المياه',
             'unit-stats' => 'الإحصائيات الشهرية للوحدات',
             'well_licenses' => 'تراخيص الآبار',
+            'water_quality_tests' => 'اختبارات جودة المياه',
+            'starion_teams' => 'فرق المحطة',
+            'safety_prfiles' => 'ملفات السلامة',
+
             // 'unit_stats' will be handled separately to create custom permissions
         ];
 
