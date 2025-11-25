@@ -50,7 +50,23 @@ class ProjectActivityController extends Controller
 
         return view('dashboard.project-activities.index', compact('projectActivities', 'projects'));
     }
+      private function generateNextCode()
+    {
+        // البحث عن آخر نشاط يحتوي على الكود بالصيغة ACT-
+        $lastActivity = ProjectActivity::where('activity_code', 'like', 'ACT-%')
+                                       ->orderBy('id', 'desc') // أو orderBy('activity_code', 'desc')
+                                       ->first();
 
+        if (!$lastActivity) {
+            return 'ACT-00001';
+        }
+
+        // استخراج الرقم من الكود (إزالة أول 4 محارف 'ACT-')
+        $number = (int) substr($lastActivity->activity_code, 4);
+
+        // زيادة الرقم وتنسيقه ليصبح 5 خانات
+        return 'ACT-' . str_pad($number + 1, 5, '0', STR_PAD_LEFT);
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -63,8 +79,8 @@ class ProjectActivityController extends Controller
         $masterActivities = MasterActivity::orderBy('name')->get();
         $units = Unit::orderBy('unit_name')->get();
         $stations = Station::orderBy('station_name')->get();
-
-        return view('dashboard.project-activities.create', compact('projects', 'masterActivities', 'units', 'stations'));
+        $nextCode = $this->generateNextCode();
+        return view('dashboard.project-activities.create', compact('projects', 'masterActivities', 'units', 'stations', 'nextCode'));
     }
 
     /**
@@ -76,7 +92,6 @@ class ProjectActivityController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'activity_code' => 'required|string|max:100|unique:project_activities,activity_code',
             'project_id' => 'required|exists:projects,id',
             'master_activity_id' => 'required|exists:master_activities,id',
             'unit_id' => 'required|exists:units,id',
@@ -89,11 +104,16 @@ class ProjectActivityController extends Controller
             'status' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
         ]);
-
+         $code = $this->generateNextCode();
+          while(ProjectActivity::where('activity_code', $code)->exists()) {
+             $number = (int) substr($code, 4);
+             $code = 'ACT-' . str_pad($number + 1, 5, '0', STR_PAD_LEFT);
+        }
+         $validatedData['activity_code'] = $code;
         ProjectActivity::create($validatedData);
 
         return redirect()->route('dashboard.project-activities.index')
-                         ->with('success', 'تم إنشاء نشاط المشروع بنجاح.');
+                          ->with('success', 'تم إنشاء نشاط المشروع بنجاح والكود هو: ' . $code);
     }
 
     /**
