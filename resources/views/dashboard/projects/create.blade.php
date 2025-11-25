@@ -282,45 +282,69 @@
         </div>
     </div>
 @endsection
-
 @push('scripts')
+    {{-- المكتبات الموجودة مسبقاً --}}
     <script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
-
-    {{-- Moment.js (dependency for date picker) with Arabic locale --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment-with-locales.min.js" integrity="sha512-LGXaggshOkD/at6PFNcp2V2unfs9yoBCen8nhOTgryNZ/IBCoGPifwiElOL4rB84goGIzkIOvyvoFZDlLUQ7MA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-    {{-- Tempus Dominus (Date Picker) JS --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js" integrity="sha512-k6/Bkb8Fxf/c1Tkyl39yJwcOZ1P4cRrJu77p83zJjN2Z55prbFHxPs9vN7q3l3+tSMGPDdoH51AEU8Vgo1cgAA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script>
         $(function() {
-            // تفعيل Select2
+            // 1. تفعيل Select2
             $('.select2').select2({
                 theme: 'bootstrap4',
                 dir: "rtl",
                 placeholder: "-- اختر --",
             });
 
-            // تفعيل Date Picker لجميع الحقول التي تحمل كلاس .datepicker
+            // 2. تفعيل Date Picker
             $('.datepicker').datetimepicker({
                 format: 'YYYY-MM-DD',
-                locale: 'ar', // تفعيل اللغة العربية
-                buttons: {
-                    showToday: true,
-                    showClear: true,
-                    showClose: true
-                },
+                locale: 'ar',
+                buttons: { showToday: true, showClear: true, showClose: true },
                 icons: {
-                    time: 'far fa-clock',
-                    date: 'far fa-calendar',
-                    up: 'fas fa-arrow-up',
-                    down: 'fas fa-arrow-down',
-                    previous: 'fas fa-chevron-left',
-                    next: 'fas fa-chevron-right',
-                    today: 'far fa-calendar-check',
-                    clear: 'far fa-trash-alt',
-                    close: 'fas fa-times'
+                    time: 'far fa-clock', date: 'far fa-calendar', up: 'fas fa-arrow-up',
+                    down: 'fas fa-arrow-down', previous: 'fas fa-chevron-left', next: 'fas fa-chevron-right',
+                    today: 'far fa-calendar-check', clear: 'far fa-trash-alt', close: 'fas fa-times'
                 }
+            });
+
+            // ==========================================
+            //  3. كود حساب مدة المشروع تلقائياً
+            // ==========================================
+
+            // دالة لحساب الفرق بين التاريخين
+            function calculateDuration() {
+                // جلب القيم من حقول الإدخال الموجودة داخل الـ div الخاص بالتقويم
+                var startVal = $('#start_date_picker input').val();
+                var endVal = $('#end_date_picker input').val();
+
+                if (startVal && endVal) {
+                    var startDate = moment(startVal, 'YYYY-MM-DD');
+                    var endDate = moment(endVal, 'YYYY-MM-DD');
+
+                    // التأكد من صحة التواريخ وأن تاريخ النهاية بعد البداية
+                    if (startDate.isValid() && endDate.isValid() && endDate.isSameOrAfter(startDate)) {
+                        // حساب الفرق بالأيام
+                        var daysDiff = endDate.diff(startDate, 'days');
+
+                        // وضع القيمة في حقل المدة (يمكنك إضافة +1 إذا كنت تريد احتساب يوم البداية أيضاً)
+                        $('#total_duration_days').val(daysDiff);
+                    } else {
+                        // تفريغ الحقل إذا كانت التواريخ غير منطقية
+                        $('#total_duration_days').val('');
+                    }
+                }
+            }
+
+            // الاستماع لحدث تغيير التاريخ في كلا التقويمين (start & end)
+            $('#start_date_picker, #end_date_picker').on('change.datetimepicker', function(e) {
+                calculateDuration();
+            });
+
+            // أيضاً الاستماع للكتابة اليدوية (Blur)
+            $('#start_date_picker input, #end_date_picker input').on('blur', function() {
+                calculateDuration();
             });
         });
     </script>

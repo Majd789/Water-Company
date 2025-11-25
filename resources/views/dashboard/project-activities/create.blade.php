@@ -54,11 +54,13 @@
                             {{-- 1. المعلومات الأساسية --}}
                             <h5 class="mt-2 mb-3 section-title"><i class="fas fa-info-circle text-primary ml-2"></i>المعلومات الأساسية</h5>
                             <div class="row">
-                                <div class="col-md-6">
+                               <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="activity_code">كود النشاط<span class="text-danger">*</span></label>
+                                        <label for="activity_code">كود النشاط (تلقائي)</label>
+                                        {{-- تم إضافة readonly واستخدام المتغير nextCode --}}
                                         <input type="text" class="form-control" id="activity_code" name="activity_code"
-                                               placeholder="أدخل كوداً فريداً للنشاط" value="{{ old('activity_code') }}" required>
+                                            value="{{ $nextCode }}" readonly style="background-color: #e9ecef; cursor: not-allowed;">
+                                        <small class="text-muted">يتم توليد هذا الكود تلقائياً ولا يمكن تعديله.</small>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
