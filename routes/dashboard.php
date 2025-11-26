@@ -96,6 +96,7 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::get('/stations/{id}/export-card', [StationController::class, 'exportStationCard'])->name('stations.exportCard');    Route::resource('wells', WellController::class);
     Route::resource('generation-groups', GenerationGroupController::class);
     Route::resource('horizontal-pumps', HorizontalPumpController::class);
+    Route::get('projects/export', [ProjectController::class, 'export'])->name('dashboard.projects.export');
 
     Route::prefix('unit-stats')->name('unit-stats.')->group(function () {
         Route::get('/', [UnitMonthlyStatController::class, 'index'])->name('index');

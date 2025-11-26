@@ -52,6 +52,9 @@
                                     <a href="{{ route('dashboard.projects.create') }}" class="btn btn-primary">
                                         <i class="fas fa-plus ml-1"></i> إضافة مشروع جديد
                                     </a>
+                                    <a href="{{ route('dashboard.projects.export') }}" class="btn btn-success">
+                                        <i class="fas fa-file-excel ml-1"></i> تصدير إكسل
+                                    </a>
                                 </div>
                                 @endcan
                             </div>
