@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Exports\ProjectsExport;
 use App\Http\Controllers\Controller;
 use App\Models\HandoverStatus;
 use App\Models\Organization;
@@ -109,40 +110,15 @@ class ProjectController extends Controller
             'approval_date' => 'nullable|date',
             'notes' => 'nullable|string',
         ]);
-        $organization = Organization::findOrFail($validatedData['organization_id']);
-
-        // الجزء الأول: كود المنظمة (e.g., "GOL")
-        $orgCode = $organization->code;
-
-        // الجزء الثاني: السنة المختصرة (e.g., "25")
-        $year = date('y');
-
-        // الجزء الثالث: الشهر المختصر بحروف كبيرة (e.g., "JAN")
-        $month = strtoupper(date('M'));
-
-        // الجزء الرابع: الرقم التسلسلي (الأكثر أهمية)
-        // إنشاء البادئة للبحث عنها في قاعدة البيانات
-        $prefix = "{$orgCode}-{$year}-{$month}-";
-
-        // البحث عن آخر مشروع بنفس البادئة لتحديد الرقم التالي
-        $lastProjectCount = Project::where('project_code', 'LIKE', "{$prefix}%")->count();
-        $nextId = $lastProjectCount + 1;
-
-        // تنسيق الرقم التسلسلي ليكون 3 أرقام مع أصفار بادئة (e.g., "001")
-        $sequence = str_pad($nextId, 3, '0', STR_PAD_LEFT);
-
-        // تجميع الكود النهائي
-        $projectCode = $prefix . $sequence;
-
-        // 3. إضافة الكود المُولّد إلى البيانات التي سيتم حفظها
-        $validatedData['project_code'] = $projectCode;
-
         // 4. إنشاء المشروع
         Project::create($validatedData);
 
         return redirect()->route('dashboard.projects.index')->with('success', 'تم إنشاء المشروع بنجاح.');
     }
-
+    public function export()
+    {
+    return Excel::download(new ProjectsExport, 'projects_' . date('Y-m-d') . '.xlsx');
+    }
     /**
      * Display the specified resource.
      */
@@ -173,7 +149,6 @@ class ProjectController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'organization_id' => 'required|exists:organizations,id',
             'donor_name' => 'nullable|string|max:255',
             'supervisor_name' => 'nullable|string|max:255',
             'supervisor_phone' => 'nullable|string|max:50',

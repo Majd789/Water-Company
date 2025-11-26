@@ -153,8 +153,12 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="status">حالة النشاط</label>
-                                        <input type="text" class="form-control" id="status" name="status" placeholder="مثال: قيد التنفيذ" value="{{ old('status') }}">
-                                    </div>
+                                       <select name="status" class="form-control select2" id="status" required>
+                                            <option value="" disabled selected>-- اختر الحالة --</option>
+                                            <option value="ينتظر مقاول" {{ old('status') == 'ينتظر مقاول' ? 'selected' : '' }}>ينتظر مقاول</option>
+                                            <option value="قيد التنفيذ" {{ old('status') == 'قيد التنفيذ' ? 'selected' : '' }}>قيد التنفيذ</option>
+                                            <option value="منفذ" {{ old('status') == 'منفذ' ? 'selected' : '' }}>منفذ</option>
+                                        </select>                                    </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
