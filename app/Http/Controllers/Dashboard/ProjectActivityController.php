@@ -80,7 +80,8 @@ class ProjectActivityController extends Controller
         $units = Unit::orderBy('unit_name')->get();
         $stations = Station::orderBy('station_name')->get();
         $nextCode = $this->generateNextCode();
-        return view('dashboard.project-activities.create', compact('projects', 'masterActivities', 'units', 'stations', 'nextCode'));
+        $projectActivity=new ProjectActivity();
+        return view('dashboard.project-activities.create', compact('projects', 'masterActivities', 'units', 'stations', 'nextCode','projectActivity'));
     }
 
     /**
@@ -141,7 +142,7 @@ class ProjectActivityController extends Controller
         $masterActivities = MasterActivity::orderBy('name')->get();
         $units = Unit::orderBy('unit_name')->get();
         $stations = Station::orderBy('station_name')->get();
-
+        $masterActivity = $projectActivity->masterActivity;
         return view('dashboard.project-activities.edit', compact('projectActivity', 'projects', 'masterActivities', 'units', 'stations'));
     }
 
@@ -155,7 +156,6 @@ class ProjectActivityController extends Controller
     public function update(Request $request, ProjectActivity $projectActivity)
     {
         $validatedData = $request->validate([
-            'activity_code' => 'required|string|max:100|unique:project_activities,activity_code,' . $projectActivity->id,
             'project_id' => 'required|exists:projects,id',
             'master_activity_id' => 'required|exists:master_activities,id',
             'unit_id' => 'required|exists:units,id',
