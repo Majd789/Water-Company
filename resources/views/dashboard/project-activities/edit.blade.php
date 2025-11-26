@@ -76,18 +76,22 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-12">
+                               <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="master_activity_id">نوع النشاط<span class="text-danger">*</span></label>
                                         <select name="master_activity_id" class="form-control select2" id="master_activity_id" required>
                                             <option value="" disabled>-- اختر نوع النشاط من القائمة الرئيسية --</option>
                                             @foreach ($masterActivities as $masterActivity)
-                                                <option value="{{ $masterActivity->id }}" {{ old('master_activity_id', $projectActivity->master_activity_id) == $masterActivity->id ? 'selected' : '' }}>
+                                                {{-- إضافة data-unit --}}
+                                                <option value="{{ $masterActivity->id }}"
+                                                        data-unit="{{ $masterActivity->unit }}"
+                                                        {{ old('master_activity_id', $projectActivity->master_activity_id) == $masterActivity->id ? 'selected' : '' }}>
                                                     {{ $masterActivity->name }}
                                                 </option>
                                             @endforeach
                                         </select>
                                     </div>
+
                                 </div>
                             </div>
 
@@ -138,12 +142,14 @@
                                         <input type="number" step="0.01" class="form-control" id="quantity" name="quantity" placeholder="مثال: 500" value="{{ old('quantity', $projectActivity->quantity) }}">
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label for="unit_measure">الواحدة</label>
-                                        <input type="text" class="form-control" id="unit_measure" name="unit_measure" placeholder="مثال: متر، قطعة" value="{{ old('unit_measure', $projectActivity->unit_measure) }}">
+                               <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="unit_measure">الواحدة</label>
+                                            {{-- يفضل جعلها readonly لضمان تطابقها مع نوع النشاط --}}
+                                            <input type="text" class="form-control" id="unit_measure" name="unit_measure"
+                                                placeholder="مثال: متر، قطعة" value="{{ old('unit_measure', $projectActivity->unit_measure) }}" readonly>
+                                        </div>
                                     </div>
-                                </div>
                                  <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="cost">التكلفة التقديرية</label>
@@ -181,17 +187,33 @@
         </div>
     </div>
 @endsection
-
 @push('scripts')
     <script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
     <script>
         $(function() {
-            // تفعيل Select2
             $('.select2').select2({
                 theme: 'bootstrap4',
                 dir: "rtl",
                 placeholder: "-- اختر --"
             });
+
+            // ==========================================
+            // كود تحديث الواحدة عند التغيير
+            // ==========================================
+            $('#master_activity_id').on('change', function() {
+                var selectedOption = $(this).find(':selected');
+                var unit = selectedOption.data('unit');
+
+                if(unit) {
+                    $('#unit_measure').val(unit);
+                }
+            });
+
+            // ملاحظة: في صفحة التعديل، البيانات موجودة بالفعل من قاعدة البيانات،
+            // لذلك لا نجبر التحديث عند التحميل (trigger) إلا إذا أردت التأكد من التطابق 100%
+            // لكن يفضل تركها كما هي لتجنب مسح أي تعديل يدوي سابق إن وجد.
+            // إذا كنت تريد فرض التطابق دائماً، أضف السطر التالي:
+            // $('#master_activity_id').trigger('change');
         });
     </script>
 @endpush
