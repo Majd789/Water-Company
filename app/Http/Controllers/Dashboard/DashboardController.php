@@ -180,56 +180,69 @@ class DashboardController extends Controller
             // ------------------ (نهاية الإضافات الجديدة) ------------------
 
             // إعداد بيانات الخريطة للوضع العام (عرض المحطات فقط)
-            $geoJsonData = [
-                'stations' => $this->getGeoJsonForModel(Station::whereIn('id', $scopedStationIds), 'station_name', 'blue', 'dashboard.stations.show'),
+         $projectQuery = Project::query();
+            if ($user->unit_id) {
+                $projectQuery->whereHas('activities', function ($q) use ($user) {
+                    $q->where('unit_id', $user->unit_id);
+                });
+            }
+
+            // 2. بناء مصفوفة KPI التي ينتظرها ملف الـ Blade
+            $statistics['projects_kpi'] = [
+                'total_count' => (clone $projectQuery)->count(),
+                'total_value' => (clone $projectQuery)->sum('total_value'),
+
+                // مشاريع قيد التنفيذ (Active)
+                'active_count' => (clone $projectQuery)->whereHas('generalStatus', function ($q) {
+                    $q->whereIn('name', ['قيد التنفيذ', 'قيد التنفيذ ويحوي أنشطة شاغرة', 'تنفيذ جزئي']);
+                })->count(),
+
+                // مشاريع تنتظر مقاول (Pending)
+                'pending_count' => (clone $projectQuery)->whereHas('generalStatus', function ($q) {
+                    $q->where('name', 'ينتظر مقاولين');
+                })->count(),
             ];
-            $projectQuery = Project::query();
-            $statistics['projects_by_org'] = (clone $projectQuery)
-                ->select('organization_id', DB::raw('count(*) as count, sum(total_value) as total_value'))
-                ->with('organization:id,name') // جلب الاسم فقط للأداء
-                ->groupBy('organization_id')
-                ->orderByDesc('total_value')
-                ->limit(6) // أعلى 6 منظمات
-                ->get();
 
-            // 3. تحليل الحالة العامة (Project Status Distribution) - للمخطط الدائري
-            $statistics['projects_by_status'] = (clone $projectQuery)
-                ->select('general_status_id', DB::raw('count(*) as count, sum(total_value) as total_value'))
-                ->with('generalStatus:id,name')
-                ->groupBy('general_status_id')
-                ->orderByDesc('count')
-                ->get();
+            // 3. مخالفات العقود (للمربع الأحمر)
+            $statistics['contract_alerts'] = ContractorTask::where('is_discrepant', true)
+                ->whereHas('projectActivity', function($q) use ($projectQuery) {
+                     $q->whereIn('project_id', $projectQuery->pluck('id'));
+                })->count();
 
-            // 4. تحليل نوع المشروع (Project Types)
-            $statistics['projects_by_type'] = (clone $projectQuery)
-                ->select('project_type_id', DB::raw('count(*) as count, sum(total_value) as total_value'))
-                ->with('projectType:id,name')
-                ->groupBy('project_type_id')
-                ->get();
-
-            // 5. التحليل الزمني السنوي (Yearly Trend)
+            // 4. الاتجاه السنوي (للشارت)
             $statistics['projects_yearly_trend'] = (clone $projectQuery)
                 ->whereNotNull('start_date')
                 ->selectRaw('YEAR(start_date) as year, count(*) as count, sum(total_value) as total_value')
                 ->groupBy('year')
-                ->orderByDesc('year') // الأحدث أولاً
-                ->limit(5) // آخر 5 سنوات
+                ->orderByDesc('year')
+                ->limit(5)
                 ->get();
 
-            // 6. التنبيهات: مشاريع قريبة الانتهاء (Upcoming Deadlines)
+            // 5. توزيع الحالات (للشارت الدائري)
+            $statistics['projects_by_status'] = (clone $projectQuery)
+                ->select('general_status_id', DB::raw('count(*) as count'))
+                ->with('generalStatus:id,name')
+                ->groupBy('general_status_id')
+                ->get();
+
+            // 6. مشاريع قريبة الانتهاء (للجدول)
             $statistics['upcoming_projects'] = (clone $projectQuery)
                 ->with(['organization', 'mainStatus'])
                 ->whereNotNull('end_date')
                 ->whereDate('end_date', '>=', now())
-                ->whereDate('end_date', '<=', now()->addDays(45)) // خلال 45 يوم
+                ->whereDate('end_date', '<=', now()->addDays(45))
                 ->orderBy('end_date', 'asc')
                 ->limit(6)
                 ->get();
-                $statistics['contract_alerts'] = ContractorTask::where('is_discrepant', true)
-                ->whereHas('projectActivity', function($q) use ($projectQuery) {
-                    // نستخدم نفس قيود الفلترة للمشاريع
-                    $q->whereIn('project_id', $projectQuery->pluck('id'));
-                })->count();
+
+            // 7. المنظمات (للجدول)
+            $statistics['projects_by_org'] = (clone $projectQuery)
+                ->select('organization_id', DB::raw('count(*) as count, sum(total_value) as total_value'))
+                ->with('organization:id,name')
+                ->groupBy('organization_id')
+                ->orderByDesc('total_value')
+                ->limit(6)
+                ->get();
         }
 
         return view('dashboard', [
