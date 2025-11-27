@@ -42,10 +42,6 @@
                                 عرض المشاريع <span class="badge badge-primary ml-2">{{ $projects->total() }}</span>
                             </h3>
                             <div class="card-tools d-flex align-items-center">
-                                {{-- يمكنك إضافة زر التصدير هنا مستقبلاً --}}
-                                {{-- <a href="{{ route('dashboard.projects.export', request()->query()) }}" class="btn btn-success ml-2">
-                                    <i class="fas fa-file-excel"></i> تصدير Excel
-                                </a> --}}
 
                                 @can('projects.create')
                                 <div class="card-tools">
@@ -54,6 +50,9 @@
                                     </a>
                                     <a href="{{ route('dashboard.projects.export') }}" class="btn btn-success">
                                         <i class="fas fa-file-excel ml-1"></i> تصدير إكسل
+                                    </a>
+                                    <a href="{{ route('dashboard.projects.export_report', request()->query()) }}" class="btn btn-dark btn-sm ml-1" title="تصدير تقرير إحصائي وتفصيلي">
+                                        <i class="fas fa-file-contract ml-1"></i> تقرير شامل وتفصيلي
                                     </a>
                                 </div>
                                 @endcan

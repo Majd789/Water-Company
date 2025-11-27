@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Exports\ProjectComprehensiveExport;
 use App\Exports\ProjectsExport;
 use App\Http\Controllers\Controller;
 use App\Models\HandoverStatus;
@@ -118,6 +119,21 @@ class ProjectController extends Controller
     public function export()
     {
     return Excel::download(new ProjectsExport, 'projects_' . date('Y-m-d') . '.xlsx');
+    }
+     public function exportReport(Request $request)
+    {
+        // تجميع الفلاتر الحالية من الرابط (بحث، وحدة، منظمة)
+        // لضمان أن التقرير يطابق ما يراه المستخدم
+        $filters = [
+            'unit_id' => $request->unit_id ?? auth()->user()->unit_id,
+            'organization_id' => $request->organization_id,
+            'search' => $request->search,
+        ];
+
+        // اسم الملف مع التاريخ والوقت
+        $fileName = 'تقرير_المشاريع_الشامل_' . date('Y-m-d_H-i') . '.xlsx';
+
+        return Excel::download(new ProjectComprehensiveExport($filters), $fileName);
     }
     /**
      * Display the specified resource.
