@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\Project;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB; // نحتاج DB للعمليات الحسابية المعقدة
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -21,22 +22,17 @@ class ProjectSummarySheet implements FromView, WithTitle, ShouldAutoSize, WithSt
 
     public function view(): View
     {
-        // 1. بناء الاستعلام الأساسي مع الفلاتر
+        // 1. الاستعلام الأساسي مع الفلاتر
         $query = Project::query();
 
-        // تصفية حسب الوحدة (User Unit)
         if (!empty($this->filters['unit_id'])) {
             $query->whereHas('activities', function ($q) {
                 $q->where('unit_id', $this->filters['unit_id']);
             });
         }
-
-        // تصفية حسب المنظمة
         if (!empty($this->filters['organization_id'])) {
             $query->where('organization_id', $this->filters['organization_id']);
         }
-
-        // تصفية البحث العام
         if (!empty($this->filters['search'])) {
             $searchTerm = trim($this->filters['search']);
             $query->where(function ($q) use ($searchTerm) {
@@ -45,55 +41,96 @@ class ProjectSummarySheet implements FromView, WithTitle, ShouldAutoSize, WithSt
             });
         }
 
-        // 2. جلب الإحصائيات (Counts)
+        // --- الإجماليات العامة ---
+        $totalCount = (clone $query)->count();
+        $totalValue = (clone $query)->sum('total_value');
+        $avgDuration = (clone $query)->avg('total_duration_days'); // متوسط مدة المشاريع
 
-        // إحصائية حسب نوع المشروع
+        // --- 1. إحصائيات المنظمات (العدد + القيمة المالية) ---
+        $byOrg = (clone $query)
+            ->select('organization_id')
+            ->selectRaw('count(*) as count, sum(total_value) as total_value')
+            ->with('organization')
+            ->groupBy('organization_id')
+            ->orderByDesc('total_value') // ترتيب حسب القيمة المالية الأعلى
+            ->get();
+
+        // --- 2. إحصائيات الجهات المانحة (العدد + القيمة المالية) ---
+        $byDonor = (clone $query)
+            ->select('donor_name')
+            ->whereNotNull('donor_name')
+            ->where('donor_name', '!=', '')
+            ->selectRaw('count(*) as count, sum(total_value) as total_value')
+            ->groupBy('donor_name')
+            ->orderByDesc('count') // ترتيب حسب الأكثر تمويلاً
+            ->get();
+
+        // --- 3. إحصائيات نوع المشروع (مع القيمة المالية) ---
         $byType = (clone $query)
             ->select('project_type_id')
-            ->selectRaw('count(*) as count')
+            ->selectRaw('count(*) as count, sum(total_value) as total_value')
             ->with('projectType')
             ->groupBy('project_type_id')
             ->get();
 
-        // إحصائية حسب الحالة الرئيسية
-        $byMainStatus = (clone $query)
-            ->select('main_status_id')
-            ->selectRaw('count(*) as count')
-            ->with('mainStatus')
-            ->groupBy('main_status_id')
+        // --- 4. إحصائيات الحالة العامة (General Status) ---
+        $byGenStatus = (clone $query)
+            ->select('general_status_id')
+            ->selectRaw('count(*) as count, sum(total_value) as total_value')
+            ->with('generalStatus')
+            ->groupBy('general_status_id')
             ->get();
 
-        // إحصائية حسب حالة التسليم
+        // --- 5. إحصائيات حالة التسليم ---
         $byHandoverStatus = (clone $query)
             ->select('handover_status_id')
-            ->selectRaw('count(*) as count')
+            ->selectRaw('count(*) as count, sum(total_value) as total_value')
             ->with('handoverStatus')
             ->groupBy('handover_status_id')
             ->get();
 
-        // الإجماليات
-        $totalCount = (clone $query)->count();
-        $totalValue = (clone $query)->sum('total_value');
+        // --- 6. إحصائيات المشرفين (أكثر المشرفين نشاطاً) ---
+        $bySupervisor = (clone $query)
+            ->select('supervisor_name')
+            ->whereNotNull('supervisor_name')
+            ->selectRaw('count(*) as count, sum(total_value) as total_managed_value')
+            ->groupBy('supervisor_name')
+            ->orderByDesc('count')
+            ->limit(15) // أهم 15 مشرف
+            ->get();
 
-        // إرسال البيانات إلى ملف العرض (Blade)
+        // --- 7. التوزيع الزمني (حسب سنة البدء) ---
+        $byYear = (clone $query)
+            ->selectRaw('YEAR(start_date) as year, count(*) as count')
+            ->whereNotNull('start_date')
+            ->groupBy('year')
+            ->orderByDesc('year')
+            ->get();
+
         return view('dashboard.projects.exports.summary', [
-            'byType' => $byType,
-            'byMainStatus' => $byMainStatus,
-            'byHandoverStatus' => $byHandoverStatus,
             'totalCount' => $totalCount,
             'totalValue' => $totalValue,
+            'avgDuration' => $avgDuration,
+            'byOrg' => $byOrg,
+            'byDonor' => $byDonor,
+            'byType' => $byType,
+            'byGenStatus' => $byGenStatus,
+            'byHandoverStatus' => $byHandoverStatus,
+            'bySupervisor' => $bySupervisor,
+            'byYear' => $byYear,
         ]);
     }
 
     public function title(): string
     {
-        return 'ملخص الإحصائيات';
+        return 'الإحصائيات الشاملة';
     }
 
     public function styles(Worksheet $sheet)
     {
-        // جعل اتجاه الورقة من اليمين لليسار
         $sheet->setRightToLeft(true);
+        // تنسيق الأرقام لعمود المبالغ (افتراضياً سنجعل الأعمدة C و D بتنسيق العملة في أماكن تواجدها)
+        // هذا مجرد تنسيق عام، التنسيق الدقيق يتم عبر ترتيب الجداول
         return [];
     }
 }
