@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -182,6 +183,53 @@ class DashboardController extends Controller
             $geoJsonData = [
                 'stations' => $this->getGeoJsonForModel(Station::whereIn('id', $scopedStationIds), 'station_name', 'blue', 'dashboard.stations.show'),
             ];
+            $projectQuery = Project::query();
+            $statistics['projects_by_org'] = (clone $projectQuery)
+                ->select('organization_id', DB::raw('count(*) as count, sum(total_value) as total_value'))
+                ->with('organization:id,name') // جلب الاسم فقط للأداء
+                ->groupBy('organization_id')
+                ->orderByDesc('total_value')
+                ->limit(6) // أعلى 6 منظمات
+                ->get();
+
+            // 3. تحليل الحالة العامة (Project Status Distribution) - للمخطط الدائري
+            $statistics['projects_by_status'] = (clone $projectQuery)
+                ->select('general_status_id', DB::raw('count(*) as count, sum(total_value) as total_value'))
+                ->with('generalStatus:id,name')
+                ->groupBy('general_status_id')
+                ->orderByDesc('count')
+                ->get();
+
+            // 4. تحليل نوع المشروع (Project Types)
+            $statistics['projects_by_type'] = (clone $projectQuery)
+                ->select('project_type_id', DB::raw('count(*) as count, sum(total_value) as total_value'))
+                ->with('projectType:id,name')
+                ->groupBy('project_type_id')
+                ->get();
+
+            // 5. التحليل الزمني السنوي (Yearly Trend)
+            $statistics['projects_yearly_trend'] = (clone $projectQuery)
+                ->whereNotNull('start_date')
+                ->selectRaw('YEAR(start_date) as year, count(*) as count, sum(total_value) as total_value')
+                ->groupBy('year')
+                ->orderByDesc('year') // الأحدث أولاً
+                ->limit(5) // آخر 5 سنوات
+                ->get();
+
+            // 6. التنبيهات: مشاريع قريبة الانتهاء (Upcoming Deadlines)
+            $statistics['upcoming_projects'] = (clone $projectQuery)
+                ->with(['organization', 'mainStatus'])
+                ->whereNotNull('end_date')
+                ->whereDate('end_date', '>=', now())
+                ->whereDate('end_date', '<=', now()->addDays(45)) // خلال 45 يوم
+                ->orderBy('end_date', 'asc')
+                ->limit(6)
+                ->get();
+                $statistics['contract_alerts'] = ContractorTask::where('is_discrepant', true)
+                ->whereHas('projectActivity', function($q) use ($projectQuery) {
+                    // نستخدم نفس قيود الفلترة للمشاريع
+                    $q->whereIn('project_id', $projectQuery->pluck('id'));
+                })->count();
         }
 
         return view('dashboard', [
@@ -190,6 +238,7 @@ class DashboardController extends Controller
             'stations' => $stationsForDropdown,
             'selectedStation' => $selectedStation,
             'geoJsonData' => $geoJsonData,
+
         ]);
     }
 
