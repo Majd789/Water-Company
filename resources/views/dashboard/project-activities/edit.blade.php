@@ -82,7 +82,6 @@
                                         <select name="master_activity_id" class="form-control select2" id="master_activity_id" required>
                                             <option value="" disabled>-- اختر نوع النشاط من القائمة الرئيسية --</option>
                                             @foreach ($masterActivities as $masterActivity)
-                                                {{-- إضافة data-unit --}}
                                                 <option value="{{ $masterActivity->id }}"
                                                         data-unit="{{ $masterActivity->unit }}"
                                                         {{ old('master_activity_id', $projectActivity->master_activity_id) == $masterActivity->id ? 'selected' : '' }}>
@@ -95,17 +94,17 @@
                                 </div>
                             </div>
 
-                            {{-- 2. الموقع المستهدف --}}
+                            {{-- 2. الموقع المستهدف (تم التعديل هنا) --}}
                             <h5 class="mt-4 mb-3 section-title"><i class="fas fa-map-marked-alt text-success ml-2"></i>الموقع المستهدف</h5>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="unit_id">الوحدة الإدارية<span class="text-danger">*</span></label>
-                                        <select name="unit_id" class="form-control select2" id="unit_id" required>
-                                            <option value="" disabled>-- اختر الوحدة --</option>
-                                            @foreach ($units as $unit)
-                                                <option value="{{ $unit->id }}" {{ old('unit_id', $projectActivity->unit_id) == $unit->id ? 'selected' : '' }}>
-                                                    {{ $unit->unit_name }}
+                                        <label for="town_id">القرية / البلدة<span class="text-danger">*</span></label>
+                                        <select name="town_id" class="form-control select2" id="town_id" required>
+                                            <option value="" disabled>-- اختر القرية --</option>
+                                            @foreach ($towns as $town)
+                                                <option value="{{ $town->id }}" {{ old('town_id', $projectActivity->town_id) == $town->id ? 'selected' : '' }}>
+                                                    {{ $town->town_name }} - ({{ $town->unit->unit_name ?? 'بدون وحدة' }})
                                                 </option>
                                             @endforeach
                                         </select>
@@ -113,22 +112,9 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="station_id">المحطة<span class="text-danger">*</span></label>
-                                        <select name="station_id" class="form-control select2" id="station_id" required>
-                                            <option value="" disabled>-- اختر المحطة --</option>
-                                            @foreach ($stations as $station)
-                                                <option value="{{ $station->id }}" {{ old('station_id', $projectActivity->station_id) == $station->id ? 'selected' : '' }}>
-                                                    {{ $station->station_name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label for="village_name">القرية/الموقع المحدد</label>
-                                        <input type="text" class="form-control" id="village_name" name="village_name"
-                                               placeholder="اسم القرية أو وصف دقيق للموقع" value="{{ old('village_name', $projectActivity->village_name) }}">
+                                        <label for="station_name">اسم المحطة / الموقع</label>
+                                        <input type="text" class="form-control" id="station_name" name="station_name"
+                                               placeholder="أدخل اسم المحطة كتابةً" value="{{ old('station_name', $projectActivity->station_name) }}">
                                     </div>
                                 </div>
                             </div>
@@ -145,7 +131,6 @@
                                <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="unit_measure">الواحدة</label>
-                                            {{-- يفضل جعلها readonly لضمان تطابقها مع نوع النشاط --}}
                                             <input type="text" class="form-control" id="unit_measure" name="unit_measure"
                                                 placeholder="مثال: متر، قطعة" value="{{ old('unit_measure', $projectActivity->unit_measure) }}" readonly>
                                         </div>
@@ -159,7 +144,13 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="status">حالة النشاط</label>
-                                        <input type="text" class="form-control" id="status" name="status" placeholder="مثال: قيد التنفيذ" value="{{ old('status', $projectActivity->status) }}">
+                                        {{-- تم تحويلها إلى select لضمان التوحيد --}}
+                                        <select name="status" class="form-control select2" id="status">
+                                            <option value="" disabled>-- اختر الحالة --</option>
+                                            <option value="ينتظر مقاول" {{ old('status', $projectActivity->status) == 'ينتظر مقاول' ? 'selected' : '' }}>ينتظر مقاول</option>
+                                            <option value="قيد التنفيذ" {{ old('status', $projectActivity->status) == 'قيد التنفيذ' ? 'selected' : '' }}>قيد التنفيذ</option>
+                                            <option value="منفذ" {{ old('status', $projectActivity->status) == 'منفذ' ? 'selected' : '' }}>منفذ</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -197,9 +188,6 @@
                 placeholder: "-- اختر --"
             });
 
-            // ==========================================
-            // كود تحديث الواحدة عند التغيير
-            // ==========================================
             $('#master_activity_id').on('change', function() {
                 var selectedOption = $(this).find(':selected');
                 var unit = selectedOption.data('unit');
@@ -208,12 +196,6 @@
                     $('#unit_measure').val(unit);
                 }
             });
-
-            // ملاحظة: في صفحة التعديل، البيانات موجودة بالفعل من قاعدة البيانات،
-            // لذلك لا نجبر التحديث عند التحميل (trigger) إلا إذا أردت التأكد من التطابق 100%
-            // لكن يفضل تركها كما هي لتجنب مسح أي تعديل يدوي سابق إن وجد.
-            // إذا كنت تريد فرض التطابق دائماً، أضف السطر التالي:
-            // $('#master_activity_id').trigger('change');
         });
     </script>
 @endpush
