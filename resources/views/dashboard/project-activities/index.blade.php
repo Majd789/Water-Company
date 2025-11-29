@@ -50,8 +50,6 @@
                         <div class="card-body">
                             @include('dashboard.partials.alerts')
 
-                            {{-- يمكنك إضافة فلاتر هنا مستقبلاً (حسب المشروع) --}}
-
                             <div class="table-responsive">
                                 <table id="projectActivitiesTable" class="table table-bordered table-striped table-hover">
                                     <thead>
@@ -60,6 +58,8 @@
                                             <th>كود النشاط</th>
                                             <th>اسم النشاط</th>
                                             <th>المشروع</th>
+                                            {{-- تم تحديث العناوين --}}
+                                            <th>القرية</th>
                                             <th>المحطة</th>
                                             <th>التكلفة</th>
                                             <th class="text-center no-export">الإجراءات</th>
@@ -72,7 +72,9 @@
                                                 <td>{{ $activity->activity_code }}</td>
                                                 <td>{{ $activity->masterActivity->name ?? 'N/A' }}</td>
                                                 <td>{{ $activity->project->name ?? 'N/A' }}</td>
-                                                <td>{{ $activity->station->station_name ?? 'N/A' }}</td>
+                                                {{-- عرض القرية واسم المحطة النصي --}}
+                                                <td>{{ $activity->town->town_name ?? 'N/A' }}</td>
+                                                <td>{{ $activity->station_name ?? '-' }}</td>
                                                 <td>${{ number_format($activity->cost, 2) }}</td>
                                                 <td class="text-center">
                                                     <div class="btn-group">
@@ -105,7 +107,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="7" class="text-center">لا توجد أنشطة مشاريع لعرضها.</td>
+                                                <td colspan="8" class="text-center">لا توجد أنشطة مشاريع لعرضها.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>

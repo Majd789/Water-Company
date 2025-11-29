@@ -57,7 +57,6 @@
                                <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="activity_code">كود النشاط (تلقائي)</label>
-                                        {{-- تم إضافة readonly واستخدام المتغير nextCode --}}
                                         <input type="text" class="form-control" id="activity_code" name="activity_code"
                                             value="{{ $nextCode }}" readonly style="background-color: #e9ecef; cursor: not-allowed;">
                                         <small class="text-muted">يتم توليد هذا الكود تلقائياً ولا يمكن تعديله.</small>
@@ -76,58 +75,45 @@
                                         </select>
                                     </div>
                                 </div>
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="master_activity_id">نوع النشاط<span class="text-danger">*</span></label>
-                                    <select name="master_activity_id" class="form-control select2" id="master_activity_id" required>
-                                        <option value="" disabled>-- اختر نوع النشاط من القائمة الرئيسية --</option>
-                                        @foreach ($masterActivities as $masterActivity)
-                                            {{-- إضافة data-unit --}}
-                                            <option value="{{ $masterActivity->id }}"
-                                                    data-unit="{{ $masterActivity->unit }}"
-                                                    {{ old('master_activity_id', $projectActivity->master_activity_id) == $masterActivity->id ? 'selected' : '' }}>
-                                                {{ $masterActivity->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="master_activity_id">نوع النشاط<span class="text-danger">*</span></label>
+                                        <select name="master_activity_id" class="form-control select2" id="master_activity_id" required>
+                                            <option value="" disabled selected>-- اختر نوع النشاط من القائمة الرئيسية --</option>
+                                            @foreach ($masterActivities as $masterActivity)
+                                                <option value="{{ $masterActivity->id }}"
+                                                        data-unit="{{ $masterActivity->unit }}"
+                                                        {{ old('master_activity_id', $projectActivity->master_activity_id) == $masterActivity->id ? 'selected' : '' }}>
+                                                    {{ $masterActivity->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-                            </div>
 
-                            {{-- 2. الموقع المستهدف --}}
+                            {{-- 2. الموقع المستهدف (تم التعديل هنا) --}}
                             <h5 class="mt-4 mb-3 section-title"><i class="fas fa-map-marked-alt text-success ml-2"></i>الموقع المستهدف</h5>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="unit_id">الوحدة الإدارية<span class="text-danger">*</span></label>
-                                        <select name="unit_id" class="form-control select2" id="unit_id" required>
-                                            <option value="" disabled selected>-- اختر الوحدة --</option>
-                                            @foreach ($units as $unit)
-                                                <option value="{{ $unit->id }}" {{ old('unit_id') == $unit->id ? 'selected' : '' }}>
-                                                    {{ $unit->unit_name }}
+                                        <label for="town_id">القرية / البلدة<span class="text-danger">*</span></label>
+                                        <select name="town_id" class="form-control select2" id="town_id" required>
+                                            <option value="" disabled selected>-- اختر القرية --</option>
+                                            @foreach ($towns as $town)
+                                                <option value="{{ $town->id }}" {{ old('town_id') == $town->id ? 'selected' : '' }}>
+                                                    {{ $town->town_name }} - ({{ $town->unit->unit_name ?? 'بدون وحدة' }})
                                                 </option>
                                             @endforeach
                                         </select>
+                                        <small class="text-muted">اختيار القرية يحدد الوحدة الإدارية تلقائياً.</small>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="station_id">المحطة<span class="text-danger">*</span></label>
-                                        <select name="station_id" class="form-control select2" id="station_id" required>
-                                            <option value="" disabled selected>-- اختر المحطة --</option>
-                                            @foreach ($stations as $station)
-                                                <option value="{{ $station->id }}" {{ old('station_id') == $station->id ? 'selected' : '' }}>
-                                                    {{ $station->station_name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label for="village_name">القرية/الموقع المحدد</label>
-                                        <input type="text" class="form-control" id="village_name" name="village_name"
-                                               placeholder="اسم القرية أو وصف دقيق للموقع" value="{{ old('village_name') }}">
+                                        <label for="station_name">اسم المحطة / الموقع</label>
+                                        <input type="text" class="form-control" id="station_name" name="station_name"
+                                               placeholder="أدخل اسم المحطة كتابةً" value="{{ old('station_name') }}">
                                     </div>
                                 </div>
                             </div>
@@ -144,7 +130,6 @@
                               <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="unit_measure">الواحدة</label>
-                                        {{-- يفضل جعلها readonly لضمان تطابقها مع نوع النشاط --}}
                                         <input type="text" class="form-control" id="unit_measure" name="unit_measure"
                                             placeholder="مثال: متر، قطعة" value="{{ old('unit_measure', $projectActivity->unit_measure) }}" readonly>
                                     </div>
@@ -163,7 +148,8 @@
                                             <option value="ينتظر مقاول" {{ old('status') == 'ينتظر مقاول' ? 'selected' : '' }}>ينتظر مقاول</option>
                                             <option value="قيد التنفيذ" {{ old('status') == 'قيد التنفيذ' ? 'selected' : '' }}>قيد التنفيذ</option>
                                             <option value="منفذ" {{ old('status') == 'منفذ' ? 'selected' : '' }}>منفذ</option>
-                                        </select>                                    </div>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
@@ -201,9 +187,6 @@
                 placeholder: "-- اختر --"
             });
 
-            // ==========================================
-            // كود تحديث الواحدة عند التغيير
-            // ==========================================
             $('#master_activity_id').on('change', function() {
                 var selectedOption = $(this).find(':selected');
                 var unit = selectedOption.data('unit');
@@ -212,12 +195,6 @@
                     $('#unit_measure').val(unit);
                 }
             });
-
-            // ملاحظة: في صفحة التعديل، البيانات موجودة بالفعل من قاعدة البيانات،
-            // لذلك لا نجبر التحديث عند التحميل (trigger) إلا إذا أردت التأكد من التطابق 100%
-            // لكن يفضل تركها كما هي لتجنب مسح أي تعديل يدوي سابق إن وجد.
-            // إذا كنت تريد فرض التطابق دائماً، أضف السطر التالي:
-            // $('#master_activity_id').trigger('change');
         });
     </script>
 @endpush

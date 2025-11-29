@@ -12,9 +12,12 @@ class ProjectActivity extends Model
 
     public function project() { return $this->belongsTo(Project::class); }
     public function masterActivity() { return $this->belongsTo(MasterActivity::class); }
-    public function unit() { return $this->belongsTo(Unit::class); } // الربط مع موديل Unit الموجود لديك
-    public function station() { return $this->belongsTo(Station::class); } // الربط مع موديل Station الموجود لديك
 
+    public function town() { return $this->belongsTo(Town::class); }
+    public function getUnitAttribute()
+    {
+        return $this->town ? $this->town->unit : null;
+    }
     /**
      * كل نشاط له العديد من المهام
      */

@@ -1,19 +1,16 @@
 <?php
 
 namespace App\Http\Controllers\Dashboard;
+
 use App\Http\Controllers\Controller;
 use App\Models\MasterActivity;
 use App\Models\Project;
 use App\Models\ProjectActivity;
-use App\Models\Station;
-use App\Models\Unit;
+use App\Models\Town; // استدعاء موديل القرية
 use Illuminate\Http\Request;
 
 class ProjectActivityController extends Controller
 {
-    /**
-     * Constructor to apply middleware for permissions.
-     */
     public function __construct()
     {
         $this->middleware('permission:project_activities.view')->only(['index', 'show']);
@@ -22,82 +19,70 @@ class ProjectActivityController extends Controller
         $this->middleware('permission:project_activities.delete')->only('destroy');
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\View\View
-     */
     public function index(Request $request)
     {
-        // Eager load relationships for efficiency
-        $query = ProjectActivity::with(['project', 'masterActivity', 'unit', 'station']);
+        // تم تحديث العلاقات (town بدلاً من unit و station)
+        $query = ProjectActivity::with(['project', 'masterActivity', 'town.unit']);
 
-        // Filter by Project
         if ($request->filled('project_id')) {
             $query->where('project_id', $request->project_id);
         }
 
-        // Search functionality
         if ($request->filled('search')) {
             $searchTerm = trim($request->search);
-            $query->where('activity_code', 'like', "%{$searchTerm}%")
-                  ->orWhere('village_name', 'like', "%{$searchTerm}%");
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('activity_code', 'like', "%{$searchTerm}%")
+                  ->orWhere('station_name', 'like', "%{$searchTerm}%"); // البحث باسم المحطة النصي
+            });
         }
 
         $projectActivities = $query->latest()->paginate(3000);
-        $projects = Project::orderBy('name')->get(); // For the filter dropdown
+        $projects = Project::orderBy('name')->get();
 
         return view('dashboard.project-activities.index', compact('projectActivities', 'projects'));
     }
-      private function generateNextCode()
+
+    private function generateNextCode()
     {
-        // البحث عن آخر نشاط يحتوي على الكود بالصيغة ACT-
         $lastActivity = ProjectActivity::where('activity_code', 'like', 'ACT-%')
-                                       ->orderBy('id', 'desc') // أو orderBy('activity_code', 'desc')
+                                       ->orderBy('id', 'desc')
                                        ->first();
 
         if (!$lastActivity) {
             return 'ACT-00001';
         }
 
-        // استخراج الرقم من الكود (إزالة أول 4 محارف 'ACT-')
         $number = (int) substr($lastActivity->activity_code, 4);
-
-        // زيادة الرقم وتنسيقه ليصبح 5 خانات
         return 'ACT-' . str_pad($number + 1, 5, '0', STR_PAD_LEFT);
     }
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\View\View
-     */
+
     public function create()
     {
-        // Fetch data needed for dropdowns in the create form
         $projects = Project::orderBy('name')->get();
         $masterActivities = MasterActivity::orderBy('name')->get();
-        $units = Unit::orderBy('unit_name')->get();
-        $stations = Station::orderBy('station_name')->get();
+
+        // جلب القرى بدلاً من الوحدات والمحطات
+        // نقوم بتحميل علاقة الوحدة مع القرية لعرضها في القائمة (مثلاً: "القرية - الوحدة")
+        $towns = Town::with('unit')->orderBy('town_name')->get();
+
         $nextCode = $this->generateNextCode();
-        $projectActivity=new ProjectActivity();
-        return view('dashboard.project-activities.create', compact('projects', 'masterActivities', 'units', 'stations', 'nextCode','projectActivity'));
+        $projectActivity = new ProjectActivity();
+
+        return view('dashboard.project-activities.create', compact('projects', 'masterActivities', 'towns', 'nextCode', 'projectActivity'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function store(Request $request)
     {
         $validatedData = $request->validate([
             'project_id' => 'required|exists:projects,id',
             'master_activity_id' => 'required|exists:master_activities,id',
-            'unit_id' => 'required|exists:units,id',
-            'station_id' => 'required|exists:stations,id',
-            'village_name' => 'nullable|string|max:255',
+
+            // التحقق من القرية
+            'town_id' => 'required|exists:towns,id',
+
+            // اسم المحطة نصي اختياري (أو إجباري حسب رغبتك)
+            'station_name' => 'nullable|string|max:255',
+
             'quantity' => 'nullable|numeric',
             'unit_measure' => 'nullable|string|max:50',
             'unit_capacity' => 'nullable|numeric',
@@ -105,62 +90,43 @@ class ProjectActivityController extends Controller
             'status' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
         ]);
-         $code = $this->generateNextCode();
-          while(ProjectActivity::where('activity_code', $code)->exists()) {
+
+        $code = $this->generateNextCode();
+        while(ProjectActivity::where('activity_code', $code)->exists()) {
              $number = (int) substr($code, 4);
              $code = 'ACT-' . str_pad($number + 1, 5, '0', STR_PAD_LEFT);
         }
-         $validatedData['activity_code'] = $code;
+        $validatedData['activity_code'] = $code;
+
         ProjectActivity::create($validatedData);
 
         return redirect()->route('dashboard.project-activities.index')
                           ->with('success', 'تم إنشاء نشاط المشروع بنجاح والكود هو: ' . $code);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\ProjectActivity  $projectActivity
-     * @return \Illuminate\View\View
-     */
     public function show(ProjectActivity $projectActivity)
     {
-        $projectActivity->load(['project', 'masterActivity', 'unit', 'station', 'tasks.projectContractor.contractor']);
+        // تحديث العلاقات
+        $projectActivity->load(['project', 'masterActivity', 'town.unit', 'tasks.projectContractor.contractor']);
         return view('dashboard.project-activities.show', compact('projectActivity'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\ProjectActivity  $projectActivity
-     * @return \Illuminate\View\View
-     */
     public function edit(ProjectActivity $projectActivity)
     {
-        // Fetch data needed for dropdowns, same as create method
         $projects = Project::orderBy('name')->get();
         $masterActivities = MasterActivity::orderBy('name')->get();
-        $units = Unit::orderBy('unit_name')->get();
-        $stations = Station::orderBy('station_name')->get();
-        $masterActivity = $projectActivity->masterActivity;
-        return view('dashboard.project-activities.edit', compact('projectActivity', 'projects', 'masterActivities', 'units', 'stations'));
+        $towns = Town::with('unit')->orderBy('town_name')->get();
+
+        return view('dashboard.project-activities.edit', compact('projectActivity', 'projects', 'masterActivities', 'towns'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\ProjectActivity  $projectActivity
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function update(Request $request, ProjectActivity $projectActivity)
     {
         $validatedData = $request->validate([
             'project_id' => 'required|exists:projects,id',
             'master_activity_id' => 'required|exists:master_activities,id',
-            'unit_id' => 'required|exists:units,id',
-            'station_id' => 'required|exists:stations,id',
-            'village_name' => 'nullable|string|max:255',
+            'town_id' => 'required|exists:towns,id',
+            'station_name' => 'nullable|string|max:255',
             'quantity' => 'nullable|numeric',
             'unit_measure' => 'nullable|string|max:50',
             'unit_capacity' => 'nullable|numeric',
@@ -172,19 +138,11 @@ class ProjectActivityController extends Controller
         $projectActivity->update($validatedData);
 
         return redirect()->route('dashboard.project-activities.index')
-                         ->with('success', 'تم تحديث نشاط المشروع بنجاح.');
+                        ->with('success', 'تم تحديث نشاط المشروع بنجاح.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\ProjectActivity  $projectActivity
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function destroy(ProjectActivity $projectActivity)
     {
-        // The database schema's 'onDelete('cascade')' for tasks should handle this.
-        // However, an application-level check can provide a better user experience.
         if ($projectActivity->tasks()->exists()) {
             return redirect()->route('dashboard.project-activities.index')
                              ->with('error', 'لا يمكن حذف النشاط لوجود مهام مقاولين مرتبطة به.');
