@@ -105,14 +105,17 @@ class DashboardController extends Controller
 
             // ------------------ (بداية الإضافات الجديدة) ------------------
             // تحديد المشاريع التي تقع ضمن نطاق صلاحيات المستخدم
-            $projectIdsQuery = Project::query();
-            if ($user->unit_id) {
-                // إذا كان المستخدم في وحدة، أظهر فقط المشاريع التي لها أنشطة في هذه الوحدة
-                $projectIdsQuery->whereHas('activities', function ($q) use ($user) {
-                    $q->where('unit_id', $user->unit_id);
-                });
-            }
-            $projectIds = $projectIdsQuery->pluck('id');
+           $projectIdsQuery = Project::query();
+if ($user->unit_id) {
+    // جلب معرفات البلدات التابعة لهذه الوحدة
+    $townIds = \App\Models\Town::where('unit_id', $user->unit_id)->pluck('id');
+
+    // إذا كان المستخدم في وحدة، أظهر فقط المشاريع التي لها أنشطة في بلدات هذه الوحدة
+    $projectIdsQuery->whereHas('activities', function ($q) use ($townIds) {
+        $q->whereIn('town_id', $townIds);
+    });
+}
+$projectIds = $projectIdsQuery->pluck('id');
             // ------------------ (نهاية الإضافات الجديدة) ------------------
 
             // -- الجرد التفصيلي لمكونات النطاق --
@@ -180,12 +183,15 @@ class DashboardController extends Controller
             // ------------------ (نهاية الإضافات الجديدة) ------------------
 
             // إعداد بيانات الخريطة للوضع العام (عرض المحطات فقط)
-         $projectQuery = Project::query();
-            if ($user->unit_id) {
-                $projectQuery->whereHas('activities', function ($q) use ($user) {
-                    $q->where('unit_id', $user->unit_id);
-                });
-            }
+        $projectQuery = Project::query();
+        if ($user->unit_id) {
+        // جلب معرفات البلدات مرة أخرى (أو استخدام المتغير السابق إذا كان متاحاً في النطاق)
+        $townIds = \App\Models\Town::where('unit_id', $user->unit_id)->pluck('id');
+
+        $projectQuery->whereHas('activities', function ($q) use ($townIds) {
+            $q->whereIn('town_id', $townIds);
+        });
+    }
 
             // 2. بناء مصفوفة KPI التي ينتظرها ملف الـ Blade
             $statistics['projects_kpi'] = [
