@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MasterActivity;
 use App\Models\Project;
 use App\Models\ProjectActivity;
-use App\Models\Town; // استدعاء موديل القرية
+use App\Models\Town;
 use Illuminate\Http\Request;
 
 class ProjectActivityController extends Controller
@@ -21,7 +21,6 @@ class ProjectActivityController extends Controller
 
     public function index(Request $request)
     {
-        // تم تحديث العلاقات (town بدلاً من unit و station)
         $query = ProjectActivity::with(['project', 'masterActivity', 'town.unit']);
 
         if ($request->filled('project_id')) {
@@ -32,7 +31,7 @@ class ProjectActivityController extends Controller
             $searchTerm = trim($request->search);
             $query->where(function($q) use ($searchTerm) {
                 $q->where('activity_code', 'like', "%{$searchTerm}%")
-                  ->orWhere('station_name', 'like', "%{$searchTerm}%"); // البحث باسم المحطة النصي
+                  ->orWhere('station_name', 'like', "%{$searchTerm}%");
             });
         }
 
@@ -42,6 +41,8 @@ class ProjectActivityController extends Controller
         return view('dashboard.project-activities.index', compact('projectActivities', 'projects'));
     }
 
+    /*
+    // تم تعليق دالة التوليد التلقائي
     private function generateNextCode()
     {
         $lastActivity = ProjectActivity::where('activity_code', 'like', 'ACT-%')
@@ -55,34 +56,31 @@ class ProjectActivityController extends Controller
         $number = (int) substr($lastActivity->activity_code, 4);
         return 'ACT-' . str_pad($number + 1, 5, '0', STR_PAD_LEFT);
     }
+    */
 
     public function create()
     {
         $projects = Project::orderBy('name')->get();
         $masterActivities = MasterActivity::orderBy('name')->get();
-
-        // جلب القرى بدلاً من الوحدات والمحطات
-        // نقوم بتحميل علاقة الوحدة مع القرية لعرضها في القائمة (مثلاً: "القرية - الوحدة")
         $towns = Town::with('unit')->orderBy('town_name')->get();
 
-        $nextCode = $this->generateNextCode();
+        // $nextCode = $this->generateNextCode(); // تم التعليق
         $projectActivity = new ProjectActivity();
 
-        return view('dashboard.project-activities.create', compact('projects', 'masterActivities', 'towns', 'nextCode', 'projectActivity'));
+        // تم إزالة nextCode من الـ compact
+        return view('dashboard.project-activities.create', compact('projects', 'masterActivities', 'towns', 'projectActivity'));
     }
 
     public function store(Request $request)
     {
         $validatedData = $request->validate([
+            // تمت إضافة كود النشاط هنا ليصبح إدخالاً يدوياً واجباً وفريداً
+            'activity_code' => 'required|string|unique:project_activities,activity_code|max:50',
+
             'project_id' => 'required|exists:projects,id',
             'master_activity_id' => 'required|exists:master_activities,id',
-
-            // التحقق من القرية
             'town_id' => 'required|exists:towns,id',
-
-            // اسم المحطة نصي اختياري (أو إجباري حسب رغبتك)
             'station_name' => 'nullable|string|max:255',
-
             'quantity' => 'nullable|numeric',
             'unit_measure' => 'nullable|string|max:50',
             'unit_capacity' => 'nullable|numeric',
@@ -91,22 +89,25 @@ class ProjectActivityController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        /*
+        // تم تعليق كود التوليد التلقائي قبل الحفظ
         $code = $this->generateNextCode();
         while(ProjectActivity::where('activity_code', $code)->exists()) {
              $number = (int) substr($code, 4);
              $code = 'ACT-' . str_pad($number + 1, 5, '0', STR_PAD_LEFT);
         }
         $validatedData['activity_code'] = $code;
+        */
 
         ProjectActivity::create($validatedData);
 
+        // تم تعديل رسالة النجاح
         return redirect()->route('dashboard.project-activities.index')
-                          ->with('success', 'تم إنشاء نشاط المشروع بنجاح والكود هو: ' . $code);
+                          ->with('success', 'تم إنشاء نشاط المشروع بنجاح.');
     }
 
     public function show(ProjectActivity $projectActivity)
     {
-        // تحديث العلاقات
         $projectActivity->load(['project', 'masterActivity', 'town.unit', 'tasks.projectContractor.contractor']);
         return view('dashboard.project-activities.show', compact('projectActivity'));
     }
@@ -123,6 +124,9 @@ class ProjectActivityController extends Controller
     public function update(Request $request, ProjectActivity $projectActivity)
     {
         $validatedData = $request->validate([
+            // عند التعديل يجب استثناء الآيدي الحالي من فحص التكرار
+            'activity_code' => 'required|string|max:50|unique:project_activities,activity_code,' . $projectActivity->id,
+
             'project_id' => 'required|exists:projects,id',
             'master_activity_id' => 'required|exists:master_activities,id',
             'town_id' => 'required|exists:towns,id',

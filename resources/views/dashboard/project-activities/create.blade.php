@@ -54,12 +54,17 @@
                             {{-- 1. المعلومات الأساسية --}}
                             <h5 class="mt-2 mb-3 section-title"><i class="fas fa-info-circle text-primary ml-2"></i>المعلومات الأساسية</h5>
                             <div class="row">
-                               <div class="col-md-6">
+                            <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="activity_code">كود النشاط (تلقائي)</label>
-                                        <input type="text" class="form-control" id="activity_code" name="activity_code"
-                                            value="{{ $nextCode }}" readonly style="background-color: #e9ecef; cursor: not-allowed;">
-                                        <small class="text-muted">يتم توليد هذا الكود تلقائياً ولا يمكن تعديله.</small>
+                                        {{-- تم تعديل الحقل هنا ليقبل الإدخال اليدوي --}}
+                                        <label for="activity_code">كود النشاط<span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control @error('activity_code') is-invalid @enderror"
+                                               id="activity_code" name="activity_code"
+                                               placeholder="أدخل كود النشاط (مثال: ACT-001)"
+                                               value="{{ old('activity_code') }}" required>
+                                        @error('activity_code')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
                                     </div>
                                 </div>
                                 <div class="col-md-6">
