@@ -92,13 +92,14 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::post('solar_energy/import', [SolarEnergyController::class, 'import'])->name('import.solar_energies');
     Route::post('diesel_tanks/import', [DieselTankController::class, 'import'])->name('import.diesel_tanks');
     Route::post('safety-profiles/import', [SafetyProfileController::class, 'import'])->name('import.safety_profiles');
+    Route::post('project-activities/import', [ProjectActivityController::class, 'import'])->name('project-activities.import');
     Route::post('/maintenance_tasks/import', [MaintenanceTaskController::class, 'import'])->name('maintenance_tasks.import');
     Route::get('/stations/{id}/export-card', [StationController::class, 'exportStationCard'])->name('stations.exportCard');    Route::resource('wells', WellController::class);
     Route::resource('generation-groups', GenerationGroupController::class);
     Route::resource('horizontal-pumps', HorizontalPumpController::class);
     Route::get('projects/export-report', [ProjectController::class, 'exportReport'])->name('projects.export_report');
     Route::get('projects/export', [ProjectController::class, 'export'])->name('dashboard.projects.export');
-
+    Route::get('project-activities/export', [ProjectActivityController::class, 'export'])->name('project-activities.export');
     Route::prefix('unit-stats')->name('unit-stats.')->group(function () {
         Route::get('/', [UnitMonthlyStatController::class, 'index'])->name('index');
         Route::get('/create', [UnitMonthlyStatController::class, 'create'])->name('create');

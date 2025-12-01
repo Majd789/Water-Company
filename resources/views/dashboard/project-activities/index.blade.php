@@ -43,6 +43,42 @@
                                     <a href="{{ route('dashboard.project-activities.create') }}" class="btn btn-primary">
                                         <i class="fas fa-plus mr-1"></i> إضافة نشاط جديد
                                     </a>
+                                    <a href="{{ route('dashboard.project-activities.export') }}" class="btn btn-info" id="exportBtn">
+                                    <i class="fas fa-file-export"></i> تصدير Excel
+                                    </a>
+                                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#importExcelModal">
+                                        <i class="fas fa-file-excel"></i> استيراد Excel
+                                    </button>
+
+                                    <!-- نافذة الاستيراد (Modal) -->
+                                    <div class="modal fade" id="importExcelModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">استيراد أنشطة المشاريع</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <form action="{{ route('dashboard.project-activities.import') }}" method="POST" enctype="multipart/form-data">
+                                            @csrf
+                                            <div class="modal-body">
+                                                <div class="form-group">
+                                                    <label>اختر ملف الإكسل</label>
+                                                    <input type="file" name="file" class="form-control" required>
+                                                </div>
+                                                <div class="alert alert-warning">
+                                                    <small>يرجى التأكد من تنسيق الملف وأن العمود الأول هو كود النشاط.</small>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">إغلاق</button>
+                                                <button type="submit" class="btn btn-primary">رفع واستيراد</button>
+                                            </div>
+                                        </form>
+                                        </div>
+                                    </div>
+                                    </div>
                                 @endcan
                             </div>
                         </div>

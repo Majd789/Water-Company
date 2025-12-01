@@ -9,5 +9,11 @@ class MasterActivity extends Model
 {
     protected $table = 'master_activities';
     use HasFactory;
+    protected $fillable = [
+    'name',
+    'code',
+    'unit'
+
+];
     protected $guarded = [];
 }
