@@ -11,6 +11,7 @@ use App\Models\SolarEnergy;
 use App\Models\Project;
 use App\Models\ProjectContractor;
 use App\Models\ContractorTask;
+use App\Models\ProjectActivity;
 use App\Models\Station;
 use App\Models\Unit;
 use App\Models\User;
@@ -249,6 +250,81 @@ $projectIds = $projectIdsQuery->pluck('id');
                 ->orderByDesc('total_value')
                 ->limit(6)
                 ->get();
+                // ==========================================================
+            // د) إحصائيات الأنشطة (Activities Stats) - الإضافة الجديدة الشاملة
+            // ==========================================================
+
+            // 1. تحديد نطاق الأنشطة (Scoping)
+            $activitiesQuery = ProjectActivity::query();
+
+            // إذا كان المستخدم يتبع لوحدة، نعرض فقط أنشطة بلدات هذه الوحدة
+            if ($user->unit_id) {
+                $townIds = \App\Models\Town::where('unit_id', $user->unit_id)->pluck('id');
+                $activitiesQuery->whereIn('town_id', $townIds);
+            }
+
+            // 2. مؤشرات الأداء الرئيسية (KPIs)
+            $statistics['activities_kpi'] = [
+                'total_activities' => (clone $activitiesQuery)->count(),
+                'total_cost'       => (clone $activitiesQuery)->sum('cost'),
+
+                // الأنشطة المنفذة
+                'completed_count'  => (clone $activitiesQuery)->where('status', 'منفذ')->count(),
+                'completed_cost'   => (clone $activitiesQuery)->where('status', 'منفذ')->sum('cost'),
+
+                // الأنشطة قيد التنفيذ
+                'ongoing_count'    => (clone $activitiesQuery)->where('status', 'قيد التنفيذ')->count(),
+                'ongoing_cost'     => (clone $activitiesQuery)->where('status', 'قيد التنفيذ')->sum('cost'),
+
+                // الأنشطة المعلقة (ينتظر مقاول / قيد الدراسة / ملغى)
+                'pending_count'    => (clone $activitiesQuery)->whereNotIn('status', ['منفذ', 'قيد التنفيذ'])->count(),
+            ];
+
+            // 3. توزيع الأنشطة حسب النوع (Master Activity) - الأكثر تكلفة
+            // يساعد في معرفة أين تذهب الأموال (طاقة شمسية، صيانة، توريد...)
+           $statistics['activities_by_type'] = (clone $activitiesQuery)
+                ->select('master_activity_id', DB::raw('count(*) as count'), DB::raw('sum(cost) as total_cost'))
+                ->whereNotNull('master_activity_id')
+                ->with('masterActivity:id,name')
+                ->groupBy('master_activity_id')
+                ->orderByDesc('count') // الترتيب حسب الأكثر تكراراً
+                // ->orderByDesc('total_cost') // استخدم هذا السطر بدلاً من السابق إذا أردت الترتيب حسب الكلفة
+                ->limit(5)
+                ->get();
+
+            // 4. توزيع الأنشطة حسب الحالة (Status Distribution)
+            // يستخدم للرسم البياني الدائري
+            $statistics['activities_by_status'] = (clone $activitiesQuery)
+                ->select('status', DB::raw('count(*) as count'))
+                ->whereNotNull('status')
+                ->groupBy('status')
+                ->get();
+
+            // 5. التوزيع الجغرافي للأنشطة (أعلى البلدات نشاطاً)
+            // يظهر المناطق التي يتم العمل بها حالياً
+           $statistics['activities_by_town'] = (clone $activitiesQuery)
+                ->select('town_id', DB::raw('count(*) as count'), DB::raw('sum(cost) as total_cost'))
+                ->whereNotNull('town_id') // استبعاد القيم الفارغة
+                ->with('town:id,town_name') // جلب اسم البلدة
+                ->groupBy('town_id')
+                ->orderByDesc('count') // البلدات الأكثر نشاطاً
+                ->limit(6)
+                ->get();
+
+            // 6. آخر الأنشطة المضافة (Latest Feed)
+            // لعرض جدول بأحدث التحديثات
+            $statistics['recent_activities_list'] = (clone $activitiesQuery)
+                ->with(['project:id,project_code,name', 'town:id,town_name', 'masterActivity:id,name'])
+                ->latest()
+                ->limit(6)
+                ->get();
+
+            // 7. الأنشطة ذات التكلفة الصفرية (للتدقيق المالي)
+            $statistics['zero_cost_activities_count'] = (clone $activitiesQuery)
+                ->where(function($q) {
+                    $q->where('cost', 0)->orWhereNull('cost');
+                })
+                ->count();
         }
 
         return view('dashboard', [
