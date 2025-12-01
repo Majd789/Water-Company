@@ -92,6 +92,7 @@
                                         <tr>
                                             <th>#</th>
                                             <th>كود النشاط</th>
+                                            <th>كود المشروع</th>
                                             <th>اسم النشاط</th>
                                             <th>المشروع</th>
                                             {{-- تم تحديث العناوين --}}
@@ -106,6 +107,7 @@
                                            <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $activity->activity_code }}</td>
+                                                <td>{{ $activity->project->project_code ?? 'N/A' }}</td>
                                                 <td>{{ $activity->masterActivity->name ?? 'N/A' }}</td>
                                                 <td>{{ $activity->project->name ?? 'N/A' }}</td>
                                                 {{-- عرض القرية واسم المحطة النصي --}}
