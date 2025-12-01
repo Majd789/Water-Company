@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Exports\ProjectActivitiesExport;
 use App\Http\Controllers\Controller;
+use App\Imports\ProjectActivitiesImport;
 use App\Models\MasterActivity;
 use App\Models\Project;
 use App\Models\ProjectActivity;
 use App\Models\Town;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProjectActivityController extends Controller
 {
@@ -144,7 +147,24 @@ class ProjectActivityController extends Controller
         return redirect()->route('dashboard.project-activities.index')
                         ->with('success', 'تم تحديث نشاط المشروع بنجاح.');
     }
+    public function export(Request $request)
+    {
+        // نمرر الـ request للكلاس لكي يصدر البيانات المفلترة (إن وجدت)
+        return Excel::download(new ProjectActivitiesExport($request), 'project_activities.xlsx');
+    }
+    public function import(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,xls,csv',
+    ]);
 
+    try {
+        Excel::import(new ProjectActivitiesImport, $request->file('file'));
+        return redirect()->back()->with('success', 'تم استيراد البيانات بنجاح وتمت معالجة البلدات!');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'حدث خطأ: ' . $e->getMessage());
+    }
+}
     public function destroy(ProjectActivity $projectActivity)
     {
         if ($projectActivity->tasks()->exists()) {
