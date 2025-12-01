@@ -127,7 +127,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="position-relative mb-4">
-                                    <canvas id="projectsTrendChart" height="200"></canvas>
+                                    <canvas id="projectsTrendChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -139,7 +139,7 @@
                                 <h3 class="card-title text-muted">توزيع حالات المشاريع</h3>
                             </div>
                             <div class="card-body">
-                                <canvas id="projectStatusChart" height="200"></canvas>
+                                <canvas id="projectStatusChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
                             </div>
                         </div>
                     </div>
@@ -226,7 +226,166 @@
         </div>
         @endif
     @endif {{-- تم إضافة هذا الإغلاق للشرط الأول الخاص بـ !$selectedStation --}}
+        @if(!$selectedStation && isset($statistics['activities_kpi']))
+        {{-- ================================================================= --}}
+        {{-- قسم إحصائيات الأنشطة (Activities Dashboard) --}}
+        {{-- ================================================================= --}}
+        <div class="card card-outline card-teal shadow-sm mb-4">
+            <div class="card-header border-0">
+                <h3 class="card-title text-teal font-weight-bold">
+                    <i class="fas fa-tasks mr-1"></i> لوحة مؤشرات الأنشطة التشغيلية
+                </h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="card-body pt-2">
+                {{-- الصف الأول: المؤشرات الرقمية للأنشطة --}}
+                <div class="row">
+                    <!-- إجمالي الأنشطة -->
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <div class="info-box mb-3 bg-light project-stat-card">
+                            <span class="info-box-icon bg-teal elevation-1"><i class="fas fa-list-ul"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text text-muted">إجمالي الأنشطة</span>
+                                <span class="info-box-number display-4 text-teal">{{ number_format($statistics['activities_kpi']['total_activities'] ?? 0) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- الكلفة الإجمالية -->
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <div class="info-box mb-3 bg-light project-stat-card">
+                            <span class="info-box-icon bg-olive elevation-1"><i class="fas fa-coins"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text text-muted">الكلفة الكلية</span>
+                                <span class="info-box-number text-olive">${{ number_format($statistics['activities_kpi']['total_cost'] ?? 0) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- أنشطة منفذة -->
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <div class="info-box mb-3 bg-light project-stat-card">
+                            <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-check-double"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text text-muted">تم التنفيذ</span>
+                                <span class="info-box-number text-primary">
+                                    {{ $statistics['activities_kpi']['completed_count'] ?? 0 }}
+                                    <small class="d-block text-muted" style="font-size: 0.7rem">(${{ number_format($statistics['activities_kpi']['completed_cost'] ?? 0) }})</small>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- أنشطة قيد التنفيذ -->
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <div class="info-box mb-3 bg-light project-stat-card">
+                            <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-spinner"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text text-muted">جارٍ العمل</span>
+                                <span class="info-box-number text-warning">
+                                    {{ $statistics['activities_kpi']['ongoing_count'] ?? 0 }}
+                                    <small class="d-block text-muted" style="font-size: 0.7rem">(${{ number_format($statistics['activities_kpi']['ongoing_cost'] ?? 0) }})</small>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
+                {{-- الصف الثاني: المخططات البيانية للأنشطة --}}
+                <div class="row mt-2">
+                    <!-- الرسم البياني: الأنشطة حسب النوع (الأكثر تكلفة) -->
+                    <div class="col-md-6">
+                        <div class="card shadow-none border h-100">
+                            <div class="card-header border-0">
+                                <h3 class="card-title text-muted">أعلى 5 أنواع أنشطة تكلفة</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="activitiesTypeChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- الرسم البياني: الأنشطة حسب البلدة (الجغرافي) -->
+                    <div class="col-md-6">
+                        <div class="card shadow-none border h-100">
+                            <div class="card-header border-0">
+                                <h3 class="card-title text-muted">التوزيع الجغرافي للأنشطة (أعلى البلدات)</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="activitiesTownChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- الصف الثالث: جدول آخر الأنشطة --}}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card card-outline card-secondary mb-0">
+                            <div class="card-header">
+                                <h3 class="card-title text-bold text-dark">
+                                    <i class="fas fa-history mr-1"></i> أحدث الأنشطة المضافة
+                                </h3>
+                                <div class="card-tools">
+                                    @if(isset($statistics['zero_cost_activities_count']) && $statistics['zero_cost_activities_count'] > 0)
+                                        <span class="badge badge-danger" title="أنشطة بدون كلفة مالية">
+                                            <i class="fas fa-exclamation-circle"></i> {{ $statistics['zero_cost_activities_count'] }} نشاط صفري
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="card-body p-0 table-responsive">
+                                <table class="table table-sm table-hover text-nowrap">
+                                    <thead>
+                                        <tr>
+                                            <th>كود النشاط</th>
+                                            <th>النوع</th>
+                                            <th>المشروع</th>
+                                            <th>الموقع</th>
+                                            <th>الكمية</th>
+                                            <th>الكلفة</th>
+                                            <th>الحالة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($statistics['recent_activities_list'] ?? [] as $activity)
+                                            <tr>
+                                                <td class="font-weight-bold text-teal">
+                                                    <a href="{{ route('dashboard.project-activities.show', $activity->id) }}">
+                                                        {{ $activity->activity_code }}
+                                                    </a>
+                                                </td>
+                                                <td>{{ Str::limit($activity->masterActivity->name ?? 'غير محدد', 30) }}</td>
+                                                <td><small>{{ $activity->project->project_code ?? '' }}</small></td>
+                                                <td>{{ $activity->town->town_name ?? '' }} - {{ $activity->station_name }}</td>
+                                                <td>{{ $activity->quantity }} {{ $activity->unit_measure }}</td>
+                                                <td class="text-success font-weight-bold">${{ number_format($activity->cost) }}</td>
+                                                <td>
+                                                    @php
+                                                        $badgeColor = match($activity->status) {
+                                                            'منفذ' => 'success',
+                                                            'قيد التنفيذ' => 'warning',
+                                                            'ينتظر مقاول' => 'secondary',
+                                                            'ملغى' => 'danger',
+                                                            default => 'info'
+                                                        };
+                                                    @endphp
+                                                    <span class="badge badge-{{ $badgeColor }}">{{ $activity->status ?? 'غير محدد' }}</span>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="7" class="text-center">لا توجد أنشطة حديثة.</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="card-footer text-center">
+                                <a href="{{ route('dashboard.project-activities.index') }}" class="text-muted">عرض كل الأنشطة</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
     {{-- ================================================================= --}}
     {{-- الخريطة والمخطط الرئيسي --}}
     {{-- ================================================================= --}}
@@ -340,28 +499,56 @@
     {{-- مكتبات الخريطة التفاعلية --}}
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.js"></script>
+@push('scripts')
+    {{-- مكتبات JavaScript الأساسية --}}
+    <script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {{-- مكتبات الخريطة التفاعلية --}}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.js"></script>
 
     <script>
         // دوال مساعدة للتحكم في اللوحة الجانبية للخريطة
-        function openSidebar(content) { document.getElementById('sidebar-content').innerHTML = content; document.getElementById('map-sidebar').classList.add('open'); }
-        function closeSidebar() { document.getElementById('map-sidebar').classList.remove('open'); }
+        function openSidebar(content) {
+            document.getElementById('sidebar-content').innerHTML = content;
+            document.getElementById('map-sidebar').classList.add('open');
+        }
+
+        function closeSidebar() {
+            document.getElementById('map-sidebar').classList.remove('open');
+        }
 
         $(function () {
             // تهيئة فلتر البحث عن المحطات
             $('.select2bs4').select2({ theme: 'bootstrap4', dir: 'rtl' });
 
-            // تهيئة الخريطة
+            // =================================================================
+            // 1. تهيئة الخريطة التفاعلية (Leaflet Map)
+            // =================================================================
             if ($('#map').length) {
-                var mapCenter = [36.1, 36.7];
+                var mapCenter = [36.1, 36.7]; // مركز افتراضي (يمكن تغييره حسب الحاجة)
                 var map = L.map('map').setView(mapCenter, 9);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
 
                 var geoJsonData = @json($geoJsonData);
                 var allFeaturesGroup = L.featureGroup();
                 let selectedLayer = null;
 
-                function createCircleMarker(color, isSelected = false) { return { radius: isSelected ? 11 : 7, fillColor: color, color: isSelected ? '#ff3838' : '#000', weight: isSelected ? 3 : 1, opacity: 1, fillOpacity: 0.9 }; }
+                // دالة لإنشاء نمط النقطة (Marker Style)
+                function createCircleMarker(color, isSelected = false) {
+                    return {
+                        radius: isSelected ? 11 : 7,
+                        fillColor: color,
+                        color: isSelected ? '#ff3838' : '#000',
+                        weight: isSelected ? 3 : 1,
+                        opacity: 1,
+                        fillOpacity: 0.9
+                    };
+                }
 
+                // رسم العناصر على الخريطة
                 Object.keys(geoJsonData).forEach(key => {
                     let data = geoJsonData[key];
                     if (data && data.features.length > 0) {
@@ -370,10 +557,24 @@
                             onEachFeature: (feature, layer) => {
                                 allFeaturesGroup.addLayer(layer);
                                 layer.on('click', function (e) {
-                                    if (selectedLayer) { selectedLayer.setStyle(createCircleMarker(selectedLayer.feature.properties.color)); }
+                                    // إعادة تعيين النمط السابق
+                                    if (selectedLayer) {
+                                        selectedLayer.setStyle(createCircleMarker(selectedLayer.feature.properties.color));
+                                    }
+                                    // تمييز العنصر المختار
                                     layer.setStyle(createCircleMarker(feature.properties.color, true));
                                     selectedLayer = layer;
-                                    let content = `<h5 class="border-bottom pb-2 mb-3">${feature.properties.name || 'تفاصيل العنصر'}</h5><ul class="list-unstyled"><li><strong>النوع:</strong> ${feature.properties.type}</li>${feature.properties.station_name ? `<li><strong>المحطة:</strong> ${feature.properties.station_name}</li>` : ''}<li><strong>الحالة:</strong> ${feature.properties.status}</li></ul><a href="${feature.properties.detail_url}" target="_blank" class="btn btn-primary btn-block mt-4">عرض التفاصيل الكاملة</a>`;
+
+                                    // تعبئة الشريط الجانبي بالتفاصيل
+                                    let content = `
+                                        <h5 class="border-bottom pb-2 mb-3">${feature.properties.name || 'تفاصيل العنصر'}</h5>
+                                        <ul class="list-unstyled">
+                                            <li><strong>النوع:</strong> ${feature.properties.type}</li>
+                                            ${feature.properties.station_name ? `<li><strong>المحطة:</strong> ${feature.properties.station_name}</li>` : ''}
+                                            <li><strong>الحالة:</strong> ${feature.properties.status}</li>
+                                        </ul>
+                                        <a href="${feature.properties.detail_url}" target="_blank" class="btn btn-primary btn-block mt-4">عرض التفاصيل الكاملة</a>
+                                    `;
                                     openSidebar(content);
                                     L.DomEvent.stopPropagation(e);
                                 });
@@ -382,38 +583,87 @@
                     }
                 });
 
+                // إضافة أداة القياس
                 new L.Control.Measure({ position: 'topright', primaryLengthUnit: 'meters', localization: 'ar' }).addTo(map);
-                map.on('click', function() { if (selectedLayer) { selectedLayer.setStyle(createCircleMarker(selectedLayer.feature.properties.color)); selectedLayer = null; } closeSidebar(); });
-                if (allFeaturesGroup.getLayers().length > 0) { map.fitBounds(allFeaturesGroup.getBounds().pad(0.2)); }
+
+                // إغلاق الشريط عند النقر على الخريطة
+                map.on('click', function() {
+                    if (selectedLayer) {
+                        selectedLayer.setStyle(createCircleMarker(selectedLayer.feature.properties.color));
+                        selectedLayer = null;
+                    }
+                    closeSidebar();
+                });
+
+                // ضبط حدود الخريطة لتشمل جميع العناصر
+                if (allFeaturesGroup.getLayers().length > 0) {
+                    map.fitBounds(allFeaturesGroup.getBounds().pad(0.2));
+                }
             }
 
-            // تهيئة المخططات البيانية (في الوضع العام فقط)
+            // =================================================================
+            // 2. تهيئة المخططات البيانية (Charts) - تعمل فقط في الوضع العام
+            // =================================================================
             @if(!$selectedStation)
+
+                // أ) مخطط حالة المحطات (Doughnut)
                 if ($('#stationStatusChart').length && @json($statistics['stations_by_status'] ?? null)) {
-                    var pieData = { labels: @json(array_keys($statistics['stations_by_status']->toArray())), datasets: [{ data: @json(array_values($statistics['stations_by_status']->toArray())), backgroundColor: ['#28a745', '#dc3545', '#6c757d', '#ffc107'] }] };
-                    new Chart($('#stationStatusChart').get(0).getContext('2d'), { type: 'doughnut', data: pieData, options: { maintainAspectRatio: false, responsive: true, legend: { position: 'bottom' }} });
+                    var pieData = {
+                        labels: @json(array_keys($statistics['stations_by_status']->toArray())),
+                        datasets: [{
+                            data: @json(array_values($statistics['stations_by_status']->toArray())),
+                            backgroundColor: ['#28a745', '#dc3545', '#6c757d', '#ffc107']
+                        }]
+                    };
+                    new Chart($('#stationStatusChart').get(0).getContext('2d'), {
+                        type: 'doughnut',
+                        data: pieData,
+                        options: { maintainAspectRatio: false, responsive: true, legend: { position: 'bottom' }}
+                    });
                 }
 
+                // ب) مخطط مصادر الطاقة (Bar)
                 if ($('#energySourceChart').length && @json($statistics['energy_source_distribution'] ?? null)) {
-                    var barData = { labels: @json(array_keys($statistics['energy_source_distribution']->toArray())), datasets: [{ label: 'عدد المحطات', backgroundColor: 'rgba(60,141,188,0.9)', data: @json(array_values($statistics['energy_source_distribution']->toArray())) }] };
-                    var barOptions = { responsive: true, maintainAspectRatio: false, scales: { yAxes: [{ ticks: { beginAtZero: true, callback: function(value) {if (Number.isInteger(value)) {return value;}} }}] }, legend: { display: false } };
+                    var barData = {
+                        labels: @json(array_keys($statistics['energy_source_distribution']->toArray())),
+                        datasets: [{
+                            label: 'عدد المحطات',
+                            backgroundColor: 'rgba(60,141,188,0.9)',
+                            data: @json(array_values($statistics['energy_source_distribution']->toArray()))
+                        }]
+                    };
+                    var barOptions = {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { yAxes: [{ ticks: { beginAtZero: true, callback: function(value) {if (Number.isInteger(value)) {return value;}} }}] },
+                        legend: { display: false }
+                    };
                     new Chart($('#energySourceChart').get(0).getContext('2d'), { type: 'bar', data: barData, options: barOptions });
                 }
 
+                // ج) مخطط أنواع التراخيص (Doughnut)
                 if ($('#licenseTypeChart').length && @json($statistics['licenses_by_type'] ?? null)) {
-                    var pieDataLicenses = { labels: @json(array_keys($statistics['licenses_by_type']->toArray())), datasets: [{ data: @json(array_values($statistics['licenses_by_type']->toArray())), backgroundColor: ['#17a2b8', '#ffc107', '#28a745', '#dc3545'] }] };
-                    new Chart($('#licenseTypeChart').get(0).getContext('2d'), { type: 'doughnut', data: pieDataLicenses, options: { maintainAspectRatio: false, responsive: true, legend: { position: 'bottom' }} });
+                    var pieDataLicenses = {
+                        labels: @json(array_keys($statistics['licenses_by_type']->toArray())),
+                        datasets: [{
+                            data: @json(array_values($statistics['licenses_by_type']->toArray())),
+                            backgroundColor: ['#17a2b8', '#ffc107', '#28a745', '#dc3545']
+                        }]
+                    };
+                    new Chart($('#licenseTypeChart').get(0).getContext('2d'), {
+                        type: 'doughnut',
+                        data: pieDataLicenses,
+                        options: { maintainAspectRatio: false, responsive: true, legend: { position: 'bottom' }}
+                    });
                 }
 
-                // مخططات المشاريع (جديد)
+                // د) مخطط اتجاه المشاريع (Line Chart)
                 if(document.getElementById('projectsTrendChart') && @json($statistics['projects_yearly_trend'] ?? null)) {
                     var trendCtx = document.getElementById('projectsTrendChart').getContext('2d');
                     var trendData = @json($statistics['projects_yearly_trend'] ?? []);
 
                     if(trendData.length > 0) {
-                         // قلب المصفوفة لعرض السنوات تصاعدياً
-                        trendData.reverse();
-
+                        trendData.reverse(); // ترتيب السنوات تصاعدياً
                         var years = trendData.map(item => item.year);
                         var values = trendData.map(item => item.total_value);
                         var counts = trendData.map(item => item.count);
@@ -453,6 +703,7 @@
                     }
                 }
 
+                // هـ) مخطط حالة المشاريع (Doughnut Chart)
                 if(document.getElementById('projectStatusChart') && @json($statistics['projects_by_status'] ?? null)) {
                     var statusCtx = document.getElementById('projectStatusChart').getContext('2d');
                     var statusRawData = @json($statistics['projects_by_status'] ?? []);
@@ -477,6 +728,68 @@
                         });
                     }
                 }
+
+                // =========================================================
+                // و) مخططات الأنشطة (Project Activities Charts) - الإضافة الجديدة
+                // =========================================================
+
+                // 1. مخطط أنواع الأنشطة (Horizontal Bar Chart)
+                if(document.getElementById('activitiesTypeChart') && @json($statistics['activities_by_type'] ?? null)) {
+                    var actTypeCtx = document.getElementById('activitiesTypeChart').getContext('2d');
+                    var actTypeData = @json($statistics['activities_by_type'] ?? []);
+
+                    if(actTypeData.length > 0) {
+                        new Chart(actTypeCtx, {
+                            type: 'bar', // في Chart.js 3+، نستخدم indexAxis: 'y' للشريط الأفقي
+                            data: {
+                                labels: actTypeData.map(item => item.master_activity ? item.master_activity.name : 'نوع غير محدد'),
+                                datasets: [{
+                                    label: 'عدد الأنشطة',
+                                    data: actTypeData.map(item => item.count),
+                                    backgroundColor: 'rgba(32, 201, 151, 0.7)', // لون Teal مميز
+                                    borderColor: '#20c997',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                indexAxis: 'y', // هذا يجعل المخطط أفقياً
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: { x: { ticks: { precision: 0 } } } // التأكد من أن الأرقام صحيحة (بدون فواصل)
+                            }
+                        });
+                    }
+                }
+
+                // 2. مخطط التوزيع الجغرافي للأنشطة (Doughnut Chart)
+                if(document.getElementById('activitiesTownChart') && @json($statistics['activities_by_town'] ?? null)) {
+                    var actTownCtx = document.getElementById('activitiesTownChart').getContext('2d');
+                    var actTownData = @json($statistics['activities_by_town'] ?? []);
+
+                    if(actTownData.length > 0) {
+                        new Chart(actTownCtx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: actTownData.map(item => item.town ? item.town.town_name : 'موقع غير محدد'),
+                                datasets: [{
+                                    data: actTownData.map(item => item.count),
+                                    backgroundColor: [
+                                        '#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6f42c1', '#fd7e14'
+                                    ],
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { position: 'left', labels: { boxWidth: 12 } }
+                                }
+                            }
+                        });
+                    }
+                }
+
             @endif
         });
     </script>
