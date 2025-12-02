@@ -26,7 +26,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::paginate(15);
+        $users = User::with('roles')->get();
         return view('dashboard.users.index', compact('users'));
     }
 
