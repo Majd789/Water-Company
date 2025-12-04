@@ -24,51 +24,59 @@ class ProjectContractorsImport implements ToModel, WithStartRow
 
     public function model(array $row)
     {
-        // 1. البيانات الأساسية
-        $contractCode = trim($row[0] ?? ''); // العمود 0: كود العقد
+        // 1. البيانات الأساسية (مفاتيح الربط)
+        $contractCode = trim($row[0] ?? ''); // العمود 0: كود العقد (المفتاح الفريد)
         $projectCode  = trim($row[5] ?? ''); // العمود 5: كود المشروع
 
+        // تجاهل الأسطر الفارغة
         if (empty($contractCode) || empty($projectCode)) {
             return null;
         }
 
+        // جلب معرف المشروع
         $projectId = $this->getProjectId($projectCode);
-        if (!$projectId) return null;
+        if (!$projectId) return null; // لا يمكن الاستيراد بدون مشروع صحيح
 
-        // 2. معالجة المقاول (العمود 7)
+        // 2. معالجة المقاول
         $contractorName = trim($row[7] ?? '');
-        $contractorId = $this->getContractorId($contractorName);
+        $contractorId = $this->getContractorOrCreate($contractorName);
 
-        // 3. معالجة القيمة والعملة (العمود 10)
+        // 3. معالجة القيمة والعملة
         $rawValue = $row[10] ?? '';
 
-        // اكتشاف العملة من النص (مثلاً: "98,835.00 €")
+        // اكتشاف العملة
         $currency = 'USD'; // الافتراضي
-        if (Str::contains($rawValue, ['€', 'EUR', 'Euro', 'euro'])) {
+        if (Str::contains($rawValue, ['€', 'EUR', 'Euro'])) {
             $currency = 'EUR';
-        } elseif (Str::contains($rawValue, ['TRY', 'TL'])) {
+        } elseif (Str::contains($rawValue, ['TRY', 'TL', 'ليرة'])) {
             $currency = 'TRY';
         }
 
-        // تنظيف الرقم من الرموز والفواصل
-        $cleanValue = str_replace(['$', '€', 'EUR', 'USD', ',', ' '], '', $rawValue);
+        // تنظيف الرقم
+        $cleanValue = str_replace(['$', '€', 'EUR', 'USD', ',', ' ', '£'], '', $rawValue);
         $value = is_numeric($cleanValue) ? floatval($cleanValue) : 0;
 
-        // 4. معالجة التواريخ (الأعمدة القياسية)
-        $contractDate = $this->parseDate($row[9] ?? null);  // تاريخ العقد
-        $startDate    = $this->parseDate($row[13] ?? null); // تاريخ البداية المخطط
-        $endDate      = $this->parseDate($row[14] ?? null); // تاريخ النهاية المخطط
-        $approvalDate = $this->parseDate($row[17] ?? null); // تاريخ الموافقة
-        $actualStart  = $this->parseDate($row[18] ?? null); // البدء الفعلي
-        $actualEnd    = $this->parseDate($row[19] ?? null); // الانتهاء الفعلي
+        // 4. معالجة التواريخ
+        $contractDate = $this->parseDate($row[9] ?? null);
+        $startDate    = $this->parseDate($row[13] ?? null);
+        $endDate      = $this->parseDate($row[14] ?? null);
+        $approvalDate = $this->parseDate($row[17] ?? null);
+        $actualStart  = $this->parseDate($row[18] ?? null);
+        $actualEnd    = $this->parseDate($row[19] ?? null);
 
         // 5. الحالة
-        $statusName = trim($row[20] ?? '');
+        $contractStatusTxt = trim($row[15] ?? ''); // حالة العقد (موافقة)
+        $statusName = trim($row[20] ?? '');        // حالة التنفيذ
         $statusId = $this->getStatusId($statusName);
 
-        // 6. الحفظ في قاعدة البيانات
+        // الموافقة
+        $approvalNum = trim($row[16] ?? '');
+
+        // 6. الحفظ أو التعديل (updateOrCreate)
+        // المصفوفة الأولى: شروط البحث (إذا وجدها يعدل)
+        // المصفوفة الثانية: القيم التي سيتم حفظها أو تعديلها
         return ProjectContractor::updateOrCreate(
-            ['contract_code' => $contractCode],
+            ['contract_code' => $contractCode], // البحث عن طريق كود العقد
             [
                 'project_id'            => $projectId,
                 'contractor_id'         => $contractorId,
@@ -79,17 +87,17 @@ class ProjectContractorsImport implements ToModel, WithStartRow
                 'duration_days'         => intval($row[12] ?? 0),
                 'start_date'            => $startDate,
                 'end_date'              => $endDate,
-                'contract_status'       => $row[15] ?? null, // حالة العقد (موافقة)
-                'org_approval_number'   => $row[16] ?? null,
+                'contract_status'       => $contractStatusTxt, // سيتم تحديث حالة العقد
+                'org_approval_number'   => $approvalNum,       // سيتم تحديث رقم الموافقة
                 'org_approval_date'     => $approvalDate,
-                'actual_start_date'     => $actualStart,
+                'actual_start_date'     => $actualStart,       // سيتم تحديث التواريخ الفعلية
                 'actual_end_date'       => $actualEnd,
-                'contractor_status_id'  => $statusId,
+                'contractor_status_id'  => $statusId,          // سيتم تحديث حالة التنفيذ
             ]
         );
     }
 
-    // --- دوال مساعدة ---
+    // --- الدوال المساعدة ---
 
     private function getProjectId($code)
     {
@@ -102,41 +110,53 @@ class ProjectContractorsImport implements ToModel, WithStartRow
         return null;
     }
 
-    private function getContractorId($excelName)
+    private function getContractorOrCreate($excelName)
     {
         if (empty($excelName)) return null;
 
         if (isset($this->contractorsCache[$excelName])) return $this->contractorsCache[$excelName];
 
-        $contractor = Contractor::where('name', $excelName)->first();
-        if ($contractor) {
-            $this->contractorsCache[$excelName] = $contractor->id;
-            return $contractor->id;
-        }
-
-        // بحث ذكي (تجاهل: ممثلة بـ / عنها ...)
-        $searchName = $excelName;
-        foreach (['ممثلة', 'عنها', 'بإدارة', 'وكيلا'] as $keyword) {
-            if (Str::contains($searchName, $keyword)) {
-                $searchName = Str::before($searchName, $keyword);
+        $cleanName = $excelName;
+        foreach (['ممثلة', 'عنها', 'بإدارة', 'وكيلا', 'بـ'] as $keyword) {
+            if (Str::contains($cleanName, $keyword)) {
+                $cleanName = Str::before($cleanName, $keyword);
             }
         }
-        $searchName = trim($searchName);
+        $cleanName = trim($cleanName);
 
-        $contractor = Contractor::where('name', 'LIKE', "%{$searchName}%")->first();
+        $contractor = Contractor::where('name', $excelName)->first();
+
+        if (!$contractor) {
+            $contractor = Contractor::where('name', 'LIKE', "%{$cleanName}%")->first();
+        }
+
         if ($contractor) {
             $this->contractorsCache[$excelName] = $contractor->id;
             return $contractor->id;
         }
 
-        return null;
+        // إنشاء جديد إذا لم يوجد
+        try {
+            $codePrefix = Str::upper(Str::substr(Str::slug($cleanName), 0, 3));
+            if (empty($codePrefix)) $codePrefix = 'CON';
+            $newCode = $codePrefix . '-' . rand(1000, 9999);
+
+            $newContractor = Contractor::create([
+                'name' => $cleanName,
+                'code' => $newCode,
+            ]);
+
+            $this->contractorsCache[$excelName] = $newContractor->id;
+            return $newContractor->id;
+
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     private function getStatusId($statusName)
     {
-        // إذا فارغة نعتبرها "قيد التنفيذ" (ID: 2)
         if (empty($statusName)) return 2;
-
         $status = ContractorStatus::where('name', 'LIKE', "%$statusName%")->first();
         return $status ? $status->id : 2;
     }
@@ -146,11 +166,9 @@ class ProjectContractorsImport implements ToModel, WithStartRow
         if (empty($value) || $value == '_' || $value == '-') return null;
 
         try {
-            // معالجة رقم Excel التسلسلي (Serial)
             if (is_numeric($value)) {
                 return Date::excelToDateTimeObject($value)->format('Y-m-d');
             }
-            // معالجة النصوص
             return Carbon::parse(str_replace('/', '-', $value))->format('Y-m-d');
         } catch (\Exception $e) {
             return null;
