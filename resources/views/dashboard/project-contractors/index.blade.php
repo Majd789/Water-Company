@@ -43,14 +43,52 @@
                                     <a href="{{ route('dashboard.project-contractors.create') }}" class="btn btn-primary">
                                         <i class="fas fa-plus mr-1"></i> إضافة عقد جديد
                                     </a>
+                                    <a href="{{ route('dashboard.project-contractors.export', request()->query()) }}" class="btn btn-warning ms-2">
+                                        <i class="fas fa-file-download"></i> تصدير Excel
+                                    </a>
+                                @endcan
+
+                                {{-- زر الاستيراد والمودال --}}
+                                @can('project_contractors.create')
+                                    <button type="button" class="btn btn-success ml-2" data-toggle="modal" data-target="#importModal">
+                                        <i class="fas fa-file-excel"></i> استيراد من Excel
+                                    </button>
+
+                                    {{-- المودال --}}
+                                    <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <form action="{{ route('dashboard.project-contractors.import') }}" method="POST" enctype="multipart/form-data">
+                                                @csrf
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="importModalLabel">استيراد عقود المقاولين</h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="form-group">
+                                                            <label for="file">اختر ملف Excel</label>
+                                                            <input type="file" class="form-control-file" name="file" required accept=".xlsx,.xls,.csv">
+                                                            <small class="form-text text-muted">
+                                                                يجب أن يتطابق ترتيب الأعمدة مع النموذج المعتمد (كود العقد، كود المشروع، ...).
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">إغلاق</button>
+                                                        <button type="submit" class="btn btn-success">رفع واستيراد</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
                                 @endcan
                             </div>
                         </div>
 
                         <div class="card-body">
                             @include('dashboard.partials.alerts')
-
-                            {{-- يمكنك إضافة فلاتر هنا مستقبلاً (حسب المشروع أو المقاول) --}}
 
                             <div class="table-responsive">
                                 <table id="projectContractorsTable" class="table table-bordered table-striped table-hover">
@@ -72,7 +110,7 @@
                                                 <td>{{ $contract->contract_code }}</td>
                                                 <td>{{ $contract->project->name ?? 'N/A' }}</td>
                                                 <td>{{ $contract->contractor->name ?? 'N/A' }}</td>
-                                                <td>${{ number_format($contract->value, 2) }}</td>
+                                                <td>{{ number_format($contract->value, 2) }} {{ $contract->currency }}</td>
                                                 <td>
                                                     <span class="badge badge-info">{{ $contract->contractorStatus->name ?? 'N/A' }}</span>
                                                 </td>

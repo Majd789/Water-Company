@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Exports\ProjectContractorsExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProjectContractorRequest;
 use App\Models\Contractor;
@@ -9,7 +10,8 @@ use App\Models\ContractorStatus;
 use App\Models\Project;
 use App\Models\ProjectContractor;
 use Illuminate\Http\Request;
-
+use App\Imports\ProjectContractorsImport;
+use Maatwebsite\Excel\Facades\Excel;
 class ProjectContractorController extends Controller
 {
     /**
@@ -47,7 +49,26 @@ class ProjectContractorController extends Controller
 
         return view('dashboard.project-contractors.index', compact('projectContractors', 'projects', 'contractors'));
     }
+     public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv',
+        ]);
 
+        try {
+            Excel::import(new ProjectContractorsImport, $request->file('file'));
+
+            return redirect()->route('dashboard.project-contractors.index')
+                             ->with('success', 'تم استيراد بيانات عقود المقاولين بنجاح.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                             ->with('error', 'حدث خطأ أثناء الاستيراد: ' . $e->getMessage());
+        }
+    }
+    public function export(Request $request)
+    {
+        return Excel::download(new ProjectContractorsExport($request), 'project_contractors_' . date('Y-m-d') . '.xlsx');
+    }
     /**
      * Show the form for creating a new resource.
      *
