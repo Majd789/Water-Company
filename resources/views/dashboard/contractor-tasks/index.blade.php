@@ -43,7 +43,43 @@
                                     <a href="{{ route('dashboard.contractor-tasks.create') }}" class="btn btn-primary">
                                         <i class="fas fa-plus mr-1"></i> إضافة مهمة جديدة
                                     </a>
+                                    <a href="{{ route('dashboard.contractor-tasks.export') }}" class="btn btn-warning ms-2">
+                                        <i class="fas fa-file-download"></i> تصدير المهام (Tasks)
+                                    </a>
                                 @endcan
+                            </div>
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#importTasksModal">
+                                    <i class="fas fa-file-excel"></i> استيراد المهام (Tasks)
+                                </button>
+                            </div>
+
+                            {{-- مودال استيراد المهام --}}
+                            <div class="modal fade" id="importTasksModal" tabindex="-1" role="dialog" aria-labelledby="importTasksLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <form action="{{ route('dashboard.contractor-tasks.import') }}" method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="importTasksLabel">استيراد مهام المقاولين</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="form-group">
+                                                    <label>اختر ملف Excel</label>
+                                                    <input type="file" name="file" class="form-control-file" required accept=".xlsx,.xls,.csv">
+                                                    <small class="text-muted">يجب أن يحتوي الملف على: كود المهمة، كود المقاول، كود النشاط، ...</small>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">إغلاق</button>
+                                                <button type="submit" class="btn btn-success">رفع</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
 

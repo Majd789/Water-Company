@@ -102,6 +102,8 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::get('projects/export-report', [ProjectController::class, 'exportReport'])->name('projects.export_report');
     Route::get('projects/export', [ProjectController::class, 'export'])->name('dashboard.projects.export');
     Route::get('project-activities/export', [ProjectActivityController::class, 'export'])->name('project-activities.export');
+    Route::post('contractor-tasks/import', [ContractorTaskController::class, 'import'])->name('contractor-tasks.import');
+    Route::get('contractor-tasks/export', [ContractorTaskController::class, 'export'])->name('contractor-tasks.export');
     Route::get('project-contractors/export', [ProjectContractorController::class, 'export'])->name('project-contractors.export');
     Route::prefix('unit-stats')->name('unit-stats.')->group(function () {
         Route::get('/', [UnitMonthlyStatController::class, 'index'])->name('index');

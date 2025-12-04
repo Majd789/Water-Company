@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Exports\ContractorTasksExport;
 use App\Http\Controllers\Controller;
 use App\Models\ContractorTask;
 use App\Models\Project;
 use App\Models\ProjectActivity;
 use App\Models\ProjectContractor;
 use Illuminate\Http\Request;
-
+use App\Imports\ContractorTasksImport;
+use Maatwebsite\Excel\Facades\Excel;
 class ContractorTaskController extends Controller
 {
     /**
@@ -47,7 +49,24 @@ class ContractorTaskController extends Controller
 
         return view('dashboard.contractor-tasks.index', compact('contractorTasks'));
     }
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv',
+        ]);
 
+        try {
+            Excel::import(new ContractorTasksImport, $request->file('file'));
+
+            return redirect()->back()->with('success', 'تم استيراد مهام المقاولين بنجاح.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'حدث خطأ: ' . $e->getMessage());
+        }
+    }
+    public function export()
+    {
+        return Excel::download(new ContractorTasksExport, 'contractor_tasks_' . date('Y-m-d') . '.xlsx');
+    }
     /**
      * Show the form for creating a new resource.
      *
