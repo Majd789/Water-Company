@@ -20,5 +20,10 @@ class ProjectContractor extends Pivot
     /**
      * كل عقد مقاول له العديد من المهام
      */
-    public function tasks() { return $this->hasMany(ContractorTask::class); }
+ public function tasks()
+    {
+        // تأكد أن الجدول في قاعدة البيانات اسمه 'contractor_tasks'
+        // وأن المفتاح الأجنبي فيه هو 'project_contractor_id'
+        return $this->hasMany(ContractorTask::class, 'project_contractor_id', 'id');
+    }
 }

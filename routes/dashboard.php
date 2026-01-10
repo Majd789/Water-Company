@@ -24,6 +24,7 @@ use App\Http\Controllers\Dashboard\{
     ProjectGeneralStatusController,
     ProjectMainStatusController,
     ProjectTypeController,
+    ReportsController,
     SafetyProfileController,
     StationTeamController,
     UnitMonthlyStatController,
@@ -97,6 +98,8 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')
     Route::post('project-contractors/import', [ProjectContractorController::class, 'import'])->name('project-contractors.import');
     Route::get('/stations/{id}/export-card', [StationController::class, 'exportStationCard'])->name('stations.exportCard');
     Route::resource('wells', WellController::class);
+     Route::get('reports', [ReportsController::class, 'index'])->name('reports.index');
+    Route::post('reports/generate', [ReportsController::class, 'generate'])->name('reports.generate');
     Route::resource('generation-groups', GenerationGroupController::class);
     Route::resource('horizontal-pumps', HorizontalPumpController::class);
     Route::get('projects/export-report', [ProjectController::class, 'exportReport'])->name('projects.export_report');

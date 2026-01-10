@@ -22,5 +22,10 @@ class Town extends Model
     {
         return $this->hasMany(Station::class);
     }
+     public function projectActivities()
+    {
+        // هذه العلاقة تعني أن "القرية" تحتوي على "عدة أنشطة مشاريع"
+        return $this->hasMany(ProjectActivity::class, 'town_id', 'id');
+    }
 }
 
