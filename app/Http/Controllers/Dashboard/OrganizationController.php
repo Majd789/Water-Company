@@ -46,10 +46,13 @@ class OrganizationController extends Controller
         return redirect()->route('dashboard.organizations.index')->with('success', 'تم إنشاء المنظمة بنجاح.');
     }
 
-    public function show(Organization $organization)
-    {
-        return view('dashboard.organizations.show', compact('organization'));
-    }
+   public function show(Organization $organization)
+{
+    // جلب المنظمة مع المشاريع، وأنشطة المشاريع، وعقود المقاولين المرتبطة بالمشاريع
+    $organization->load(['projects.activities', 'projects.projectContracts.contractor']);
+
+    return view('dashboard.organizations.show', compact('organization'));
+}
 
     public function edit(Organization $organization)
     {
