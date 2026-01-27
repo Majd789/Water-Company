@@ -61,11 +61,7 @@
         </div>
 
         {{-- رابط تسجيل حساب جديد --}}
-        @if (Route::has('register'))
-            <div class="col-12 text-center" style="margin-top: 1rem">
-                <p class="small mb-0">ليس لديك حساب؟ <a href="{{ route('register') }}">إنشاء حساب جديد</a></p>
-            </div>
-        @endif
+
     </form>
 </x-guest-layout>
 
