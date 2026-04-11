@@ -13,7 +13,7 @@ use App\Http\Controllers\Dashboard\{
     WeeklyReportController, ActivityLogController, AssessmentController, ContractorController, ContractorStatusController, ContractorTaskController, DataExportController, DailyStationReportController,
 
     DieselTankController, DisinfectionPumpController, ElectricityHourController,
-    ElectricityTransformerController, HandoverStatusController, MaintenanceTaskController,
+    ElectricityTransformerController, EmployeeController, HandoverStatusController, LeaveController, LeaveTypeController, MaintenanceTaskController,
     MasterActivityController,
     MetricController,
     MonthController,
@@ -45,6 +45,21 @@ Route::get('/', fn() => redirect()->route('login'));
 
 // --- 2. مسارات لوحة التحكم الرئيسية (محمية وتستخدم البادئة /dashboard) ---
 Route::middleware(['auth', 'verified'])->prefix('dashboard')->name('dashboard.')->group(function () {
+    // 1. مسارات التصدير والاستيراد (ليكونوا في الأعلى كما فعلت في ملفك)
+     Route::get('employees/export', [EmployeeController::class, 'export'])->name('employees.export');
+     Route::get('employees/download-template', [EmployeeController::class, 'downloadTemplate'])->name('employees.download-template');
+    Route::post('employees/import', [EmployeeController::class, 'import'])->name('employees.import');
+    Route::get('/leaves/export', [LeaveController::class, 'export'])->name('leaves.export');
+    Route::post('/leaves/import', [LeaveController::class, 'import'])->name('leaves.import');
+
+    // 2. مسارات الـ Resources
+    Route::resource('employees', EmployeeController::class);
+    Route::resource('leave-types', LeaveTypeController::class);
+    Route::resource('leaves', LeaveController::class);
+    // 3. مسار الطباعة الخاص بالإجازة
+    Route::get('leaves/{leave}/export-excel', [LeaveController::class, 'exportExcel'])->name('leaves.export-excel');
+
+
     Route::get('/activity-log/export', [ActivityLogController::class, 'export'])->name('activity-log.export');
     Route::get('/towns/export', [TownController::class, 'export'])->name('towns.export');
     Route::get('/stations/export', [StationController::class, 'export'])->name('stations.export');

@@ -307,6 +307,17 @@
                             'dashboard.master-activities.*', 'dashboard.project-types.*', 'dashboard.project-main-statuses.*',
                             'dashboard.project-general-statuses.*', 'dashboard.contractor-statuses.*', 'dashboard.handover-statuses.*',
                         ];
+                        // تعريف الصلاحيات الخاصة بالقسم
+                        $leavePermissions = [
+                            'leaves.view',
+                            'leaves.manage',
+                            'leave_types.view'
+                        ];
+                        // تعريف المسارات التي تجعل القسم نشطاً (Active)
+                        $leaveRoutes = [
+                            'dashboard.leaves.*',
+                            'dashboard.leave-types.*'
+                        ];
                     @endphp
                   <x-sidebar-menu-section title="إدارة المشاريع" icon="fas fa-project-diagram" :permissions="$projectManagementPermissions" :routes="$projectManagementRoutes">
 
@@ -499,6 +510,58 @@
                     @endcan
                     {{-- يمكنك إضافة المزيد من الروابط هنا مستقبلاً --}}
                 </x-sidebar-menu-section>
+                {{-- قسم شؤون الموظفين والإجازات --}}
+@php
+    // تعريف الصلاحيات الخاصة بالقسم
+    $leavePermissions = [
+        'leaves.view',
+        'leaves.manage',
+        'leave_types.view'
+    ];
+    // تعريف المسارات التي تجعل القسم نشطاً (Active)
+    $leaveRoutes = [
+        'dashboard.leaves.*',
+        'dashboard.leave-types.*'
+    ];
+@endphp
+
+            <x-sidebar-menu-section title="الموارد البشرية" icon="fas fa-user-clock" :permissions="$leavePermissions" :routes="$leaveRoutes">
+
+                {{-- خيارات الموظف --}}
+                <li class="nav-header">خدمات الموظفين</li>
+                @can('employees.view')
+                    <li class="nav-item">
+                        <a href="{{ route('dashboard.employees.index') }}"
+                        class="nav-link {{ Request::routeIs('dashboard.employees.*') ? 'active' : '' }}">
+                            <i class="fas fa-users nav-icon"></i>
+                            <p>إدارة الموظفين</p>
+                        </a>
+                    </li>
+                @endcan
+                @can('leaves.view')
+                    <li class="nav-item">
+                        <a href="{{ route('dashboard.leaves.index') }}"
+                        class="nav-link {{ Request::routeIs('dashboard.leaves.index') ? 'active' : '' }}">
+                            <i class="fas fa-calendar-alt nav-icon"></i>
+                            <p>طلبات إجازاتي</p>
+                        </a>
+                    </li>
+                @endcan
+
+
+
+                {{-- الإعدادات الخاصة بالإجازات --}}
+                @can('leave_types.view')
+                    <li class="nav-item">
+                        <a href="{{ route('dashboard.leave-types.index') }}"
+                        class="nav-link {{ Request::routeIs('dashboard.leave-types.*') ? 'active' : '' }}">
+                            <i class="fas fa-cog nav-icon"></i>
+                            <p>أنواع الإجازات</p>
+                        </a>
+                    </li>
+                @endcan
+
+            </x-sidebar-menu-section>
                     <li class="nav-header">الإعدادات</li>
 
                     {{-- 4. إدارة النظام --}}
