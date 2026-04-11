@@ -64,6 +64,9 @@ class RolePermissionSeeder extends Seeder
             'water_quality_tests' => 'اختبارات جودة المياه',
             'starion_teams' => 'فرق المحطة',
             'safety_prfiles' => 'ملفات السلامة',
+            'employees' => 'الموظفين',
+            'leaves' => 'الإجازات',
+            'leave_types' => 'أنواع الإجازات',
 
             // 'unit_stats' will be handled separately to create custom permissions
         ];
