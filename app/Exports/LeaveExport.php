@@ -35,6 +35,7 @@ public function setPageSetup(): array
     {
         return [
             AfterSheet::class => function(AfterSheet $event) {
+
                 $sheet = $event->sheet->getDelegate();
                 $sheet->setRightToLeft(true);
 
