@@ -17,7 +17,7 @@
 
             <tr>
                 <td style="font-weight: bold; border: 1px solid #000; background-color: #fafafa; padding: 8px; width: 15%;">الاسم الثلاثي:</td>
-                 <td colspan="2" style="border: 1px solid #000; text-align: center; font-size: 15px;">{{ $leave->employee->full_name }}</td>
+                <td colspan="2" style="border: 1px solid #000; text-align: center; font-size: 15px;">{{ $leave->employee->full_name }}</td>
                 <td style="font-weight: bold; border: 1px solid #000; background-color: #fafafa; padding: 8px; width: 15%;">الوحدة / القسم:</td>
                 <td colspan="2" style="border: 1px solid #000; text-align: center; font-size: 15px;">{{ $leave->employee->unit->unit_name ?? 'إدلب' }}</td>
             </tr>
@@ -29,14 +29,10 @@
             </tr>
             <tr>
                 <td style="font-weight: bold; border: 1px solid #000; background-color: #fafafa; padding: 8px;">نوع الإجازة:</td>
-                <td colspan="2" style="border: 1px solid #000; color: #ff0000; font-weight: bold; text-align: center;">{{ $leave->leaveType->type_name ?? 'Annual' }}</td>
-                <td style="font-weight: bold; border: 1px solid #000; background-color: #fafafa; padding: 8px;">الموظف البديل:</td>
-                <td colspan="2" style="border: 1px solid #000; color: #808080; text-align: center;">................................</td>
+                <td colspan="5" style="border: 1px solid #000; color: #ff0000; font-weight: bold; text-align: center;">{{ $leave->leaveType->type_name ?? 'Annual' }}</td>
             </tr>
 
-
-
-           <tr>
+            <tr>
                 <td colspan="3" style="border: 1px solid #000; padding: 12px; text-align: center;">
                     الإجازات المستنفذة: <strong style="color: #d9534f;">{{ $leave->employee->total_allowed_days - $leave->employee->remaining_days }}</strong> يوم
                 </td>
@@ -45,37 +41,25 @@
                 </td>
             </tr>
 
-            <tr><td colspan="6" style="height: 40px;"></td></tr>
+            <tr><td colspan="6" style="height: 20px;"></td></tr>
 
             <tr>
-                <td colspan="6" style="text-align: center;">
-                    <table style="width: 50%; margin: 0 auto; border-collapse: collapse;">
-                         <tr>
-                <td colspan="6" style="padding-top: 10px;text-align: center; font-size: 12px; font-weight: bold;">
-                   <span style="font-weight: normal;text_ border-bottom: 1px dotted #000;">&nbsp; {{ date('Y/m/d') }} &nbsp;</span>
+                <td colspan="6" style="text-align: center; font-size: 12px; font-weight: bold; padding-bottom: 15px;">
+                   التاريخ: <span style="font-weight: normal; border-bottom: 1px dotted #000;">&nbsp; {{ date('Y/m/d') }} &nbsp;</span>
                 </td>
             </tr>
 
-
-
             <tr>
-                <td colspan="3" style="font-weight: bold; text-align: center; font-size: 14px;"><u>توقيع مقدم الطلب</u></td>
-                <td colspan="3" style="font-weight: bold; text-align: center; font-size: 14px;"><u>توقيع المدير المباشر</u></td>
+                <td colspan="2" style="font-weight: bold; text-align: center; font-size: 13px;"><u> مقدم الطلب</u></td>
+                <td colspan="2" style="font-weight: bold; text-align: center; font-size: 13px;"><u> المدير المباشر</u></td>
+                <td colspan="2" style="font-weight: bold; text-align: center; font-size: 13px;"><u> المدير الإداري</u></td>
             </tr>
             <tr>
-                <td colspan="3" style="height: 70px; vertical-align: bottom; text-align: center; color: #888;"></td>
-                <td colspan="3" style="height: 70px; vertical-align: bottom; text-align: center; color: #888;"></td>
+                <td colspan="2" style="height: 80px; vertical-align: bottom; text-align: center; color: #888;">...........................</td>
+                <td colspan="2" style="height: 80px; vertical-align: bottom; text-align: center; color: #888;">...........................</td>
+                <td colspan="2" style="height: 80px; vertical-align: bottom; text-align: center; color: #888;">...........................</td>
             </tr>
 
-
-              <tr>
-                            <td style="font-weight: bold;  font-size: 15px; "><u>توقيع المدير الإداري</u></td>
-                        </tr>
-
-
-                    </table>
-                </td>
-            </tr>
             <tr><td colspan="6" style="height: 10px;"></td></tr>
         </tbody>
     </table>
